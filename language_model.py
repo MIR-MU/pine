@@ -56,7 +56,7 @@ class LanguageModel(object):
             self._train_model()
             return self._load_training_duration()
 
-    def __str__(self) -> str:
+    def __repr__(self) -> str:
         return '<<{} {}>>'.format(self.__class__.__name__, self.name)
 
     def _bare_model_path(self) -> Path:
