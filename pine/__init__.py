@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from .pine import LanguageModel
+from .language_model import LanguageModel
 
 __author__ = 'Vítek Novotný'
 __email__ = 'witiko@mail.muni.cz'
