@@ -359,5 +359,6 @@ def evaluate(dataset: Path, model: LanguageModel, method: str, result_dir: Path)
             for line in error_rates:
                 print(line, file=f)
     print_error_rate_analysis(dataset, error_rates)
+    _wmdistance.cache_clear()  # Clear the WMD cache, so that the datasets don't take up RAM
 
     return error_rates
