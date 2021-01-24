@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from itertools import chain
-from functools import lru_cache, partial
+from functools import lru_cache
 from logging import getLogger
 from pathlib import Path
 from typing import List, Tuple, Optional
@@ -17,11 +17,11 @@ from gensim.similarities import SoftCosineSimilarity, SparseTermSimilarityMatrix
 import numpy as np
 from scipy.io import loadmat
 from scipy.stats import mode
-import smart_open
 from tqdm import tqdm
 
 from .. import LanguageModel
 from ..config import TEXT_CLASSIFICATION_DATASET_SIZES, TEXT_CLASSIFICATION_DATASETS, TEXT_CLASSIFICATION_METHODS
+from ..util import download_to
 
 
 COMMON_VECTORS = None
@@ -374,20 +374,16 @@ def evaluate(dataset_path: Path, language_model: LanguageModel,
     return error_rates
 
 
-def get_dataset_paths(result_dir: Path, buffer_size: int = 2**20) -> List[Path]:
+def get_dataset_paths(result_dir: Path) -> List[Path]:
     dataset_paths = result_dir.glob('*.mat')
     dataset_paths = sorted(dataset_paths)
     if dataset_paths:
         return dataset_paths
 
+    url = TEXT_CLASSIFICATION_DATASETS['url']
+    size = TEXT_CLASSIFICATION_DATASETS['size']
     dataset_zipfile_path = (result_dir / 'WMD_datasets').with_suffix('.zip')
-    desc = 'Downloading datasets {}'.format(dataset_zipfile_path)
-    with tqdm(total=TEXT_CLASSIFICATION_DATASETS['size'], unit='B', desc=desc) as pbar:
-        with dataset_zipfile_path.open('wb') as wf:
-            with smart_open.open(TEXT_CLASSIFICATION_DATASETS['url'], 'rb') as rf:
-                for data in iter(partial(rf.read, buffer_size), b''):
-                    wf.write(data)
-                    pbar.update(len(data))
+    download_to(url, size, dataset_zipfile_path)
     LOGGER.info('Extracting datasets from {} to {}'.format(dataset_zipfile_path, result_dir))
     with ZipFile(dataset_zipfile_path, 'r') as zf:
         zf.extractall(result_dir)

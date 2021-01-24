@@ -5,4 +5,7 @@ from .text_classification import (
     get_dataset_paths as get_text_classification_datasets,
 )
 
-__all__ = ['evaluate_text_classification', 'get_text_classification_datasets']
+__all__ = [
+    'evaluate_text_classification',
+    'get_text_classification_datasets',
+]
