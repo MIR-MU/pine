@@ -41,7 +41,14 @@ FASTTEXT_PARAMETERS = {
         'cum_table',
         'corpus_count',
         'corpus_total_words',
-    ]
+    ],
+    'train': {
+        'compute_loss': False,
+    },
+    'train_keys': set([
+        'epochs',
+        'compute_loss',
+    ]),
 }
 
 TEXT_CLASSIFICATION_DOCUMENT_SIZES = {

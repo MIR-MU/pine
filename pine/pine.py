@@ -7,6 +7,7 @@ from typing import Iterable, Dict, Optional
 from ..config import FASTTEXT_PARAMETERS, PICKLE_PROTOCOL
 
 from gensim.models import FastText, KeyedVectors
+from gensim.models.callbacks import CallbackAny2Vec
 
 
 LOGGER = getLogger(__name__)
@@ -27,9 +28,7 @@ class LanguageModel(object):
         }
         self._model = None
         self._vectors = None
-
-    def __str__(self) -> str:
-        return '<<{} {}>>'.format(self.__class__.__name__, self.name)
+        self._training_duration = None
 
     @property
     def model(self) -> FastText:
@@ -47,6 +46,17 @@ class LanguageModel(object):
             self._train_model()
             return self._load_vectors()
 
+    @property
+    def training_duration(self) -> float:
+        try:
+            return self._load_training_duration()
+        except IOError:
+            self._train_model()
+            return self._load_training_duration()
+
+    def __str__(self) -> str:
+        return '<<{} {}>>'.format(self.__class__.__name__, self.name)
+
     def _bare_model_path(self) -> Path:
         return (self.result_dir / self.name).with_suffix('.bare-model')
 
@@ -56,7 +66,10 @@ class LanguageModel(object):
     def _vectors_path(self) -> Path:
         return (self.result_dir / self.name).with_suffix('.vec')
 
-    def _load_model(self):
+    def _training_duration_path(self) -> Path:
+        return (self.result_dir / self.name).with_suffix('.duration')
+
+    def _load_model(self) -> FastText:
         if self._model is not None:
             return self._model
         LOGGER.debug('Loading model for {} from {}'.format(self, self.model_path()))
@@ -64,7 +77,15 @@ class LanguageModel(object):
         self._vectors = self._model.wv.vectors
         return self._model
 
-    def _load_vectors(self):
+    def _load_training_duration(self) -> float:
+        if self._training_duration is not None:
+            return self._training_duration
+        with self.training_duration_path().open('rt') as f:
+            LOGGER.debug('Loading training duration for {} from {}'.format(self, self.training_duration_path()))
+            self._training_duration = float(f.read())
+        return self._training_duration
+
+    def _load_vectors(self) -> KeyedVectors:
         if self._vectors is not None:
             return self._vectors
         LOGGER.debug('Loading vectors for {} from {}'.format(self, self.vectors_path()))
@@ -86,7 +107,7 @@ class LanguageModel(object):
                     if key in FASTTEXT_PARAMETERS['build_vocab'].keys()
                 },
             }
-            LOGGER.debug('Building vocab for {}'.format(self))
+            LOGGER.info('Building vocab for {}'.format(self))
             bare_model.build_vocab(corpus_iterable=self.corpus, **build_vocab_parameters)
             saved_values = {'model_values': {}, 'wv_values': {}}
             for key in FASTTEXT_PARAMETERS['build_vocab_keys']:
@@ -112,4 +133,44 @@ class LanguageModel(object):
         return model
 
     def _train_model(self) -> FastText:
-        pass
+        model = self._build_vocab()
+        training_duration_measure = TrainingDurationMeasure()
+        train_parameters = {
+            **FASTTEXT_PARAMETERS['train'],
+            **{
+                'total_examples': model.corpus_count,
+                'total_words': model.corpus_total_words,
+                'callbacks': [training_duration_measure],
+            },
+            **{
+                key: value
+                for (key, value) in self.fasttext_parameters.items()
+                if key in FASTTEXT_PARAMETERS['train_keys']
+            }
+        }
+        LOGGER.info('Training {}'.format(self))
+        model.train(corpus_iterable=self.corpus, **train_parameters)
+
+        LOGGER.info('Saving model for {} to {}'.format(self, self.model_path()))
+        model.save(str(self.model_path()))
+        LOGGER.debug('Saving vectors for {} to {}'.format(self, self.vectors_path()))
+        model.wv.save_word2vec_format(str(self.vectors_path()))
+        LOGGER.debug('Saving training duration for {} to {}'.format(self, self.training_duration_path()))
+        training_duration = training_duration_measure.total_seconds
+        with self.training_duration_path().open('wt') as f:
+            print(training_duration, file=f)
+
+
+class TrainingDurationMeasure(CallbackAny2Vec):
+    def __init__(self):
+        self.start_time = None
+        self.total_seconds = 0.0
+
+    def on_epoch_begin(self, model):
+        from datetime import datetime
+        self.start_time = datetime.now()
+
+    def on_epoch_end(self, model):
+        from datetime import datetime
+        finish_time = datetime.now()
+        self.total_seconds += (finish_time - self.start_time).total_seconds()
