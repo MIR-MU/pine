@@ -67,4 +67,13 @@ TEXT_CLASSIFICATION_DOCUMENT_SIZES = {
   '20ng2_500': 11293,
 }
 
+CORPUS_SIZES = {
+    'wikipedia': {
+        'en': 249230825,
+    },
+    'common_crawl': {
+        'en': 37070013808,
+    },
+}
+
 PICKLE_PROTOCOL = 3
