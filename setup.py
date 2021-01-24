@@ -32,8 +32,8 @@ parsed_test_requirements = parse_requirements(
 )
 
 
-requirements = [str(ir.req) for ir in parsed_requirements]
-test_requirements = [str(tr.req) for tr in parsed_test_requirements]
+requirements = [str(ir.requirement) for ir in parsed_requirements]
+test_requirements = [str(tr.requirement) for tr in parsed_test_requirements]
 
 
 setup(
