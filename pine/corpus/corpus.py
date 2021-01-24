@@ -29,7 +29,7 @@ def get_corpus(name: str, result_dir: Path, language: str = 'en') -> Corpus:
     else:
         raise ValueError('Corpus {} not yet implemented'.format(name))
 
-    corpus_path = get_corpus_path(language=language, result_dir=result_dir)
+    corpus_path = get_corpus_path(language=language, name=name, result_dir=result_dir)
     corpus = Corpus(name, corpus_path, corpus_size)
     return corpus
 

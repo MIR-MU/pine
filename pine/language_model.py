@@ -15,7 +15,7 @@ from gensim.models.callbacks import CallbackAny2Vec
 LOGGER = getLogger(__name__)
 
 
-class LanguageModel(object):
+class LanguageModel:
     def __init__(self, corpus: Iterable[Iterable[str]], result_dir: Path,
                  name: str, subwords: bool = True, positions: bool = True,
                  use_vocab_from: LanguageModel = None,
@@ -77,7 +77,7 @@ class LanguageModel(object):
         if self._model is not None:
             return self._model
         LOGGER.debug('Loading model for {} from {}'.format(self, self.model_path()))
-        self._model = FastText.load(str(self.model_path()))
+        self._model = FastText.load(str(self.model_path()), mmap='r')
         self._vectors = self._model.wv.vectors
         return self._model
 
