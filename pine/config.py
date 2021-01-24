@@ -51,6 +51,11 @@ FASTTEXT_PARAMETERS = {
     ]),
 }
 
+TEXT_CLASSIFICATION_METHODS = set([
+    'scm',
+    'wmd',
+])
+
 TEXT_CLASSIFICATION_DOCUMENT_SIZES = {
   'bbcsport': 517,
   'twitter': 2176,

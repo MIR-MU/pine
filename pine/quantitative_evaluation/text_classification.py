@@ -17,7 +17,7 @@ from scipy.stats import mode
 from tqdm import tqdm
 
 from .. import LanguageModel
-from ..config import TEXT_CLASSIFICATION_DOCUMENT_SIZES
+from ..config import TEXT_CLASSIFICATION_DOCUMENT_SIZES, TEXT_CLASSIFICATION_METHODS
 
 
 COMMON_VECTORS = None
@@ -218,8 +218,8 @@ class WmdSimilarity(SimilarityABC):
 class Evaluator:
     def __init__(self, dataset: Dataset, model: LanguageModel, method: str):
         self.dataset = dataset
-        if method not in ('scm', 'wmd'):
-            raise ValueError('Unsupported method {}'.format(method))
+        if method not in TEXT_CLASSIFICATION_METHODS:
+            raise ValueError('Unknown method {}'.format(method))
         self.method = method
         self.vectors = model.vectors
 
@@ -255,14 +255,15 @@ class Evaluator:
             train_corpus = [dictionary.doc2bow(document) for document in train_corpus]
             train_corpus = tfidf[train_corpus]
             similarity_model = SoftCosineSimilarity(train_corpus, similarity_matrix)
-
             test_corpus = (document.words for document in test_documents)
             test_corpus = [dictionary.doc2bow(document) for document in test_corpus]
             test_corpus = tfidf[test_corpus]
-        else:  # if self.method == 'wmd'
+        elif self.method == 'wmd':
             train_corpus = [document.words for document in train_documents]
             similarity_model = WmdSimilarity(train_corpus, self.vectors)
             test_corpus = [document.words for document in test_documents]
+        else:
+            raise ValueError('Preprocessing for method {} not yet implemented'.format(self.method))
 
         return (train_documents, test_documents, similarity_model, test_corpus)
 
