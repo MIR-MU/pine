@@ -16,6 +16,7 @@ LOGGER = getLogger(__name__)
 class LanguageModel(object):
     def __init__(self, corpus: Iterable[Iterable[str]], result_dir: Path,
                  name: str, subwords: bool = True, positions: bool = True,
+                 use_vocab_from: LanguageModel = None,
                  gensim_kwargs: Optional[Dict] = None):
         self.corpus = corpus
         self.result_dir = result_dir
@@ -26,6 +27,7 @@ class LanguageModel(object):
             **FASTTEXT_PARAMETERS['positions'][positions],
             **gensim_kwargs,
         }
+        self.use_vocab_from = use_vocab_from
         self._model = None
         self._vectors = None
         self._training_duration = None
@@ -98,17 +100,23 @@ class LanguageModel(object):
                 LOGGER.debug('Loading vocab for {} from {}'.format(self, self._bare_model_path()))
                 saved_values = pickle.load(rf)
         except IOError:
-            bare_model = FastText(**self.fasttext_parameters)
-            build_vocab_parameters = {
-                **FASTTEXT_PARAMETERS['build_vocab'],
-                **{
-                    key: value
-                    for (key, value) in self.fasttext_parameters.items()
-                    if key in FASTTEXT_PARAMETERS['build_vocab'].keys()
-                },
-            }
-            LOGGER.info('Building vocab for {}'.format(self))
-            bare_model.build_vocab(corpus_iterable=self.corpus, **build_vocab_parameters)
+            if self.use_vocab_from is None:
+                bare_model = FastText(**self.fasttext_parameters)
+                build_vocab_parameters = {
+                    **FASTTEXT_PARAMETERS['build_vocab'],
+                    **{
+                        key: value
+                        for (key, value) in self.fasttext_parameters.items()
+                        if key in FASTTEXT_PARAMETERS['build_vocab'].keys()
+                    },
+                }
+                LOGGER.info('Building vocab for {}'.format(self))
+                bare_model.build_vocab(corpus_iterable=self.corpus, **build_vocab_parameters)
+            else:
+                if self.use_vocab_from._model is None:
+                    LOGGER.warn('Using vocab of uninitialized {}'.format(self.use_vocab_from))
+                LOGGER.debug('Using vocab of {} for {}'.format(self.use_vocab_from, self))
+                bare_model = self.use_vocab_from.model
             saved_values = {'model_values': {}, 'wv_values': {}}
             for key in FASTTEXT_PARAMETERS['build_vocab_keys']:
                 if key in vars(bare_model):
@@ -118,6 +126,7 @@ class LanguageModel(object):
                 else:
                     message = 'Key {} not found in FastText model or its keyed vectors'.format(key)
                     raise KeyError(message)
+            del bare_model
             with self._bare_model_path().open('wb') as wf:
                 LOGGER.debug('Saving vocab for {} to {}'.format(self, self._bare_model_path()))
                 pickle.dump(saved_values, wf, protocol=PICKLE_PROTOCOL)
