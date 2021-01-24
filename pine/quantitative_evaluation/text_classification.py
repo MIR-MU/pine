@@ -17,6 +17,7 @@ from scipy.stats import mode
 from tqdm import tqdm
 
 from .. import LanguageModel
+from ..config import TEXT_CLASSIFICATION_DOCUMENT_SIZES
 
 
 COMMON_VECTORS = None
@@ -37,20 +38,9 @@ class Document:
 
 
 class Dataset:
-    train_document_sizes = {
-      'bbcsport': 517,
-      'twitter': 2176,
-      'recipe2': 3059,
-      'ohsumed': 3999,
-      'classic': 4965,
-      'r8': 5485,
-      'amazon': 5600,
-      '20ng2_500': 11293,
-    }
-
     def __init__(self, name: str, dataset: Path, split_idx: int):
-        if name not in self.train_document_sizes:
-            raise('Unknown dataset {}'.format(name))
+        if name not in TEXT_CLASSIFICATION_DOCUMENT_SIZES:
+            raise ValueError('Unknown dataset {}'.format(name))
         self.name = name
         self.split_idx = split_idx
         self.path = str(dataset)
@@ -73,7 +63,7 @@ class Dataset:
         LOGGER.debug('Loading {}'.format(self))
         data = loadmat(self.path)
         self._train_docs_per_split(data)
-        if len(self.train_documents) != self.train_document_sizes[self.name]:
+        if len(self.train_documents) != TEXT_CLASSIFICATION_DOCUMENT_SIZES[self.name]:
             message = 'Expected {} train documents but loaded {}'
             message = message.format(self.train_document_sizes[self.name], len(self.train_documents))
             raise ValueError(message)
@@ -231,7 +221,7 @@ class Evaluator:
         if method not in ('scm', 'wmd'):
             raise ValueError('Unsupported method {}'.format(method))
         self.method = method
-        self.vectors = model.wv
+        self.vectors = model.vectors
 
     def __hash__(self) -> int:
         return hash((self.dataset, self.method))
@@ -260,7 +250,7 @@ class Evaluator:
             train_corpus = [document.words for document in train_documents]
             dictionary = Dictionary(train_corpus, prune_at=None)
             tfidf = TfidfModel(dictionary=dictionary, smartirs='nfn')
-            termsim_index = WordEmbeddingSimilarityIndex(self.wv)
+            termsim_index = WordEmbeddingSimilarityIndex(self.vectors)
             similarity_matrix = SparseTermSimilarityMatrix(termsim_index, dictionary, tfidf)
             train_corpus = [dictionary.doc2bow(document) for document in train_corpus]
             train_corpus = tfidf[train_corpus]
