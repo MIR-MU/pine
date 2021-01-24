@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 
+from __future__ import annotations
+
 from itertools import chain
 from functools import cache
 from logging import getLogger
@@ -52,7 +54,7 @@ class Dataset:
     def __hash__(self) -> int:
         return hash((self.name, self.split_idx))
 
-    def __eq__(self, other) -> bool:
+    def __eq__(self, other: Dataset) -> bool:
         return self.name == other.name and self.split_idx == other.split_idx
 
     def load(self):
@@ -226,7 +228,7 @@ class Evaluator:
     def __hash__(self) -> int:
         return hash((self.dataset, self.method))
 
-    def __eq__(self, other) -> bool:
+    def __eq__(self, other: Evaluator) -> bool:
         return self.dataset == other.dataset and self.method == other.method
 
     @cache
