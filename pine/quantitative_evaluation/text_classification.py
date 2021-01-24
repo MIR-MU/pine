@@ -42,7 +42,9 @@ class Document:
 class Dataset:
     def __init__(self, name: str, dataset: Path, split_idx: int):
         if name not in TEXT_CLASSIFICATION_DOCUMENT_SIZES:
-            raise ValueError('Unknown dataset {}'.format(name))
+            known_datasets = ', '.join(TEXT_CLASSIFICATION_DOCUMENT_SIZES)
+            message = 'Unknown dataset {} (known datasets: {})'.format(name, known_datasets)
+            raise ValueError(message)
         self.name = name
         self.split_idx = split_idx
         self.path = str(dataset)
@@ -221,7 +223,9 @@ class Evaluator:
     def __init__(self, dataset: Dataset, model: LanguageModel, method: str):
         self.dataset = dataset
         if method not in TEXT_CLASSIFICATION_METHODS:
-            raise ValueError('Unknown method {}'.format(method))
+            known_methods = ', '.join(TEXT_CLASSIFICATION_METHODS)
+            message = 'Unknown method {} (known methods: {})'.format(method, known_methods)
+            raise ValueError(message)
         self.method = method
         self.vectors = model.vectors
 
@@ -265,7 +269,8 @@ class Evaluator:
             similarity_model = WmdSimilarity(train_corpus, self.vectors)
             test_corpus = [document.words for document in test_documents]
         else:
-            raise ValueError('Preprocessing for method {} not yet implemented'.format(self.method))
+            message = 'Preprocessing for method {} not yet implemented'.format(self.method)
+            raise ValueError(message)
 
         return (train_documents, test_documents, similarity_model, test_corpus)
 
