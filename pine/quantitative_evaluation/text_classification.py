@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from itertools import chain
-from functools import cache
+from functools import lru_cache
 from logging import getLogger
 from pathlib import Path
 from typing import List, Tuple, Optional
@@ -176,7 +176,7 @@ def __wmdistance(query: List[str], document: List[str]) -> float:
     return COMMON_VECTORS.wmdistance(query, document)
 
 
-@cache
+@lru_cache(maxsize=None)
 def _wmdistance(query: List[str], document: List[str]) -> float:
     return EXECUTOR.submit(__wmdistance, query, document)
 
@@ -235,7 +235,7 @@ class Evaluator:
     def __eq__(self, other: Evaluator) -> bool:
         return self.dataset == other.dataset and self.method == other.method
 
-    @cache
+    @lru_cache(maxsize=None)
     def _preprocess_dataset(self, level: str) -> Tuple[
                 List[Document], List[Document], SimilarityABC, List[Tuple[int, float]]
             ]:

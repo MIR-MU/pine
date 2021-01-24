@@ -4,12 +4,7 @@
 language: python
 
 env:
-  - TOXENV=py35
-  - TOXENV=py34
-  - TOXENV=py33
-  - TOXENV=py27
-  - TOXENV=py26
-  - TOXENV=pypy
+  - TOXENV=py37
 
 # command to install dependencies, e.g. pip install -r requirements.txt --use-mirrors
 install: pip install -U tox
@@ -28,4 +23,4 @@ deploy:
   on:
     tags: true
     repo: witiko/pine
-    condition: $TOXENV == py27
+    condition: $TOXENV == py37
