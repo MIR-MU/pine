@@ -6,7 +6,7 @@ from logging import getLogger
 from pathlib import Path
 import pickle
 from typing import Iterable, Dict, Optional
-from ..config import FASTTEXT_PARAMETERS, PICKLE_PROTOCOL
+from .config import FASTTEXT_PARAMETERS, PICKLE_PROTOCOL
 
 from gensim.models import FastText, KeyedVectors
 from gensim.models.callbacks import CallbackAny2Vec

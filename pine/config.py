@@ -56,15 +56,20 @@ TEXT_CLASSIFICATION_METHODS = set([
     'wmd',
 ])
 
-TEXT_CLASSIFICATION_DOCUMENT_SIZES = {
-  'bbcsport': 517,
-  'twitter': 2176,
-  'recipe2': 3059,
-  'ohsumed': 3999,
-  'classic': 4965,
-  'r8': 5485,
-  'amazon': 5600,
-  '20ng2_500': 11293,
+TEXT_CLASSIFICATION_DATASET_SIZES = {
+    'bbcsport': 517,
+    'twitter': 2176,
+    'recipe2': 3059,
+    'ohsumed': 3999,
+    'classic': 4965,
+    'r8': 5485,
+    'amazon': 5600,
+    '20ng2_500': 11293,
+}
+
+TEXT_CLASSIFICATION_DATASETS = {
+    'url': 'https://www.dropbox.com/sh/nf532hddgdt68ix/AABGLUiPRyXv6UL2YAcHmAFqa?dl=1',
+    'size': 4721151112,
 }
 
 CORPUS_SIZES = {

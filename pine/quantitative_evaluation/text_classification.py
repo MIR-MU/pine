@@ -3,11 +3,12 @@
 from __future__ import annotations
 
 from itertools import chain
-from functools import lru_cache
+from functools import lru_cache, partial
 from logging import getLogger
 from pathlib import Path
 from typing import List, Tuple, Optional
 from concurrent.futures import ProcessPoolExecutor
+from zipfile import ZipFile
 
 from gensim.corpora import Dictionary
 from gensim.interfaces import SimilarityABC
@@ -16,10 +17,11 @@ from gensim.similarities import SoftCosineSimilarity, SparseTermSimilarityMatrix
 import numpy as np
 from scipy.io import loadmat
 from scipy.stats import mode
+import smart_open
 from tqdm import tqdm
 
 from .. import LanguageModel
-from ..config import TEXT_CLASSIFICATION_DOCUMENT_SIZES, TEXT_CLASSIFICATION_METHODS
+from ..config import TEXT_CLASSIFICATION_DATASET_SIZES, TEXT_CLASSIFICATION_DATASETS, TEXT_CLASSIFICATION_METHODS
 
 
 COMMON_VECTORS = None
@@ -40,14 +42,14 @@ class Document:
 
 
 class Dataset:
-    def __init__(self, name: str, dataset: Path, split_idx: int):
-        if name not in TEXT_CLASSIFICATION_DOCUMENT_SIZES:
-            known_datasets = ', '.join(TEXT_CLASSIFICATION_DOCUMENT_SIZES)
+    def __init__(self, name: str, path: Path, split_idx: int):
+        if name not in TEXT_CLASSIFICATION_DATASET_SIZES:
+            known_datasets = ', '.join(TEXT_CLASSIFICATION_DATASET_SIZES)
             message = 'Unknown dataset {} (known datasets: {})'.format(name, known_datasets)
             raise ValueError(message)
         self.name = name
         self.split_idx = split_idx
-        self.path = str(dataset)
+        self.path = path
         self.loaded = False
 
     def __str__(self) -> str:
@@ -65,9 +67,9 @@ class Dataset:
         self.train_documents = []
         self.test_documents = []
         LOGGER.debug('Loading {}'.format(self))
-        data = loadmat(self.path)
+        data = loadmat(str(self.path))
         self._train_docs_per_split(data)
-        if len(self.train_documents) != TEXT_CLASSIFICATION_DOCUMENT_SIZES[self.name]:
+        if len(self.train_documents) != TEXT_CLASSIFICATION_DATASET_SIZES[self.name]:
             message = 'Expected {} train documents but loaded {}'
             message = message.format(self.train_document_sizes[self.name], len(self.train_documents))
             raise ValueError(message)
@@ -331,12 +333,12 @@ class Evaluator:
         return error_rate
 
 
-def load_kusner_datasets(dataset: Path) -> List[Dataset]:
-    name = dataset.name.split('-')[0]
+def load_kusner_datasets(path: Path) -> List[Dataset]:
+    name = path.name.split('-')[0]
     if '_split' in name:
-        datasets = [Dataset(name, dataset, split_idx) for split_idx in range(5)]
+        datasets = [Dataset(name, path, split_idx) for split_idx in range(5)]
     else:
-        datasets = [Dataset(name, dataset, 0)]
+        datasets = [Dataset(name, path, 0)]
     return datasets
 
 
@@ -352,16 +354,17 @@ def print_error_rate_analysis(dataset: Dataset, error_rates: List[float]):
         LOGGER.info(message.format(dataset.name, error_rate))
 
 
-def evaluate(dataset: Path, model: LanguageModel, method: str, result_dir: Path) -> List[float]:
-    datasets = load_kusner_datasets(dataset)
+def evaluate(dataset_path: Path, language_model: LanguageModel,
+             method: str, result_dir: Path) -> List[float]:
+    datasets = load_kusner_datasets(dataset_path)
     dataset, *_ = datasets
-    result_filename = '{}-{}-{}.txt'.format(method, model.name, dataset.name)
+    result_filename = '{}-{}-{}.txt'.format(method, language_model.name, dataset.name)
     result = result_dir / Path(result_filename)
     try:
         with result.open('rt') as f:
             error_rates = [float(line) for line in f]
     except IOError:
-        error_rates = [Evaluator(dataset, model, method).evaluate() for dataset in datasets]
+        error_rates = [Evaluator(dataset, language_model, method).evaluate() for dataset in datasets]
         with result.open('wt') as f:
             for line in error_rates:
                 print(line, file=f)
@@ -369,3 +372,28 @@ def evaluate(dataset: Path, model: LanguageModel, method: str, result_dir: Path)
     _wmdistance.cache_clear()  # Clear the WMD cache, so that the datasets don't take up RAM
 
     return error_rates
+
+
+def get_dataset_paths(result_dir: Path, buffer_size: int = 2**20) -> List[Path]:
+    dataset_paths = result_dir.glob('*.mat')
+    dataset_paths = sorted(dataset_paths)
+    if dataset_paths:
+        return dataset_paths
+
+    dataset_zipfile_path = (result_dir / 'WMD_datasets').with_suffix('.zip')
+    desc = 'Downloading datasets {}'.format(dataset_zipfile_path)
+    with tqdm(total=TEXT_CLASSIFICATION_DATASETS['size'], unit='B', desc=desc) as pbar:
+        with dataset_zipfile_path.open('wb') as wf:
+            with smart_open.open(TEXT_CLASSIFICATION_DATASETS['url'], 'rb') as rf:
+                for data in iter(partial(rf.read, buffer_size), b''):
+                    wf.write(data)
+                    pbar.update(len(data))
+    LOGGER.info('Extracting datasets from {} to {}'.format(dataset_zipfile_path, result_dir))
+    with ZipFile(dataset_zipfile_path, 'r') as zf:
+        zf.extractall(result_dir)
+    dataset_zipfile_path.unlink()
+    (result_dir / '20ng2_500-emd_tr_te.mat').unlink()
+
+    dataset_paths = result_dir.glob('*.mat')
+    dataset_paths = sorted(dataset_paths)
+    return dataset_paths
