@@ -19,7 +19,7 @@ from scipy.stats import mode
 from tqdm import tqdm
 
 from .. import LanguageModel
-from ..config import TEXT_CLASSIFICATION_DATASET_SIZES, TEXT_CLASSIFICATION_DATASETS, TEXT_CLASSIFICATION_METHODS
+from ..configuration import TEXT_CLASSIFICATION_DATASET_SIZES, TEXT_CLASSIFICATION_DATASETS, TEXT_CLASSIFICATION_METHODS
 from ..util import download_to, unzip_to
 
 

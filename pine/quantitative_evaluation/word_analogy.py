@@ -6,7 +6,7 @@ import json
 from typing import Tuple, List, Dict, Literal
 from pathlib import Path
 
-from ..config import WORD_ANALOGY_PARAMETERS, WORD_ANALOGY_DATASETS
+from ..configuration import WORD_ANALOGY_PARAMETERS, WORD_ANALOGY_DATASETS
 from ..language_model import LanguageModel
 from ..util import download_to
 

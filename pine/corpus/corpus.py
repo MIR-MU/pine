@@ -7,7 +7,7 @@ from typing import Iterable, List
 
 from tqdm import tqdm
 
-from ..config import CORPUS_SIZES
+from ..configuration import CORPUS_SIZES
 
 
 def get_corpus(name: str, result_dir: Path, language: str = 'en') -> Corpus:

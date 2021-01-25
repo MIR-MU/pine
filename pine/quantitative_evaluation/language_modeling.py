@@ -12,7 +12,7 @@ try:
 except ImportError:
     raise ImportError('Please install PyTorch to evaluate on language modeling')
 
-from ..config import LANGUAGE_MODELING_DATASETS
+from ..configuration import LANGUAGE_MODELING_DATASETS
 from ..language_model import LanguageModel
 from ..util import download_to, unzip_to
 
