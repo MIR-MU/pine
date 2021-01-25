@@ -65,7 +65,7 @@ def evaluate(dataset_path: Path, language_model: LanguageModel,
             for dataset in datasets[len(error_rates):]:
                 error_rate = Evaluator(dataset, language_model, method).evaluate()
                 error_rates.append(error_rate)
-                print(line, file=wf)
+                print(error_rate, file=wf)
     print_error_rate_analysis(dataset, error_rates)
     _wmdistance.cache_clear()  # Clear the WMD cache, so that the datasets don't take up RAM
 
