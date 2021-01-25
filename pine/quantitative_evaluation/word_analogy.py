@@ -27,7 +27,7 @@ def get_dataset_path(language: str, dataset_dir: Path) -> Path:
     return dataset_path
 
 
-def evaluate(dataset_path: Path, language_model: LanguageModel) -> WordAnalogyResult:
+def evaluate(dataset_path: Path, language_model: LanguageModel) -> Result:
     dataset_path = str(dataset_path)
     result_path = language_model.basename.with_suffix('.word_analogy.json')
     try:
@@ -41,7 +41,7 @@ def evaluate(dataset_path: Path, language_model: LanguageModel) -> WordAnalogyRe
     return result
 
 
-WordAnalogyResult = Tuple[
+Result = Tuple[
     float,
     List[
         Dict[

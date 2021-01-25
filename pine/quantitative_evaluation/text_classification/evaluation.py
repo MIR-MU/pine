@@ -1,0 +1,201 @@
+# -*- coding: utf-8 -*-
+
+from __future__ import annotations
+
+from functools import lru_cache
+from logging import getLogger
+from pathlib import Path
+from typing import List, Tuple, Optional
+from concurrent.futures import ProcessPoolExecutor, Future
+import shelve
+
+from gensim.corpora import Dictionary
+from gensim.interfaces import SimilarityABC
+from gensim.models import TfidfModel, KeyedVectors
+from gensim.similarities import SoftCosineSimilarity, SparseTermSimilarityMatrix, WordEmbeddingSimilarityIndex
+import numpy as np
+from scipy.stats import mode
+from tqdm import tqdm
+
+from ..language_model import LanguageModel
+from ..configuration import TEXT_CLASSIFICATION_METHODS
+from .data import Dataset, Document
+
+
+COMMON_VECTORS = None
+EXECUTOR = ProcessPoolExecutor(None)
+LOGGER = getLogger(__name__)
+
+
+class Evaluator:
+    def __init__(self, dataset: Dataset, model: LanguageModel, method: str):
+        self.dataset = dataset
+        if method not in TEXT_CLASSIFICATION_METHODS:
+            known_methods = ', '.join(TEXT_CLASSIFICATION_METHODS)
+            message = 'Unknown method {} (known methods: {})'.format(method, known_methods)
+            raise ValueError(message)
+        self.model = model
+        self.method = method
+
+    def __hash__(self) -> int:
+        return hash((self.dataset, self.method))
+
+    def __eq__(self, other: Evaluator) -> bool:
+        return self.dataset == other.dataset and self.method == other.method
+
+    @lru_cache(maxsize=1)
+    def _preprocess_dataset(self, level: str) -> Tuple[
+                List[Document], List[Document], np.ndarray, List[Tuple[int, float]]
+            ]:
+        LOGGER.debug('Preprocessing {} ({})'.format(self.dataset, level))
+
+        if level == 'validation':
+            pivot = int(round(len(self.dataset.train_documents) * 0.8))
+            train_documents = self.dataset.train_documents[:pivot]
+            test_documents = self.dataset.train_documents[pivot:]
+        elif level == 'test':
+            train_documents = self.dataset.train_documents
+            test_documents = self.dataset.test_documents
+        else:
+            message = 'Expected validation or test level, but got {}'
+            raise ValueError(message.format(level))
+
+        if self.method == 'scm':
+            train_corpus = [document.words for document in train_documents]
+            dictionary = Dictionary(train_corpus, prune_at=None)
+            tfidf = TfidfModel(dictionary=dictionary, smartirs='nfn')
+            termsim_index = WordEmbeddingSimilarityIndex(self.model.vectors)
+            similarity_matrix = SparseTermSimilarityMatrix(termsim_index, dictionary, tfidf)
+            train_corpus = [dictionary.doc2bow(document) for document in train_corpus]
+            train_corpus = tfidf[train_corpus]
+            similarity_model = SoftCosineSimilarity(train_corpus, similarity_matrix)
+            test_corpus = (document.words for document in test_documents)
+            test_corpus = [dictionary.doc2bow(document) for document in test_corpus]
+            test_corpus = tfidf[test_corpus]
+        elif self.method == 'wmd':
+            train_corpus = [document.words for document in train_documents]
+            cache_path = self.mode.cache_dir / self.model.basename.name
+            cache_path = cache_path.with_suffix('.text_classification-{}.shelf'.format(self.method))
+            similarity_model = ParallelCachingWmdSimilarity(train_corpus, self.model.vectors, cache_path)
+            test_corpus = [document.words for document in test_documents]
+        else:
+            message = 'Preprocessing for method {} not yet implemented'.format(self.method)
+            raise ValueError(message)
+
+        with np.errstate(all='ignore'):
+            similarities = similarity_model[test_corpus]
+        expected_shape = (len(test_documents), len(train_documents))
+        if similarities.shape != expected_shape:
+            message = 'Expected similarities with shape {}, but received shape {}'
+            raise ValueError(message.format(expected_shape, similarities.shape))
+
+        return (train_documents, test_documents, similarities, test_corpus)
+
+    def _collect_preds_sequential(self, level: str, knn: int) -> Tuple[List[int], List[int]]:
+        train_documents, test_documents, similarities, test_corpus = self._preprocess_dataset(level)
+
+        LOGGER.debug('Evaluating {} ({}, k={})'.format(self.dataset, level, knn))
+        y_preds, y_trues = [], []
+        similarities = enumerate(zip(test_documents, similarities))
+        for test_doc_id, (test_doc, train_doc_similarities) in similarities:
+            most_similar_idxs = train_doc_similarities.argsort()[::-1][:knn]
+            voted_targets = [train_documents[idx].target for idx in most_similar_idxs]
+            if len(voted_targets) != knn:
+                message = 'Expected {} nearest neighbors, but got {}'
+                raise ValueError(message.format(knn, len(voted_targets)))
+            y_pred = mode(voted_targets).mode[0]
+            y_true = test_doc.target
+
+            y_preds.append(y_pred)
+            y_trues.append(y_true)
+        return y_preds, y_trues
+
+    def _evaluate(self, knn: int, level: str = 'validation') -> float:
+        y_preds, y_trues = self._collect_preds_sequential(level, knn)
+        test_errors = sum(y_pred != y_true for y_pred, y_true in zip(y_preds, y_trues))
+        error_rate = test_errors / len(y_preds)
+        return error_rate
+
+    def _get_best_knn(self, knns: Tuple[int] = (1, 3, 5, 7, 9, 11, 13, 15, 17, 19)) -> int:
+        best_knn, best_error_rate = None, float('inf')
+        worst_knn, worst_error_rate = None, float('-inf')
+        for knn, error_rate in zip(knns, map(self._evaluate, knns)):
+            if error_rate < best_error_rate:
+                best_knn, best_error_rate = knn, error_rate
+            if error_rate > worst_error_rate:
+                worst_knn, worst_error_rate = knn, error_rate
+        message = 'Best/worst value of k for {}: {}/{} (validation error rate: {:.2f}/{:.2f}%)'
+        message = message.format(self.dataset, best_knn, worst_knn,
+                                 best_error_rate * 100.0, worst_error_rate * 100.0)
+        LOGGER.debug(message)
+        return best_knn
+
+    def evaluate(self) -> float:
+        self.dataset.load()
+        knn = self._get_best_knn()
+        error_rate = self._evaluate(knn, level='test')
+        self._preprocess_dataset.cache_clear()
+        message = 'Test error rate for {}: {:.2f}%'.format(self.dataset, error_rate * 100.0)
+        LOGGER.debug(message)
+        return error_rate
+
+
+def wmdistance(query: List[str], document: List[str]) -> float:
+    return COMMON_VECTORS.wmdistance(query, document)
+
+
+class ParallelCachingWmdSimilarity(SimilarityABC):
+    def __init__(self, corpus: List[List[str]], vectors: KeyedVectors, cache_path: Path,
+                 num_best: Optional[int] = None, chunksize: int = 256):
+        self.corpus = corpus
+        self.vectors = vectors
+        self.cache_path = cache_path
+        self.num_best = num_best
+        self.chunksize = chunksize
+        self.normalize = False
+        self.index = np.arange(len(corpus))
+
+    def __len__(self) -> int:
+        return len(self.corpus)
+
+    def get_similarities(self, queries: List[List[str]]) -> np.ndarray:
+        global COMMON_VECTORS
+
+        COMMON_VECTORS = self.vectors
+
+        with shelve.open(str(self.cache_path), 'c') as shelf:
+
+            def make_symmetric(query: List[str], document: List[str]) -> Tuple[List[str], List[str]]:
+                if query < document:  # Enforce symmetric caching
+                    return (document, query)
+                return (query, document)
+
+            def load_from_shelf(query: List[str], document: List[str]) -> float:
+                query, document = make_symmetric(query, document)
+                if (query, document) in shelf:
+                    return shelf[query, document]
+                return EXECUTOR.submit(wmdistance, query, document)
+
+            def store_to_shelf(query: List[str], document: List[str], value: float):
+                query, document = make_symmetric(query, document)
+                assert (query, document) not in shelf
+                shelf[query, document] = value
+
+            result = []
+            for query in tqdm(queries):
+                futures = [load_from_shelf(query, document) for document in self.corpus]
+                distances = []
+                for document, future in zip(self.corpus, futures):
+                    if isinstance(future, Future):
+                        distance = future.result()
+                        store_to_shelf(query, document, distance)
+                    else:
+                        distance = future
+                    distances.append(distance)
+                similarities = 1. / (1. + np.array(distances))
+                result.append(similarities)
+            result = np.array(result)
+
+        COMMON_VECTORS = None
+
+        return result

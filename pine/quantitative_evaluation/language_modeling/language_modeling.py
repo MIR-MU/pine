@@ -39,7 +39,7 @@ def get_dataset_paths(language: str, result_dir: Path) -> Dataset:
     return dataset_paths
 
 
-def evaluate(dataset_paths: Dataset, language_model: LanguageModel) -> LanguageModelingResult:
+def evaluate(dataset_paths: Dataset, language_model: LanguageModel) -> Result:
     result_path = language_model.basename.with_suffix('.language_modeling.json')
     try:
         with result_path.open('rt') as rf:
@@ -61,4 +61,4 @@ TrainingResult = Iterable[EvaluationResult]
 ValidationResult = EvaluationResult
 TestResult = EvaluationResult
 EpochResult = Tuple[TrainingResult, ValidationResult, LearningRate]
-LanguageModelingResult = Tuple[TestResult, Iterable[EpochResult]]
+Result = Tuple[TestResult, Iterable[EpochResult]]

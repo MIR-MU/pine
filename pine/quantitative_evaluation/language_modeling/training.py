@@ -11,14 +11,14 @@ try:
 except ImportError:
     raise ImportError('For training language models, please install PyTorch')
 
-from .language_modeling import Dataset, LanguageModelingResult, TrainingResult, EvaluationResult
+from .language_modeling import Dataset, Result, TrainingResult, EvaluationResult
 from .data import Corpus
 from .model import PreinitializedRNNModel
 from ...configuration import LANGUAGE_MODELING_PARAMETERS
 from ...language_model import LanguageModel
 
 
-def train_and_evaluate(dataset: Dataset, language_model: LanguageModel) -> LanguageModelingResult:
+def train_and_evaluate(dataset: Dataset, language_model: LanguageModel) -> Result:
     cache_path = language_model.cache_dir / language_model.basename.name
     cache_path = cache_path.with_suffix('.language-modeling.pt')
 
