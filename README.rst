@@ -1,6 +1,6 @@
-=========================================
-Position-Independent Embeddings (PInE) 🌲
-=========================================
+===============================
+Position-Independent Embeddings
+===============================
 
 .. image:: https://img.shields.io/pypi/v/pine.svg
         :target: https://pypi.python.org/pypi/pine
@@ -13,6 +13,8 @@ Position-Independent Embeddings (PInE) 🌲
         :alt: Documentation Status
 
 A python package that allows you to train, use, and evaluate position-independent word embeddings.
+
+.. image:: https://github.com/MIR-MU/pine/raw/main/images/pine.png
 
 * Free software: LGPLv2.1 license
 * Documentation: https://pine.readthedocs.org.
