@@ -1,2 +1,2 @@
-git+https://github.com/witiko/gensim.git@6b6ce4561e9a0f75f2cf18abe8ac324462316394
+gensim @ git+https://github.com/witiko/gensim.git@6b6ce4561e9a0f75f2cf18abe8ac324462316394#egg=gensim
 tqdm~=4.56.0
