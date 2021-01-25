@@ -15,10 +15,13 @@ from tqdm import tqdm
 CORPUS_NUM_ARTICLES = 4924894
 
 
-def get_corpus_path(language: str, name: str, result_dir: Path) -> Path:
+def get_corpus_path(language: str, name: str, corpus_dir: Path) -> Path:
     if language != 'en':
         raise ValueError('Unsupported Wikipedia language {}'.format(language))
-    corpus_path = (result_dir / name).with_suffix('.txt')
+    corpus_path = corpus_dir / name
+    corpus_path.mkdir(parents=True, exist_ok=True)
+    corpus_path = corpus_path / language
+    corpus_path = corpus_path.with_suffix('.txt')
     if corpus_path.exists():
         return corpus_path
     with corpus_path.open('wt') as f:

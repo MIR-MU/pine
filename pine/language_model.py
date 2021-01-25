@@ -13,6 +13,7 @@ from .corpus import get_corpus, Corpus
 
 from gensim.models import FastText, KeyedVectors
 from gensim.models.callbacks import CallbackAny2Vec
+import humanize
 
 
 LOGGER = getLogger(__name__)
@@ -22,23 +23,26 @@ class LanguageModel:
     def __init__(self,
                  corpus_name: str,
                  model_dir: Union[Path, str],
+                 cache_dir: Union[Path, str],
                  corpus_dir: Union[Path, str],
                  dataset_dir: Union[Path, str],
-                 cache_dir: Union[Path, str],
                  subwords: bool = True,
                  positions: Literal[False, 'full', 'constrained'] = 'constrained',
                  use_vocab_from: LanguageModel = None,
                  extra_fasttext_parameters: Optional[Dict] = None):
 
         self.corpus_name = corpus_name
-        self.model_dir = Path(model_dir)
+        self._model_dir = Path(model_dir)
+        self._cache_dir = Path(cache_dir)
         self.corpus_dir = Path(corpus_dir)
         self.dataset_dir = Path(dataset_dir)
-        self.cache_dir = Path(cache_dir)
         self.subwords = subwords
         self.positions = positions
         self.use_vocab_from = use_vocab_from
         self.extra_fasttext_parameters = extra_fasttext_parameters
+
+        self.model_dir.mkdir(parents=True, exist_ok=True)
+        self.cache_dir.mkdir(parents=True, exist_ok=True)
 
         self._model = None
         self._vectors = None
@@ -67,7 +71,7 @@ class LanguageModel:
         raise ValueError('Training duration not found in model {}'.format(self._model_path))
 
     def __repr__(self) -> str:
-        return '<<{} {}>>'.format(self.__class__.__name__, self.basename.with_suffix('.*'))
+        return '<<{} {}>>'.format(self.__class__.__name__, self.basename)
 
     @property
     def corpus(self) -> Corpus:
@@ -83,26 +87,47 @@ class LanguageModel:
         }
 
     @property
-    def basename(self) -> Path:
+    def basename(self) -> str:
         basename = []
         basename.append(self.corpus_name)
         basename.append(self.language)
         basename.append(MODEL_BASENAMES(self.subwords, self.positions))
         basename.append(stringify_parameters(self.extra_fasttext_parameters))
         basename = filter(len, basename)
-        return self.model_dir / '-'.join(basename)
+        return '-'.join(basename)
+
+    @property
+    def model_dir(self) -> str:
+        return self._model_dir / self.basename
+
+    @property
+    def cache_dir(self) -> str:
+        return self._cache_dir / self.basename
+
+    def print_model_files(self):
+        for path in self.model_dir, self.cache_dir:
+            for path in path.glob('**/*'):
+                if not path.is_file():
+                    continue
+                size = path.stat().st_size
+                size = humanize.naturalsize(size)
+                print('{}\t{}'.format(size, path))
 
     @property
     def _bare_model_path(self) -> Path:
-        return self.basename.with_suffix('.bare-model')
+        bare_model_path = self.model_dir / 'bare_model'
+        return bare_model_path
 
     @property
     def _model_path(self) -> Path:
-        return self.basename.with_suffix('.model')
+        model_path = self.model_dir / 'model'
+        return model_path
 
     @property
     def _vectors_path(self) -> Path:
-        return self.basename.with_suffix('.vec')
+        vectors_path = self.model_dir / 'model'
+        vectors_path = vectors_path.with_suffix('.vec')
+        return vectors_path
 
     def _load_model(self) -> FastText:
         if self._model is not None:

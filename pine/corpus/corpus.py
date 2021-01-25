@@ -10,7 +10,7 @@ from tqdm import tqdm
 from ..configuration import CORPUS_SIZES
 
 
-def get_corpus(name: str, result_dir: Path, language: str = 'en') -> Corpus:
+def get_corpus(name: str, corpus_dir: Path, language: str = 'en') -> Corpus:
     if name not in CORPUS_SIZES:
         known_corpora = ', '.join(CORPUS_SIZES)
         message = 'Unknown corpus {} (known corpora: {})'.format(name, known_corpora)
@@ -29,7 +29,7 @@ def get_corpus(name: str, result_dir: Path, language: str = 'en') -> Corpus:
     else:
         raise ValueError('Corpus {} not yet implemented'.format(name))
 
-    corpus_path = get_corpus_path(language=language, name=name, result_dir=result_dir)
+    corpus_path = get_corpus_path(language=language, name=name, corpus_dir=corpus_dir)
     corpus = LineSentence(name, corpus_path, corpus_size)
     return corpus
 

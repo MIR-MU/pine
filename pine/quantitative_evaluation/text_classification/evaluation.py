@@ -74,8 +74,10 @@ class Evaluator:
             test_corpus = tfidf[test_corpus]
         elif self.method == 'wmd':
             train_corpus = [document.words for document in train_documents]
-            cache_path = self.mode.cache_dir / self.model.basename.name
-            cache_path = cache_path.with_suffix('.text_classification-{}.shelf'.format(self.method))
+            cache_path = self.model.cache_dir / 'text_classification'
+            cache_path.mkdir(exist_ok=True)
+            cache_path = cache_path / '{}-{}'.format(self.dataset.name, self.method)
+            cache_path = cache_path.with_suffix('.shelf')
             similarity_model = ParallelCachingWmdSimilarity(train_corpus, self.model.vectors, cache_path)
             test_corpus = [document.words for document in test_documents]
         else:

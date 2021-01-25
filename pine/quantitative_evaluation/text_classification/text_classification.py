@@ -18,15 +18,17 @@ LOGGER = getLogger(__name__)
 
 
 def get_dataset_paths(dataset_dir: Path) -> List[Path]:
-    dataset_paths = dataset_dir.glob('*.mat')
+    dataset_path = dataset_dir / 'text_classification'
+    dataset_path.mkdir(parents=True, exist_ok=True)
+    dataset_paths = dataset_path.glob('*.mat')
     dataset_paths = sorted(dataset_paths)
     if dataset_paths:
         return dataset_paths
 
     dataset_zipfile_path = (dataset_dir / 'WMD_datasets').with_suffix('.zip')
     download_to(path=dataset_zipfile_path, **TEXT_CLASSIFICATION_DATASETS)
-    unzip_to(dataset_zipfile_path, dataset_dir, unlink_after=True)
-    (dataset_dir / '20ng2_500-emd_tr_te.mat').unlink()
+    unzip_to(dataset_zipfile_path, dataset_path, unlink_after=True)
+    (dataset_path / '20ng2_500-emd_tr_te.mat').unlink()
 
     dataset_paths = dataset_dir.glob('*.mat')
     dataset_paths = sorted(dataset_paths)
@@ -36,7 +38,10 @@ def get_dataset_paths(dataset_dir: Path) -> List[Path]:
 def evaluate(dataset_path: Path, language_model: LanguageModel, method: str) -> Result:
     datasets = load_kusner_datasets(dataset_path)
     dataset, *_ = datasets
-    result_path = language_model.basename.with_suffix('.text_classification-{}.txt'.format(method))
+    result_path = language_model.model_dir / 'text_classification'
+    dataset_path.mkdir(exist_ok=True)
+    result_path = result_path / '{}-{}'.format(dataset.name, method)
+    result_path = result_path.with_suffix('.txt')
     try:
         with result_path.open('rt') as rf:
             error_rates = [float(line) for line in rf]

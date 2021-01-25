@@ -18,7 +18,9 @@ def get_dataset_path(language: str, dataset_dir: Path) -> Path:
         message = message.format(known_languages)
         raise ValueError(message)
 
-    dataset_path = dataset_dir / 'word-analogy-{}'.format(language)
+    dataset_path = dataset_dir / 'word_analogy'
+    dataset_path.mkdir(parents=True, exist_ok=True)
+    dataset_path = dataset_path / language
     dataset_path = dataset_path.with_suffix('.txt')
     if dataset_path.exists():
         return dataset_path
@@ -29,7 +31,7 @@ def get_dataset_path(language: str, dataset_dir: Path) -> Path:
 
 def evaluate(dataset_path: Path, language_model: LanguageModel) -> Result:
     dataset_path = str(dataset_path)
-    result_path = language_model.basename.with_suffix('.word_analogy.json')
+    result_path = language_model.model_dir / 'word_analogy.json'
     try:
         with result_path.open('rt') as rf:
             result = json.load(rf)

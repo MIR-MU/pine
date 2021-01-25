@@ -13,10 +13,13 @@ from tqdm import tqdm
 SHARD_URL = 'http://web-language-models.s3-website-us-east-1.amazonaws.com/ngrams/en/deduped/en.{:02d}.deduped.xz'
 
 
-def get_corpus_path(language: str, name: str, result_dir: Path) -> Path:
+def get_corpus_path(language: str, name: str, corpus_dir: Path) -> Path:
     if language != 'en':
         raise ValueError('Unsupported Common Crawl language {}'.format(language))
-    corpus_path = (result_dir / name).with_suffix('.txt')
+    corpus_path = corpus_dir / name
+    corpus_path.mkdir(parents=True, exist_ok=True)
+    corpus_path = corpus_path / language
+    corpus_path = corpus_path.with_suffix('.txt')
     if corpus_path.exists():
         return corpus_path
     with corpus_path.open('wt') as f:

@@ -19,8 +19,8 @@ from ...language_model import LanguageModel
 
 
 def train_and_evaluate(dataset: Dataset, language_model: LanguageModel) -> Result:
-    cache_path = language_model.cache_dir / language_model.basename.name
-    cache_path = cache_path.with_suffix('.language-modeling.pt')
+    cache_path = language_model.cache_dir / 'language_modeling'
+    cache_path = cache_path.with_suffix('.pt')
 
     torch.manual_seed(LANGUAGE_MODELING_PARAMETERS['seed'])
     device = torch.device(LANGUAGE_MODELING_PARAMETERS['device'])
