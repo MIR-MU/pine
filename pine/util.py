@@ -6,7 +6,7 @@ from numbers import Integral
 from pathlib import Path
 from logging import getLogger
 from functools import partial
-from typing import Dict
+from typing import Dict, Any
 
 import smart_open
 from tqdm import tqdm
@@ -48,7 +48,7 @@ def unzip_to(archive: Path, result_dir: Path, unlink_after: bool = False):
 
 
 def stringify_parameters(parameters: Dict) -> str:
-    def millify(n):
+    def millify(n: Integral) -> str:
         millnames = ('', 'K', 'M', 'G', 'T')
         n = float(n)
         millidx = max(
@@ -60,7 +60,7 @@ def stringify_parameters(parameters: Dict) -> str:
         )
         return '{:.0f}{}'.format(n / 10**(3 * millidx), millnames[millidx])
 
-    def stringify(obj):
+    def stringify(obj: Any) -> str:
         obj = millify(obj) if isinstance(obj, Integral) else str(obj)
         obj = re.sub('_', '-', obj)
         return obj
