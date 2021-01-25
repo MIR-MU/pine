@@ -5,7 +5,7 @@ from __future__ import annotations
 from logging import getLogger
 from pathlib import Path
 import pickle
-from typing import Iterable, Dict, Optional
+from typing import Iterable, Dict, Optional, Literal
 from .configuration import FASTTEXT_PARAMETERS, PICKLE_PROTOCOL
 
 from gensim.models import FastText, KeyedVectors
@@ -17,7 +17,8 @@ LOGGER = getLogger(__name__)
 
 class LanguageModel:
     def __init__(self, corpus: Iterable[Iterable[str]], result_dir: Path,
-                 name: str, subwords: bool = True, positions: bool = True,
+                 name: str, subwords: bool = True,
+                 positions: Literal[False, 'full', 'constrained'] = 'constrained',
                  use_vocab_from: LanguageModel = None,
                  gensim_kwargs: Optional[Dict] = None):
         self.corpus = corpus

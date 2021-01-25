@@ -26,8 +26,12 @@ FASTTEXT_PARAMETERS = {
     'positions': {
         False: {
         },
-        True: {
+        'full': {
             'position_dependent_weights': 1,
+        },
+        'constrained': {
+            'position_dependent_weights': 1,
+            'vector_size': 60,
         },
     },
     'build_vocab': {
