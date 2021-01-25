@@ -94,7 +94,6 @@ class Evaluator:
     def _collect_preds_sequential(self, level: str, knn: int) -> Tuple[List[int], List[int]]:
         train_documents, test_documents, similarities, test_corpus = self._preprocess_dataset(level)
 
-        LOGGER.debug('Evaluating {} ({}, k={})'.format(self.dataset, level, knn))
         y_preds, y_trues = [], []
         similarities = enumerate(zip(test_documents, similarities))
         for test_doc_id, (test_doc, train_doc_similarities) in similarities:
@@ -117,9 +116,12 @@ class Evaluator:
         return error_rate
 
     def _get_best_knn(self, knns: Tuple[int] = (1, 3, 5, 7, 9, 11, 13, 15, 17, 19)) -> int:
+        self._preprocess_dataset('validation')
         best_knn, best_error_rate = None, float('inf')
         worst_knn, worst_error_rate = None, float('-inf')
-        for knn, error_rate in zip(knns, map(self._evaluate, knns)):
+        error_rates = zip(knns, map(self._evaluate, knns))
+        error_rates = tqdm(error_rates, desc='Optimizing k for kNN', total=len(knns))
+        for knn, error_rate in error_rates:
             if error_rate < best_error_rate:
                 best_knn, best_error_rate = knn, error_rate
             if error_rate > worst_error_rate:
