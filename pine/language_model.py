@@ -20,7 +20,7 @@ LOGGER = getLogger(__name__)
 
 class LanguageModel:
     def __init__(self, corpus_name: str,
-                 model_dir: Path, corpus_dir: Path, dataset_dir: Path,
+                 model_dir: Path, corpus_dir: Path, dataset_dir: Path, cache_dir: Path,
                  subwords: bool = True,
                  positions: Literal[False, 'full', 'constrained'] = 'constrained',
                  use_vocab_from: LanguageModel = None,
@@ -29,6 +29,7 @@ class LanguageModel:
         self.model_dir = model_dir
         self.corpus_dir = corpus_dir
         self.dataset_dir = dataset_dir
+        self.cache_dir = cache_dir
         self.subwords = subwords
         self.positions = positions
         self.use_vocab_from = use_vocab_from

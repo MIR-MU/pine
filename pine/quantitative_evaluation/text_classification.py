@@ -7,7 +7,8 @@ from functools import lru_cache
 from logging import getLogger
 from pathlib import Path
 from typing import List, Tuple, Optional
-from concurrent.futures import ProcessPoolExecutor
+from concurrent.futures import ProcessPoolExecutor, Future
+import shelve
 
 from gensim.corpora import Dictionary
 from gensim.interfaces import SimilarityABC
@@ -60,7 +61,6 @@ def evaluate(dataset_path: Path, language_model: LanguageModel, method: str) -> 
                 error_rates.append(error_rate)
                 print(error_rate, file=wf, flush=True)
     print_error_rate_analysis(dataset, error_rates)
-    _wmdistance.cache_clear()  # Clear the WMD cache, so that the datasets don't take up RAM
 
     return error_rates
 
@@ -210,28 +210,16 @@ class Dataset:
             raise ValueError('Unrecognized matrix format')
 
 
-def __wmdistance(query: List[str], document: List[str]) -> float:
+def wmdistance(query: List[str], document: List[str]) -> float:
     return COMMON_VECTORS.wmdistance(query, document)
 
 
-@lru_cache(maxsize=None)
-def _wmdistance(query: List[str], document: List[str]) -> float:
-    return EXECUTOR.submit(__wmdistance, query, document)
-
-
-def wmdistance(query: List[str], document: List[str]) -> float:
-    if query < document:  # Enforce symmetric caching
-        distance = _wmdistance(query, document)
-    else:
-        distance = _wmdistance(document, query)
-    return distance
-
-
-class WmdSimilarity(SimilarityABC):
-    def __init__(self, corpus: List[List[str]], vectors: KeyedVectors, num_best: Optional[int] = None,
-                 chunksize: int = 256):
+class ParallelCachingWmdSimilarity(SimilarityABC):
+    def __init__(self, corpus: List[List[str]], vectors: KeyedVectors, cache_path: Path,
+                 num_best: Optional[int] = None, chunksize: int = 256):
         self.corpus = corpus
         self.vectors = vectors
+        self.cache_path = cache_path
         self.num_best = num_best
         self.chunksize = chunksize
         self.normalize = False
@@ -245,12 +233,38 @@ class WmdSimilarity(SimilarityABC):
 
         COMMON_VECTORS = self.vectors
 
-        result = []
-        for query in tqdm(queries):
-            qresult = [wmdistance(query, document) for document in self.corpus]
-            qresult = 1. / (1. + np.array([future.result() for future in qresult]))
-            result.append(qresult)
-        result = np.array(result)
+        with shelve.open(str(self.cache_path), 'c') as shelf:
+
+            def make_symmetric(query: List[str], document: List[str]) -> Tuple[List[str], List[str]]:
+                if query < document:  # Enforce symmetric caching
+                    return (document, query)
+                return (query, document)
+
+            def load_from_shelf(query: List[str], document: List[str]) -> float:
+                query, document = make_symmetric(query, document)
+                if (query, document) in shelf:
+                    return shelf[query, document]
+                return EXECUTOR.submit(wmdistance, query, document)
+
+            def store_to_shelf(query: List[str], document: List[str], value: float):
+                query, document = make_symmetric(query, document)
+                assert (query, document) not in shelf
+                shelf[query, document] = value
+
+            result = []
+            for query in tqdm(queries):
+                futures = [load_from_shelf(query, document) for document in self.corpus]
+                distances = []
+                for document, future in zip(self.corpus, futures):
+                    if isinstance(future, Future):
+                        distance = future.result()
+                        store_to_shelf(query, document, distance)
+                    else:
+                        distance = future
+                    distances.append(distance)
+                similarities = 1. / (1. + np.array(distances))
+                result.append(similarities)
+            result = np.array(result)
 
         COMMON_VECTORS = None
 
@@ -264,8 +278,8 @@ class Evaluator:
             known_methods = ', '.join(TEXT_CLASSIFICATION_METHODS)
             message = 'Unknown method {} (known methods: {})'.format(method, known_methods)
             raise ValueError(message)
+        self.model = model
         self.method = method
-        self.vectors = model.vectors
 
     def __hash__(self) -> int:
         return hash((self.dataset, self.method))
@@ -273,9 +287,9 @@ class Evaluator:
     def __eq__(self, other: Evaluator) -> bool:
         return self.dataset == other.dataset and self.method == other.method
 
-    @lru_cache(maxsize=None)
+    @lru_cache(maxsize=1)
     def _preprocess_dataset(self, level: str) -> Tuple[
-                List[Document], List[Document], SimilarityABC, List[Tuple[int, float]]
+                List[Document], List[Document], np.ndarray, List[Tuple[int, float]]
             ]:
         LOGGER.debug('Preprocessing {} ({})'.format(self.dataset, level))
 
@@ -294,7 +308,7 @@ class Evaluator:
             train_corpus = [document.words for document in train_documents]
             dictionary = Dictionary(train_corpus, prune_at=None)
             tfidf = TfidfModel(dictionary=dictionary, smartirs='nfn')
-            termsim_index = WordEmbeddingSimilarityIndex(self.vectors)
+            termsim_index = WordEmbeddingSimilarityIndex(self.model.vectors)
             similarity_matrix = SparseTermSimilarityMatrix(termsim_index, dictionary, tfidf)
             train_corpus = [dictionary.doc2bow(document) for document in train_corpus]
             train_corpus = tfidf[train_corpus]
@@ -304,27 +318,28 @@ class Evaluator:
             test_corpus = tfidf[test_corpus]
         elif self.method == 'wmd':
             train_corpus = [document.words for document in train_documents]
-            similarity_model = WmdSimilarity(train_corpus, self.vectors)
+            cache_path = self.mode.cache_dir / self.model.basename.name
+            cache_path = cache_path.with_suffix('.text_classification-{}.shelf'.format(self.method))
+            similarity_model = ParallelCachingWmdSimilarity(train_corpus, self.model.vectors, cache_path)
             test_corpus = [document.words for document in test_documents]
         else:
             message = 'Preprocessing for method {} not yet implemented'.format(self.method)
             raise ValueError(message)
 
-        return (train_documents, test_documents, similarity_model, test_corpus)
-
-    def _collect_preds_sequential(self, level: str, knn: int) -> Tuple[List[int], List[int]]:
-        train_documents, test_documents, similarity_model, test_corpus = self._preprocess_dataset(level)
-
-        LOGGER.debug('Evaluating {} ({}, k={})'.format(self.dataset, level, knn))
-
-        y_preds = []
-        y_trues = []
         with np.errstate(all='ignore'):
             similarities = similarity_model[test_corpus]
         expected_shape = (len(test_documents), len(train_documents))
         if similarities.shape != expected_shape:
             message = 'Expected similarities with shape {}, but received shape {}'
             raise ValueError(message.format(expected_shape, similarities.shape))
+
+        return (train_documents, test_documents, similarities, test_corpus)
+
+    def _collect_preds_sequential(self, level: str, knn: int) -> Tuple[List[int], List[int]]:
+        train_documents, test_documents, similarities, test_corpus = self._preprocess_dataset(level)
+
+        LOGGER.debug('Evaluating {} ({}, k={})'.format(self.dataset, level, knn))
+        y_preds, y_trues = [], []
         similarities = enumerate(zip(test_documents, similarities))
         for test_doc_id, (test_doc, train_doc_similarities) in similarities:
             most_similar_idxs = train_doc_similarities.argsort()[::-1][:knn]
@@ -346,7 +361,6 @@ class Evaluator:
         return error_rate
 
     def _get_best_knn(self, knns: Tuple[int] = (1, 3, 5, 7, 9, 11, 13, 15, 17, 19)) -> int:
-        self._preprocess_dataset('validation')
         best_knn, best_error_rate = None, float('inf')
         worst_knn, worst_error_rate = None, float('-inf')
         for knn, error_rate in zip(knns, map(self._evaluate, knns)):
@@ -364,6 +378,7 @@ class Evaluator:
         self.dataset.load()
         knn = self._get_best_knn()
         error_rate = self._evaluate(knn, level='test')
+        self._preprocess_dataset.cache_clear()
         message = 'Test error rate for {}: {:.2f}%'.format(self.dataset, error_rate * 100.0)
         LOGGER.debug(message)
         return error_rate
