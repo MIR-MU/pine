@@ -55,7 +55,7 @@ class RNNModel(nn.Module):
         nn.init.zeros_(self.decoder.weight)
         nn.init.uniform_(self.decoder.weight, -initrange, initrange)
 
-    def forward(self, input: torch.Tensor, hidden: torch.Tensor) -> torch.tensor:
+    def forward(self, input: torch.Tensor, hidden: torch.Tensor) -> torch.Tensor:
         emb = self.drop(self.encoder(input))
         output, hidden = self.rnn(emb, hidden)
         output = self.drop(output)
