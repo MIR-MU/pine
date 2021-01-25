@@ -29,6 +29,48 @@ EXECUTOR = ProcessPoolExecutor(None)
 LOGGER = getLogger(__name__)
 
 
+def get_dataset_paths(result_dir: Path) -> List[Path]:
+    dataset_paths = result_dir.glob('*.mat')
+    dataset_paths = sorted(dataset_paths)
+    if dataset_paths:
+        return dataset_paths
+
+    url = TEXT_CLASSIFICATION_DATASETS['url']
+    size = TEXT_CLASSIFICATION_DATASETS['size']
+    dataset_zipfile_path = (result_dir / 'WMD_datasets').with_suffix('.zip')
+    download_to(url, size, dataset_zipfile_path)
+    LOGGER.info('Extracting datasets from {} to {}'.format(dataset_zipfile_path, result_dir))
+    with ZipFile(dataset_zipfile_path, 'r') as zf:
+        zf.extractall(result_dir)
+    dataset_zipfile_path.unlink()
+    (result_dir / '20ng2_500-emd_tr_te.mat').unlink()
+
+    dataset_paths = result_dir.glob('*.mat')
+    dataset_paths = sorted(dataset_paths)
+    return dataset_paths
+
+
+def evaluate(dataset_path: Path, language_model: LanguageModel,
+             method: str, result_dir: Path) -> List[float]:
+    datasets = load_kusner_datasets(dataset_path)
+    dataset, *_ = datasets
+    result_filename = '{}-{}-{}'.format(language_model.name, dataset.name, method)
+    result_path = result_dir / result_filename
+    result_path = result_path.with_suffix('.txt')
+    try:
+        with result_path.open('rt') as rf:
+            error_rates = [float(line) for line in rf]
+    except IOError:
+        error_rates = [Evaluator(dataset, language_model, method).evaluate() for dataset in datasets]
+        with result_path.open('wt') as wf:
+            for line in error_rates:
+                print(line, file=wf)
+    print_error_rate_analysis(dataset, error_rates)
+    _wmdistance.cache_clear()  # Clear the WMD cache, so that the datasets don't take up RAM
+
+    return error_rates
+
+
 class Document:
     def __init__(self, words: List[str], target: int):
         words = tuple(words)
@@ -352,44 +394,3 @@ def print_error_rate_analysis(dataset: Dataset, error_rates: List[float]):
     else:
         message = 'Test error rate for dataset {}: {:.2f}%'
         LOGGER.info(message.format(dataset.name, error_rate))
-
-
-def evaluate(dataset_path: Path, language_model: LanguageModel,
-             method: str, result_dir: Path) -> List[float]:
-    datasets = load_kusner_datasets(dataset_path)
-    dataset, *_ = datasets
-    result_filename = '{}-{}-{}.txt'.format(method, language_model.name, dataset.name)
-    result = result_dir / Path(result_filename)
-    try:
-        with result.open('rt') as f:
-            error_rates = [float(line) for line in f]
-    except IOError:
-        error_rates = [Evaluator(dataset, language_model, method).evaluate() for dataset in datasets]
-        with result.open('wt') as f:
-            for line in error_rates:
-                print(line, file=f)
-    print_error_rate_analysis(dataset, error_rates)
-    _wmdistance.cache_clear()  # Clear the WMD cache, so that the datasets don't take up RAM
-
-    return error_rates
-
-
-def get_dataset_paths(result_dir: Path) -> List[Path]:
-    dataset_paths = result_dir.glob('*.mat')
-    dataset_paths = sorted(dataset_paths)
-    if dataset_paths:
-        return dataset_paths
-
-    url = TEXT_CLASSIFICATION_DATASETS['url']
-    size = TEXT_CLASSIFICATION_DATASETS['size']
-    dataset_zipfile_path = (result_dir / 'WMD_datasets').with_suffix('.zip')
-    download_to(url, size, dataset_zipfile_path)
-    LOGGER.info('Extracting datasets from {} to {}'.format(dataset_zipfile_path, result_dir))
-    with ZipFile(dataset_zipfile_path, 'r') as zf:
-        zf.extractall(result_dir)
-    dataset_zipfile_path.unlink()
-    (result_dir / '20ng2_500-emd_tr_te.mat').unlink()
-
-    dataset_paths = result_dir.glob('*.mat')
-    dataset_paths = sorted(dataset_paths)
-    return dataset_paths

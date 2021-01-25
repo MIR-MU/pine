@@ -51,6 +51,24 @@ FASTTEXT_PARAMETERS = {
     ]),
 }
 
+WORD_ANALOGY_PARAMETERS = {
+    'case_insensitive': True,
+    'dummy4unknown': False,
+    'restrict_vocab': 2 * 10**5,
+}
+
+WORD_ANALOGY_DATASETS = {
+    'en': {
+        'url': 'https://github.com/tmikolov/word2vec/raw/master/questions-words.txt',
+        'size': 603955,
+    },
+}
+
+TEXT_CLASSIFICATION_DATASETS = {
+    'url': 'https://www.dropbox.com/sh/nf532hddgdt68ix/AABGLUiPRyXv6UL2YAcHmAFqa?dl=1',
+    'size': 4721151112,
+}
+
 TEXT_CLASSIFICATION_METHODS = set([
     'scm',
     'wmd',
@@ -65,11 +83,6 @@ TEXT_CLASSIFICATION_DATASET_SIZES = {
     'r8': 5485,
     'amazon': 5600,
     '20ng2_500': 11293,
-}
-
-TEXT_CLASSIFICATION_DATASETS = {
-    'url': 'https://www.dropbox.com/sh/nf532hddgdt68ix/AABGLUiPRyXv6UL2YAcHmAFqa?dl=1',
-    'size': 4721151112,
 }
 
 CORPUS_SIZES = {
