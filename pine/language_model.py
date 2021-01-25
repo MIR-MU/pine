@@ -34,7 +34,6 @@ class LanguageModel:
         self.use_vocab_from = use_vocab_from
         self._model = None
         self._vectors = None
-        self._training_duration = None
 
     @property
     def model(self) -> FastText:
@@ -54,54 +53,45 @@ class LanguageModel:
 
     @property
     def training_duration(self) -> float:
-        try:
-            return self._load_training_duration()
-        except IOError:
-            self._train_model()
-            return self._load_training_duration()
+        for callback in self.model.callbacks:
+            if isinstance(callback, TrainingDurationMeasure):
+                return callback.total_seconds
+        raise ValueError('Training duration not found in model {}'.format(self._model_path))
 
     def __repr__(self) -> str:
         return '<<{} {}>>'.format(self.__class__.__name__, self.name)
 
+    @property
     def _bare_model_path(self) -> Path:
         return (self.result_dir / self.name).with_suffix('.bare-model')
 
+    @property
     def _model_path(self) -> Path:
         return (self.result_dir / self.name).with_suffix('.model')
 
+    @property
     def _vectors_path(self) -> Path:
         return (self.result_dir / self.name).with_suffix('.vec')
-
-    def _training_duration_path(self) -> Path:
-        return (self.result_dir / self.name).with_suffix('.duration')
 
     def _load_model(self) -> FastText:
         if self._model is not None:
             return self._model
-        LOGGER.debug('Loading model for {} from {}'.format(self, self.model_path()))
-        self._model = FastText.load(str(self.model_path()), mmap='r')
+        LOGGER.debug('Loading model for {} from {}'.format(self, self._model_path))
+        self._model = FastText.load(str(self._model_path), mmap='r')
         self._vectors = self._model.wv
         return self._model
-
-    def _load_training_duration(self) -> float:
-        if self._training_duration is not None:
-            return self._training_duration
-        with self.training_duration_path().open('rt') as f:
-            LOGGER.debug('Loading training duration for {} from {}'.format(self, self.training_duration_path()))
-            self._training_duration = float(f.read())
-        return self._training_duration
 
     def _load_vectors(self) -> KeyedVectors:
         if self._vectors is not None:
             return self._vectors
-        LOGGER.debug('Loading vectors for {} from {}'.format(self, self.vectors_path()))
-        self._vectors = KeyedVectors.load_word2vec_format(str(self.vectors_path()))
+        LOGGER.debug('Loading vectors for {} from {}'.format(self, self._vectors_path))
+        self._vectors = KeyedVectors.load_word2vec_format(str(self._vectors_path))
         return self._vectors
 
     def _build_vocab(self) -> FastText:
         try:
-            with self._bare_model_path().open('rb') as rf:
-                LOGGER.debug('Loading vocab for {} from {}'.format(self, self._bare_model_path()))
+            with self._bare_model_path.open('rb') as rf:
+                LOGGER.debug('Loading vocab for {} from {}'.format(self, self._bare_model_path))
                 saved_values = pickle.load(rf)
         except IOError:
             if self.use_vocab_from is None:
@@ -132,8 +122,8 @@ class LanguageModel:
                     message = 'Key {} not found in FastText model or its keyed vectors'.format(key)
                     raise KeyError(message)
             del bare_model
-            with self._bare_model_path().open('wb') as wf:
-                LOGGER.debug('Saving vocab for {} to {}'.format(self, self._bare_model_path()))
+            with self._bare_model_path.open('wb') as wf:
+                LOGGER.debug('Saving vocab for {} to {}'.format(self, self._bare_model_path))
                 pickle.dump(saved_values, wf, protocol=PICKLE_PROTOCOL)
 
         model = FastText(**self.fasttext_parameters)
@@ -167,14 +157,13 @@ class LanguageModel:
         if not self.subwords:
             model.wv.vectors = model.wv.vectors_vocab  # Apply fix from Gensim issue #2891
 
-        LOGGER.info('Saving model for {} to {}'.format(self, self.model_path()))
-        model.save(str(self.model_path()))
-        LOGGER.debug('Saving vectors for {} to {}'.format(self, self.vectors_path()))
-        model.wv.save_word2vec_format(str(self.vectors_path()))
-        LOGGER.debug('Saving training duration for {} to {}'.format(self, self.training_duration_path()))
-        training_duration = training_duration_measure.total_seconds
-        with self.training_duration_path().open('wt') as f:
-            print(training_duration, file=f)
+        self._model = model
+        self._vectors = model.wv
+
+        LOGGER.info('Saving model for {} to {}'.format(self, self._model_path))
+        model.save(str(self._model_path))
+        LOGGER.debug('Saving vectors for {} to {}'.format(self, self._vectors_path))
+        model.wv.save_word2vec_format(str(self._vectors_path))
 
 
 class TrainingDurationMeasure(CallbackAny2Vec):
