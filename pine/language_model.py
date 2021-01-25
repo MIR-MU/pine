@@ -29,6 +29,8 @@ class LanguageModel:
             **FASTTEXT_PARAMETERS['positions'][positions],
             **gensim_kwargs,
         }
+        self.subwords = subwords
+        self.positions = positions
         self.use_vocab_from = use_vocab_from
         self._model = None
         self._vectors = None
@@ -161,6 +163,8 @@ class LanguageModel:
         }
         LOGGER.info('Training {}'.format(self))
         model.train(corpus_iterable=self.corpus, **train_parameters)
+        if not self.subwords:
+            model.wv.vectors = model.wv.vectors_vocab  # Apply fix from Gensim issue #2891
 
         LOGGER.info('Saving model for {} to {}'.format(self, self.model_path()))
         model.save(str(self.model_path()))
