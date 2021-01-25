@@ -31,6 +31,7 @@ def get_dataset_path(language: str, result_dir: Path) -> Path:
 
 def evaluate(dataset_path: Path, language_model: LanguageModel,
              result_dir: Path) -> WordAnalogyResult:
+    dataset_path = str(dataset_path)
     result_filename = '{}-{}'.format(language_model.name, dataset_path.stem)
     result_path = result_dir / result_filename
     result_path = result_path.with_suffix('.json')
@@ -38,10 +39,8 @@ def evaluate(dataset_path: Path, language_model: LanguageModel,
         with result_path.open('rt') as rf:
             results = json.load(rf)
     except IOError:
-        results = language_model.model.wv.evaluate_word_analogies(
-            str(dataset_path),
-            **WORD_ANALOGY_PARAMETERS,
-        )
+        vectors = language_model.vectors
+        results = vectors.evaluate_word_analogies(dataset_path, **WORD_ANALOGY_PARAMETERS)
         with result_path.open('wt') as wf:
             json.dump(results, wf, indent=4, sort_keys=True)
     return results

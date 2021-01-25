@@ -80,7 +80,7 @@ class LanguageModel:
             return self._model
         LOGGER.debug('Loading model for {} from {}'.format(self, self.model_path()))
         self._model = FastText.load(str(self.model_path()), mmap='r')
-        self._vectors = self._model.wv.vectors
+        self._vectors = self._model.wv
         return self._model
 
     def _load_training_duration(self) -> float:
