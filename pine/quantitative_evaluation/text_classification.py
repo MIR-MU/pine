@@ -8,7 +8,6 @@ from logging import getLogger
 from pathlib import Path
 from typing import List, Tuple, Optional
 from concurrent.futures import ProcessPoolExecutor
-from zipfile import ZipFile
 
 from gensim.corpora import Dictionary
 from gensim.interfaces import SimilarityABC
@@ -21,7 +20,7 @@ from tqdm import tqdm
 
 from .. import LanguageModel
 from ..config import TEXT_CLASSIFICATION_DATASET_SIZES, TEXT_CLASSIFICATION_DATASETS, TEXT_CLASSIFICATION_METHODS
-from ..util import download_to
+from ..util import download_to, unzip_to
 
 
 COMMON_VECTORS = None
@@ -37,10 +36,7 @@ def get_dataset_paths(result_dir: Path) -> List[Path]:
 
     dataset_zipfile_path = (result_dir / 'WMD_datasets').with_suffix('.zip')
     download_to(path=dataset_zipfile_path, **TEXT_CLASSIFICATION_DATASETS)
-    LOGGER.info('Extracting datasets from {} to {}'.format(dataset_zipfile_path, result_dir))
-    with ZipFile(dataset_zipfile_path, 'r') as zf:
-        zf.extractall(result_dir)
-    dataset_zipfile_path.unlink()
+    unzip_to(dataset_zipfile_path, result_dir, unlink_after=True)
     (result_dir / '20ng2_500-emd_tr_te.mat').unlink()
 
     dataset_paths = result_dir.glob('*.mat')

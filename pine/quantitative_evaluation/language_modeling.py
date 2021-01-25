@@ -5,7 +5,6 @@ from __future__ import annotations
 from logging import getLogger
 from typing import Dict, Literal, Union, List
 from pathlib import Path
-import tarfile
 
 try:
     import torch
@@ -15,7 +14,7 @@ except ImportError:
 
 from ..config import LANGUAGE_MODELING_DATASETS
 from ..language_model import LanguageModel
-from ..util import download_to
+from ..util import download_to, unzip_to
 
 
 LOGGER = getLogger(__name__)
@@ -26,10 +25,7 @@ def get_dataset_paths(language: str, result_dir: Path) -> Dataset:
     if not readme_path.exists():
         dataset_tarfile_path = (result_dir / 'icml14-data').with_suffix('.tar.bz2')
         download_to(path=dataset_tarfile_path, **LANGUAGE_MODELING_DATASETS)
-        LOGGER.info('Extracting datasets from {} to {}'.format(dataset_tarfile_path, result_dir))
-        with tarfile.open(dataset_tarfile_path, 'r:bz2') as tf:
-            tf.extractall(result_dir)
-        dataset_tarfile_path.unlink()
+        unzip_to(dataset_tarfile_path, result_dir, unlink_after=True)
 
     dataset_dirnames = {
         dirname.name.split('-')[-1]: dirname
