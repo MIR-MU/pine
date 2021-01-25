@@ -17,15 +17,13 @@ def get_dataset_path(language: str, result_dir: Path) -> Path:
         message = 'Unknown language {} for word analogies (known languages: {})'
         message = message.format(known_languages)
         raise ValueError(message)
-    url = WORD_ANALOGY_DATASETS[language]['url']
-    size = WORD_ANALOGY_DATASETS[language]['size']
 
     dataset_path = result_dir / 'word-analogy-{}'.format(language)
     dataset_path = dataset_path.with_suffix('.txt')
     if dataset_path.exists():
         return dataset_path
 
-    download_to(url, size, dataset_path)
+    download_to(path=dataset_path, **WORD_ANALOGY_DATASETS[language])
     return dataset_path
 
 
