@@ -5,7 +5,7 @@ from __future__ import annotations
 from logging import getLogger
 from pathlib import Path
 import pickle
-from typing import Dict, Optional, Literal
+from typing import Dict, Optional, Literal, Union
 
 from .configuration import FASTTEXT_PARAMETERS, MODEL_BASENAMES, PICKLE_PROTOCOL
 from .util import stringify_parameters
@@ -19,17 +19,22 @@ LOGGER = getLogger(__name__)
 
 
 class LanguageModel:
-    def __init__(self, corpus_name: str,
-                 model_dir: Path, corpus_dir: Path, dataset_dir: Path, cache_dir: Path,
+    def __init__(self,
+                 corpus_name: str,
+                 model_dir: Union[Path, str],
+                 corpus_dir: Union[Path, str],
+                 dataset_dir: Union[Path, str],
+                 cache_dir: Union[Path, str],
                  subwords: bool = True,
                  positions: Literal[False, 'full', 'constrained'] = 'constrained',
                  use_vocab_from: LanguageModel = None,
                  extra_fasttext_parameters: Optional[Dict] = None):
+
         self.corpus_name = corpus_name
-        self.model_dir = model_dir
-        self.corpus_dir = corpus_dir
-        self.dataset_dir = dataset_dir
-        self.cache_dir = cache_dir
+        self.model_dir = Path(model_dir)
+        self.corpus_dir = Path(corpus_dir)
+        self.dataset_dir = Path(dataset_dir)
+        self.cache_dir = Path(cache_dir)
         self.subwords = subwords
         self.positions = positions
         self.use_vocab_from = use_vocab_from

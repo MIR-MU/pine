@@ -109,6 +109,24 @@ TEXT_CLASSIFICATION_DATASET_SIZES = {
     '20ng2_500': 11293,
 }
 
+LANGUAGE_MODELING_PARAMETERS = {
+    'device': 'cuda',
+    'tie_weights': True,
+    'freeze_embeddings': False,
+    'ninp': 300,
+    'nhid': 300,
+    'nlayers': 2,
+    'dropout': 0.5,
+    'batch_size': 40,
+    'initial_learning_rate': 20,
+    'eval_batch_size': 10,
+    'sentence_length': 35,
+    'annealing': 4.0,
+    'clip': 0.25,
+    'epochs': 50,
+    'seed': 21,
+}
+
 CORPUS_SIZES = {
     'wikipedia': {
         'en': 249230825,
@@ -119,3 +137,8 @@ CORPUS_SIZES = {
 }
 
 PICKLE_PROTOCOL = 3
+
+JSON_DUMP_PARAMETERS = {
+    'indent': 4,
+    'sort_keys': True,
+}

@@ -2,22 +2,13 @@
 
 from __future__ import annotations
 
-from logging import getLogger
-from typing import Dict, Literal, Union, List
+import json
+from typing import Dict, Literal, Tuple, Iterable
 from pathlib import Path
 
-try:
-    pass
-    # import torch
-except ImportError:
-    raise ImportError('Please install PyTorch to evaluate on language modeling')
-
-from ..configuration import LANGUAGE_MODELING_DATASETS
-from ..language_model import LanguageModel
-from ..util import download_to, unzip_to
-
-
-LOGGER = getLogger(__name__)
+from ...configuration import LANGUAGE_MODELING_DATASETS, JSON_DUMP_PARAMETERS
+from ...language_model import LanguageModel
+from ...util import download_to, unzip_to
 
 
 def get_dataset_paths(language: str, result_dir: Path) -> Dataset:
@@ -48,13 +39,26 @@ def get_dataset_paths(language: str, result_dir: Path) -> Dataset:
     return dataset_paths
 
 
-def evaluate(dataset_paths: Dataset, language_model: LanguageModel,
-             result_dir: Path, seed: int = 21, device: str = 'cuda') -> LanguageModelingResults:
-    pass
+def evaluate(dataset_paths: Dataset, language_model: LanguageModel) -> LanguageModelingResult:
+    result_path = language_model.basename.with_suffix('.language_modeling.json')
+    try:
+        with result_path.open('rt') as rf:
+            result = json.load(rf)
+    except IOError:
+        from .training import train_and_evaluate
+        result = train_and_evaluate(dataset_paths, language_model)
+        with result_path.open('wt') as wf:
+            json.dump(result, wf, **JSON_DUMP_PARAMETERS)
+    return result
 
 
 Dataset = Dict[Literal['vocab', 'train', 'validation', 'test'], Path]
-LanguageModelingResults = Union[
-    Dict[Literal['train', 'validation'], List[float]],
-    Dict[Literal['test'], float]
-]
+Perplexity = float
+Loss = float
+LearningRate = float
+EvaluationResult = Tuple[Perplexity, Loss]
+TrainingResult = Iterable[EvaluationResult]
+ValidationResult = EvaluationResult
+TestResult = EvaluationResult
+EpochResult = Tuple[TrainingResult, ValidationResult, LearningRate]
+LanguageModelingResult = Tuple[TestResult, Iterable[EpochResult]]

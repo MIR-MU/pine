@@ -6,7 +6,7 @@ import json
 from typing import Tuple, List, Dict, Literal
 from pathlib import Path
 
-from ..configuration import WORD_ANALOGY_PARAMETERS, WORD_ANALOGY_DATASETS
+from ..configuration import WORD_ANALOGY_PARAMETERS, WORD_ANALOGY_DATASETS, JSON_DUMP_PARAMETERS
 from ..language_model import LanguageModel
 from ..util import download_to
 
@@ -32,13 +32,13 @@ def evaluate(dataset_path: Path, language_model: LanguageModel) -> WordAnalogyRe
     result_path = language_model.basename.with_suffix('.word_analogy.json')
     try:
         with result_path.open('rt') as rf:
-            results = json.load(rf)
+            result = json.load(rf)
     except IOError:
         vectors = language_model.vectors
-        results = vectors.evaluate_word_analogies(dataset_path, **WORD_ANALOGY_PARAMETERS)
+        result = vectors.evaluate_word_analogies(dataset_path, **WORD_ANALOGY_PARAMETERS)
         with result_path.open('wt') as wf:
-            json.dump(results, wf, indent=4, sort_keys=True)
-    return results
+            json.dump(result, wf, **JSON_DUMP_PARAMETERS)
+    return result
 
 
 WordAnalogyResult = Tuple[
