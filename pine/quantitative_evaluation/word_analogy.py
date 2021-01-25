@@ -1,6 +1,9 @@
 # -*- coding: utf-8 -*-
 
+from __future__ import annotations
+
 import json
+from typing import Tuple, List, Dict, Literal
 from pathlib import Path
 
 from ..config import WORD_ANALOGY_PARAMETERS, WORD_ANALOGY_DATASETS
@@ -26,7 +29,8 @@ def get_dataset_path(language: str, result_dir: Path) -> Path:
     return dataset_path
 
 
-def evaluate(dataset_path: Path, language_model: LanguageModel, result_dir: Path) -> float:
+def evaluate(dataset_path: Path, language_model: LanguageModel,
+             result_dir: Path) -> WordAnalogyResult:
     result_filename = '{}-{}'.format(language_model.name, dataset_path.stem)
     result_path = result_dir / result_filename
     result_path = result_path.with_suffix('.json')
@@ -40,5 +44,15 @@ def evaluate(dataset_path: Path, language_model: LanguageModel, result_dir: Path
         )
         with result_path.open('wt') as wf:
             json.dump(results, wf, indent=4, sort_keys=True)
-    score, sections = results
-    return score
+    return results
+
+
+WordAnalogyResult = Tuple[
+    float,
+    List[
+        Dict[
+            Literal['correct', 'incorrect'],
+            List[Tuple[str, str, str, str]],
+        ],
+    ],
+]
