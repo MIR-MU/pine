@@ -30,11 +30,14 @@ def get_corpus(name: str, result_dir: Path, language: str = 'en') -> Corpus:
         raise ValueError('Corpus {} not yet implemented'.format(name))
 
     corpus_path = get_corpus_path(language=language, name=name, result_dir=result_dir)
-    corpus = Corpus(name, corpus_path, corpus_size)
+    corpus = LineSentence(name, corpus_path, corpus_size)
     return corpus
 
 
-class Corpus:
+Corpus = Iterable[Iterable[str]]
+
+
+class LineSentence:
     def __init__(self, name: str, path: Path, size: int):
         self.name = name
         self.path = path

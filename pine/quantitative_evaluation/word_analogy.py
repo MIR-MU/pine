@@ -11,14 +11,14 @@ from ..language_model import LanguageModel
 from ..util import download_to
 
 
-def get_dataset_path(language: str, result_dir: Path) -> Path:
+def get_dataset_path(language: str, dataset_dir: Path) -> Path:
     if language not in WORD_ANALOGY_DATASETS:
         known_languages = ', '.join(WORD_ANALOGY_DATASETS)
         message = 'Unknown language {} for word analogies (known languages: {})'
         message = message.format(known_languages)
         raise ValueError(message)
 
-    dataset_path = result_dir / 'word-analogy-{}'.format(language)
+    dataset_path = dataset_dir / 'word-analogy-{}'.format(language)
     dataset_path = dataset_path.with_suffix('.txt')
     if dataset_path.exists():
         return dataset_path
@@ -27,12 +27,9 @@ def get_dataset_path(language: str, result_dir: Path) -> Path:
     return dataset_path
 
 
-def evaluate(dataset_path: Path, language_model: LanguageModel,
-             result_dir: Path) -> WordAnalogyResult:
+def evaluate(dataset_path: Path, language_model: LanguageModel) -> WordAnalogyResult:
     dataset_path = str(dataset_path)
-    result_filename = '{}-{}'.format(language_model.name, dataset_path.stem)
-    result_path = result_dir / result_filename
-    result_path = result_path.with_suffix('.json')
+    result_path = language_model.basename.with_suffix('.word_analogy.json')
     try:
         with result_path.open('rt') as rf:
             results = json.load(rf)

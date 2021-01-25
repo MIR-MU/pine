@@ -5,8 +5,11 @@ from __future__ import annotations
 from logging import getLogger
 from pathlib import Path
 import pickle
-from typing import Iterable, Dict, Optional, Literal
-from .configuration import FASTTEXT_PARAMETERS, PICKLE_PROTOCOL
+from typing import Dict, Optional, Literal
+
+from .configuration import FASTTEXT_PARAMETERS, MODEL_BASENAMES, PICKLE_PROTOCOL
+from .util import stringify_parameters
+from .corpus import get_corpus, Corpus
 
 from gensim.models import FastText, KeyedVectors
 from gensim.models.callbacks import CallbackAny2Vec
@@ -16,23 +19,21 @@ LOGGER = getLogger(__name__)
 
 
 class LanguageModel:
-    def __init__(self, corpus: Iterable[Iterable[str]], result_dir: Path,
-                 name: str, subwords: bool = True,
+    def __init__(self, corpus_name: str,
+                 model_dir: Path, corpus_dir: Path, dataset_dir: Path,
+                 subwords: bool = True,
                  positions: Literal[False, 'full', 'constrained'] = 'constrained',
                  use_vocab_from: LanguageModel = None,
-                 gensim_kwargs: Optional[Dict] = None):
-        self.corpus = corpus
-        self.result_dir = result_dir
-        self.name = name
-        self.fasttext_parameters = {
-            **FASTTEXT_PARAMETERS['baseline'],
-            **FASTTEXT_PARAMETERS['subwords'][subwords],
-            **FASTTEXT_PARAMETERS['positions'][positions],
-            **gensim_kwargs,
-        }
+                 extra_fasttext_parameters: Optional[Dict] = None):
+        self.corpus_name = corpus_name
+        self.model_dir = model_dir
+        self.corpus_dir = corpus_dir
+        self.dataset_dir = dataset_dir
         self.subwords = subwords
         self.positions = positions
         self.use_vocab_from = use_vocab_from
+        self.extra_fasttext_parameters = extra_fasttext_parameters
+
         self._model = None
         self._vectors = None
 
@@ -60,19 +61,42 @@ class LanguageModel:
         raise ValueError('Training duration not found in model {}'.format(self._model_path))
 
     def __repr__(self) -> str:
-        return '<<{} {}>>'.format(self.__class__.__name__, self.name)
+        return '<<{} {}>>'.format(self.__class__.__name__, self.basename.with_suffix('.*'))
+
+    @property
+    def corpus(self) -> Corpus:
+        return get_corpus(self.corpus_name, self.corpus_dir, self.language)
+
+    @property
+    def fasttext_parameters(self) -> Dict:
+        return {
+            **FASTTEXT_PARAMETERS['baseline'],
+            **FASTTEXT_PARAMETERS['subwords'][self.subwords],
+            **FASTTEXT_PARAMETERS['positions'][self.positions],
+            **(self.extra_fasttext_parameters or dict()),
+        }
+
+    @property
+    def basename(self) -> Path:
+        basename = []
+        basename.append(self.corpus_name)
+        basename.append(self.language)
+        basename.append(MODEL_BASENAMES(self.subwords, self.positions))
+        basename.append(stringify_parameters(self.extra_fasttext_parameters))
+        basename = filter(len, basename)
+        return self.model_dir / '-'.join(basename)
 
     @property
     def _bare_model_path(self) -> Path:
-        return (self.result_dir / self.name).with_suffix('.bare-model')
+        return self.basename.with_suffix('.bare-model')
 
     @property
     def _model_path(self) -> Path:
-        return (self.result_dir / self.name).with_suffix('.model')
+        return self.basename.with_suffix('.model')
 
     @property
     def _vectors_path(self) -> Path:
-        return (self.result_dir / self.name).with_suffix('.vec')
+        return self.basename.with_suffix('.vec')
 
     def _load_model(self) -> FastText:
         if self._model is not None:

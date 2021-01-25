@@ -28,40 +28,37 @@ EXECUTOR = ProcessPoolExecutor(None)
 LOGGER = getLogger(__name__)
 
 
-def get_dataset_paths(result_dir: Path) -> List[Path]:
-    dataset_paths = result_dir.glob('*.mat')
+def get_dataset_paths(dataset_dir: Path) -> List[Path]:
+    dataset_paths = dataset_dir.glob('*.mat')
     dataset_paths = sorted(dataset_paths)
     if dataset_paths:
         return dataset_paths
 
-    dataset_zipfile_path = (result_dir / 'WMD_datasets').with_suffix('.zip')
+    dataset_zipfile_path = (dataset_dir / 'WMD_datasets').with_suffix('.zip')
     download_to(path=dataset_zipfile_path, **TEXT_CLASSIFICATION_DATASETS)
-    unzip_to(dataset_zipfile_path, result_dir, unlink_after=True)
-    (result_dir / '20ng2_500-emd_tr_te.mat').unlink()
+    unzip_to(dataset_zipfile_path, dataset_dir, unlink_after=True)
+    (dataset_dir / '20ng2_500-emd_tr_te.mat').unlink()
 
-    dataset_paths = result_dir.glob('*.mat')
+    dataset_paths = dataset_dir.glob('*.mat')
     dataset_paths = sorted(dataset_paths)
     return dataset_paths
 
 
-def evaluate(dataset_path: Path, language_model: LanguageModel,
-             method: str, result_dir: Path) -> List[float]:
+def evaluate(dataset_path: Path, language_model: LanguageModel, method: str) -> List[float]:
     datasets = load_kusner_datasets(dataset_path)
     dataset, *_ = datasets
-    result_filename = '{}-{}-{}'.format(language_model.name, dataset.name, method)
-    result_path = result_dir / result_filename
-    result_path = result_path.with_suffix('.txt')
+    result_path = language_model.basename.with_suffix('.text_classification-{}.txt'.format(method))
     try:
         with result_path.open('rt') as rf:
             error_rates = [float(line) for line in rf]
     except IOError:
         error_rates = []
-    if len(error_rates) < len(datasets):
+    if len(error_rates) < len(datasets):  # Support partially serialized results
         with result_path.open('wt') as wf:
             for dataset in datasets[len(error_rates):]:
                 error_rate = Evaluator(dataset, language_model, method).evaluate()
                 error_rates.append(error_rate)
-                print(error_rate, file=wf)
+                print(error_rate, file=wf, flush=True)
     print_error_rate_analysis(dataset, error_rates)
     _wmdistance.cache_clear()  # Clear the WMD cache, so that the datasets don't take up RAM
 

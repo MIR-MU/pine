@@ -55,6 +55,21 @@ FASTTEXT_PARAMETERS = {
     ]),
 }
 
+
+def MODEL_BASENAMES(subwords, positions):
+    parts = []
+    if positions == 'constrained':
+        parts.append('constrained')
+    if positions is not False:
+        parts.append('positional')
+    if subwords:
+        parts.append('fasttext')
+    else:
+        parts.append('word2vec')
+    parts.append('cbow')
+    return '_'.join(parts)
+
+
 WORD_ANALOGY_PARAMETERS = {
     'case_insensitive': True,
     'dummy4unknown': False,
