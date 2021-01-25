@@ -7,8 +7,8 @@ from typing import Dict, Literal, Union, List
 from pathlib import Path
 
 try:
-    import torch
-    import torch.nn as nn
+    pass
+    # import torch
 except ImportError:
     raise ImportError('Please install PyTorch to evaluate on language modeling')
 
