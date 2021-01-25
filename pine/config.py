@@ -69,6 +69,11 @@ TEXT_CLASSIFICATION_DATASETS = {
     'size': 4721151112,
 }
 
+LANGUAGE_MODELING_DATASETS = {
+    'url': 'https://github.com/bothameister/bothameister.github.io/raw/master/icml14-data.tar.bz2',
+    'size': 10803893,
+}
+
 TEXT_CLASSIFICATION_METHODS = set([
     'scm',
     'wmd',
