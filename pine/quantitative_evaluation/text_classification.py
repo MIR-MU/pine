@@ -35,10 +35,8 @@ def get_dataset_paths(result_dir: Path) -> List[Path]:
     if dataset_paths:
         return dataset_paths
 
-    url = TEXT_CLASSIFICATION_DATASETS['url']
-    size = TEXT_CLASSIFICATION_DATASETS['size']
     dataset_zipfile_path = (result_dir / 'WMD_datasets').with_suffix('.zip')
-    download_to(url, size, dataset_zipfile_path)
+    download_to(path=dataset_zipfile_path, **TEXT_CLASSIFICATION_DATASETS)
     LOGGER.info('Extracting datasets from {} to {}'.format(dataset_zipfile_path, result_dir))
     with ZipFile(dataset_zipfile_path, 'r') as zf:
         zf.extractall(result_dir)
