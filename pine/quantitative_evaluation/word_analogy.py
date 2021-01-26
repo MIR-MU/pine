@@ -31,7 +31,8 @@ def get_dataset_path(language: str, dataset_dir: Path) -> Path:
 
 def evaluate(dataset_path: Path, language_model: LanguageModel) -> Result:
     dataset_path = str(dataset_path)
-    result_path = language_model.model_dir / 'word_analogy.json'
+    result_path = language_model.model_dir / 'word_analogy'
+    result_path = result_path.with_suffix('.json')
     try:
         with result_path.open('rt') as rf:
             result = json.load(rf)
@@ -40,9 +41,18 @@ def evaluate(dataset_path: Path, language_model: LanguageModel) -> Result:
         result = vectors.evaluate_word_analogies(dataset_path, **WORD_ANALOGY_PARAMETERS)
         with result_path.open('wt') as wf:
             json.dump(result, wf, **JSON_DUMP_PARAMETERS)
-    return result
+    return Result(result)
 
 
 TotalAccuracy = float
 Category = Dict[str, List[Tuple[str, str, str, str]]]
-Result = Tuple[TotalAccuracy, List[Category]]
+RawResult = Tuple[TotalAccuracy, List[Category]]
+
+
+class Result:
+    def __init__(self, result: RawResult):
+        self.result = result
+
+    def __repr__(self) -> str:
+        total_accuracy, _ = self.result
+        return '{:.02f}%'.format(total_accuracy * 100.0)

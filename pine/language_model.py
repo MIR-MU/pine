@@ -75,12 +75,19 @@ class LanguageModel:
             self._train_model()
             return self._load_training_duration()
 
+    @property
+    def word_analogy(self):
+        from .quantitative_evaluation import get_word_analogy_dataset, evaluate_word_analogy
+        dataset = get_word_analogy_dataset(self.language, self.dataset_dir)
+        return evaluate_word_analogy(dataset, self)
+
     def __repr__(self) -> str:
         training_duration = datetime.timedelta(seconds=self.training_duration)
         training_duration = humanize.naturaldelta(training_duration)
         lines = [
             'Language model: {}'.format(self.basename),
             'Training duration: {}'.format(training_duration),
+            'Word analogy accuracy: {}'.format(self.word_analogy),
             'Model files:',
         ]
         lines = ['\n'.join(lines)]
