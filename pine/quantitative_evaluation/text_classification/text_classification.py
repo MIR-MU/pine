@@ -17,7 +17,13 @@ from .data import load_kusner_datasets, Dataset
 LOGGER = getLogger(__name__)
 
 
-def get_dataset_paths(dataset_dir: Path) -> List[Path]:
+def get_dataset_paths(language: str, dataset_dir: Path) -> List[Path]:
+    if language not in TEXT_CLASSIFICATION_DATASETS:
+        known_languages = ', '.join(TEXT_CLASSIFICATION_DATASETS)
+        message = 'Unknown language {} for text classification (known languages: {})'
+        message = message.format(known_languages)
+        raise ValueError(message)
+
     dataset_path = dataset_dir / 'text_classification'
     dataset_path.mkdir(parents=True, exist_ok=True)
     dataset_paths = dataset_path.glob('*.mat')

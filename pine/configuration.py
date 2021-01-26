@@ -84,8 +84,10 @@ WORD_ANALOGY_DATASETS = {
 }
 
 TEXT_CLASSIFICATION_DATASETS = {
-    'url': 'https://www.dropbox.com/sh/nf532hddgdt68ix/AABGLUiPRyXv6UL2YAcHmAFqa?dl=1',
-    'size': 4721151112,
+    'en': {
+        'url': 'https://www.dropbox.com/sh/nf532hddgdt68ix/AABGLUiPRyXv6UL2YAcHmAFqa?dl=1',
+        'size': 4721151112,
+    },
 }
 
 LANGUAGE_MODELING_DATASETS = {
