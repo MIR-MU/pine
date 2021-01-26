@@ -163,7 +163,7 @@ class Dataset:
 
 def load_kusner_datasets(path: Path) -> List[Dataset]:
     name = path.name.split('-')[0]
-    if '_split' in name:
+    if '_split' in path.name:
         datasets = [Dataset(name, path, split_idx) for split_idx in range(5)]
     else:
         datasets = [Dataset(name, path, 0)]
