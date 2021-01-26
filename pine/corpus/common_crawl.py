@@ -36,10 +36,9 @@ class EnglishCommonCrawlSentences:
 
     def __iter__(self) -> Iterable[List[str]]:
         shards = [SHARD_URL.format(shard_number) for shard_number in range(100)]
-        shards = tqdm(shards, desc=self.desc, position=0)
+        shards = tqdm(shards, desc=self.desc)
         for shard in shards:
             with smart_open.open(shard, 'rt') as f:
-                sentences = tqdm(f, position=1, leave=False)
                 sentences = map(simple_preprocess, f)
                 sentences = filter(len, sentences)
                 for sentence in sentences:

@@ -207,11 +207,10 @@ class ParallelCachingWmdSimilarity(SimilarityABC):
 
             result = []
             num_hits, num_misses = 0, 0
-            for query in tqdm(queries, desc='Query', position=0):
+            for query in tqdm(queries, desc='Query'):
                 futures = [load_from_shelf(query, document) for document in self.corpus]
                 distances = []
-                documents = tqdm(self.corpus, desc='Document', position=1, leave=False)
-                for document, future in zip(documents, futures):
+                for document, future in zip(self.corpus, futures):
                     if isinstance(future, Future):
                         num_misses += 1
                         distance = future.result()

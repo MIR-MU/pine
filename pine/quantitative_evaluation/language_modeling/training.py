@@ -49,7 +49,6 @@ def train_and_evaluate(dataset: Dataset, language_model: LanguageModel) -> Resul
         sentence_length = LANGUAGE_MODELING_PARAMETERS['sentence_length']
         training_result = []
         batches = range(0, train_data.size(0) - 1, sentence_length)
-        batches = tqdm(batches, desc='Batch', position=1, leave=False)
         batches = enumerate(batches)
         for batch, i in batches:
             data, targets = get_batch(train_data, i)
@@ -90,7 +89,7 @@ def train_and_evaluate(dataset: Dataset, language_model: LanguageModel) -> Resul
     best_validation_loss = None
     epoch_results = []
     epochs = range(1, LANGUAGE_MODELING_PARAMETERS['epochs'] + 1)
-    epochs = tqdm(epochs, desc='Epoch', position=0)
+    epochs = tqdm(epochs, desc='Epoch')
     for epoch in epochs:
         training_result = train()
         validation_result = evaluate(validation_data)
