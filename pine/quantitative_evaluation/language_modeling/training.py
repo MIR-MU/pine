@@ -46,7 +46,10 @@ def train_and_evaluate(dataset: Dataset, language_model: LanguageModel) -> Resul
         hidden = model.init_hidden(LANGUAGE_MODELING_PARAMETERS['batch_size'])
         sentence_length = LANGUAGE_MODELING_PARAMETERS['sentence_length']
         training_result = []
-        for batch, i in enumerate(range(0, train_data.size(0) - 1, sentence_length)):
+        batches = range(0, train_data.size(0) - 1, sentence_length)
+        batches = tqdm(batches, desc='Batch', position=1, leave=False)
+        batches = enumerate(batches)
+        for batch, i in batches:
             data, targets = get_batch(train_data, i)
             model.zero_grad()
             hidden = repackage_hidden(hidden)
@@ -84,7 +87,9 @@ def train_and_evaluate(dataset: Dataset, language_model: LanguageModel) -> Resul
     lr = LANGUAGE_MODELING_PARAMETERS['initial_learning_rate']
     best_validation_loss = None
     epoch_results = []
-    for epoch in range(1, LANGUAGE_MODELING_PARAMETERS['epochs'] + 1):
+    epochs = range(1, LANGUAGE_MODELING_PARAMETERS['epochs'] + 1)
+    epochs = tqdm(epochs, desc='Epoch', position=0)
+    for epoch in epochs:
         training_result = train()
         validation_result = evaluate(validation_data)
         epoch_result = (training_result, validation_result, lr)
