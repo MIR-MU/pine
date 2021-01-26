@@ -21,22 +21,23 @@ LOGGER = getLogger(__name__)
 
 class LanguageModel:
     def __init__(self,
-                 corpus_name: str, language: str,
+                 corpus_name: str,
                  model_dir: Union[Path, str],
                  cache_dir: Union[Path, str],
                  corpus_dir: Union[Path, str],
                  dataset_dir: Union[Path, str],
+                 language: str = 'en',
                  subwords: bool = True,
                  positions: Union[bool, str] = 'constrained',
                  use_vocab_from: LanguageModel = None,
                  extra_fasttext_parameters: Optional[Dict] = None):
 
         self.corpus_name = corpus_name
-        self.language = language
         self._model_dir = Path(model_dir)
         self._cache_dir = Path(cache_dir)
         self.corpus_dir = Path(corpus_dir)
         self.dataset_dir = Path(dataset_dir)
+        self.language = language
         self.subwords = subwords
         self.positions = positions
         self.use_vocab_from = use_vocab_from
