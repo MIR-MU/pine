@@ -75,6 +75,9 @@ class LanguageModel:
         dataset = get_word_analogy_dataset(self.language, self.dataset_dir)
         return evaluate_word_analogy(dataset, self)
 
+    def __str__(self) -> str:
+        return self.basename
+
     def __repr__(self) -> str:
         training_duration = datetime.timedelta(seconds=self.training_duration)
         training_duration = humanize.naturaldelta(training_duration)

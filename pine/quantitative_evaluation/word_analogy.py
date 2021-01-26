@@ -53,6 +53,6 @@ class Result:
     def __init__(self, result: RawResult):
         self.result = result
 
-    def __repr__(self) -> str:
+    def __str__(self) -> str:
         total_accuracy, _ = self.result
         return '{:.02f}%'.format(total_accuracy * 100.0)
