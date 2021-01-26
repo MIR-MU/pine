@@ -25,12 +25,12 @@ def get_dataset_paths(dataset_dir: Path) -> List[Path]:
     if dataset_paths:
         return dataset_paths
 
-    dataset_zipfile_path = (dataset_dir / 'WMD_datasets').with_suffix('.zip')
+    dataset_zipfile_path = (dataset_path / 'WMD_datasets').with_suffix('.zip')
     download_to(path=dataset_zipfile_path, **TEXT_CLASSIFICATION_DATASETS)
     unzip_to(dataset_zipfile_path, dataset_path, unlink_after=True)
     (dataset_path / '20ng2_500-emd_tr_te.mat').unlink()
 
-    dataset_paths = dataset_dir.glob('*.mat')
+    dataset_paths = dataset_path.glob('*.mat')
     dataset_paths = sorted(dataset_paths)
     return dataset_paths
 
