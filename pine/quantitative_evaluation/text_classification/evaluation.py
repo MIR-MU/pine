@@ -60,6 +60,8 @@ class Evaluator:
             message = 'Expected validation or test level, but got {}'
             raise ValueError(message.format(level))
 
+        cache_path = self.model.cache_dir / 'text_classification'
+        cache_path.mkdir(exist_ok=True)
         method_parameters = TEXT_CLASSIFICATION_METHOD_PARAMETERS[self.method]
         if self.method == 'scm':
             train_corpus = [document.words for document in train_documents]
@@ -67,9 +69,14 @@ class Evaluator:
             tfidf = TfidfModel(dictionary=dictionary, smartirs='nfn')
             termsim_index = WordEmbeddingSimilarityIndex(self.model.vectors,
                                                          **method_parameters['similarity_index'])
-            similarity_matrix = SparseTermSimilarityMatrix(termsim_index, dictionary, tfidf,
-                                                           **method_parameters['similarity_matrix'])
-            similarity_matrix.matrix.eliminate_zeros()  # Apply fix from Gensim issue #2783
+            cache_path = cache_path / '{}-{}-{}'.format(self.dataset.name, self.method, level)
+            try:
+                SparseTermSimilarityMatrix.load(str(cache_path))
+            except IOError:
+                similarity_matrix = SparseTermSimilarityMatrix(termsim_index, dictionary, tfidf,
+                                                               **method_parameters['similarity_matrix'])
+                similarity_matrix.matrix.eliminate_zeros()  # Apply fix from Gensim issue #2783
+                similarity_matrix.save(str(cache_path))
             train_corpus = [dictionary.doc2bow(document) for document in train_corpus]
             train_corpus = tfidf[train_corpus]
             similarity_model = SoftCosineSimilarity(train_corpus, similarity_matrix)
@@ -78,8 +85,6 @@ class Evaluator:
             test_corpus = tfidf[test_corpus]
         elif self.method == 'wmd':
             train_corpus = [document.words for document in train_documents]
-            cache_path = self.model.cache_dir / 'text_classification'
-            cache_path.mkdir(exist_ok=True)
             cache_path = cache_path / '{}-{}'.format(self.dataset.name, self.method)
             cache_path = cache_path.with_suffix('.shelf')
             similarity_model = ParallelCachingWmdSimilarity(train_corpus, self.model.vectors, cache_path)
