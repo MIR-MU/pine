@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import datetime
 from logging import getLogger
 from pathlib import Path
 import pickle
@@ -75,7 +76,24 @@ class LanguageModel:
             return self._load_training_duration()
 
     def __repr__(self) -> str:
-        return '<<{} {}>>'.format(self.__class__.__name__, self.basename)
+        training_duration = datetime.timedelta(seconds=self.training_duration)
+        training_duration = humanize.naturaldelta(training_duration)
+        lines = [
+            'Language model: {}'.format(self.basename),
+            'Training duration: {}'.format(training_duration),
+            'Model files:',
+        ]
+        lines = ['\n'.join(lines)]
+        for path in self.model_dir, self.cache_dir:
+            for path in path.glob('**/*'):
+                if not path.is_file():
+                    continue
+                if len(lines) == 1:
+                    lines.append('')
+                size = path.stat().st_size
+                size = humanize.naturalsize(size)
+                lines.append('\t{:10}\t{}'.format(size, path))
+        return '\n'.join(lines)
 
     @property
     def corpus(self) -> Corpus:
@@ -109,15 +127,6 @@ class LanguageModel:
     def cache_dir(self) -> str:
         return self._cache_dir / self.basename
 
-    def print_model_files(self):
-        for path in self.model_dir, self.cache_dir:
-            for path in path.glob('**/*'):
-                if not path.is_file():
-                    continue
-                size = path.stat().st_size
-                size = humanize.naturalsize(size)
-                print('{}\t{}'.format(size, path))
-
     @property
     def _bare_model_path(self) -> Path:
         bare_model_path = self.model_dir / 'bare_model'
@@ -143,7 +152,7 @@ class LanguageModel:
     def _load_model(self) -> FastText:
         if self._model is not None:
             return self._model
-        LOGGER.debug('Loading model for {} from {}'.format(self, self._model_path))
+        LOGGER.debug('Loading model from {}'.format(self._model_path))
         self._model = FastText.load(str(self._model_path), mmap='r')
         self._vectors = self._model.wv
         return self._model
@@ -151,18 +160,17 @@ class LanguageModel:
     def _load_vectors(self) -> KeyedVectors:
         if self._vectors is not None:
             return self._vectors
-        LOGGER.debug('Loading vectors for {} from {}'.format(self, self._vectors_path))
+        LOGGER.debug('Loading vectors from {}'.format(self._vectors_path))
         self._vectors = KeyedVectors.load_word2vec_format(str(self._vectors_path))
         return self._vectors
 
     def _load_training_duration(self) -> float:
         if self._training_duration is not None:
             return self._training_duration
-        message = 'Loading training duration for {} from {}'
-        message = message.format(self, self._training_duration_path)
+        message = 'Loading training duration from {}'.format(self._training_duration_path)
         LOGGER.debug(message)
         with self._training_duration_path.open('rt') as f:
-            self._training_duration = float(f)
+            self._training_duration = float(next(f))
         return self._training_duration
 
     def _build_vocab(self) -> FastText:
@@ -239,12 +247,11 @@ class LanguageModel:
         self._vectors = model.wv
         self._training_duration = training_duration_measure.total_seconds
 
-        LOGGER.info('Saving model for {} to {}'.format(self, self._model_path))
+        LOGGER.info('Saving model to {}'.format(self._model_path))
         self._model.save(str(self._model_path))
-        LOGGER.debug('Saving vectors for {} to {}'.format(self, self._vectors_path))
+        LOGGER.debug('Saving vectors to {}'.format(self._vectors_path))
         self._vectors.save_word2vec_format(str(self._vectors_path))
-        message = 'Saving training duration for {} to {}'
-        message = message.format(self, self._training_duration_path)
+        message = 'Saving training duration to {}'.format(self._training_duration_path)
         LOGGER.debug(message)
         with self._training_duration_path.open('wt') as f:
             print(self._training_duration, file=f)
