@@ -21,7 +21,7 @@ LOGGER = getLogger(__name__)
 
 class LanguageModel:
     def __init__(self,
-                 corpus_name: str,
+                 corpus_name: str, language: str,
                  model_dir: Union[Path, str],
                  cache_dir: Union[Path, str],
                  corpus_dir: Union[Path, str],
@@ -32,6 +32,7 @@ class LanguageModel:
                  extra_fasttext_parameters: Optional[Dict] = None):
 
         self.corpus_name = corpus_name
+        self.language = language
         self._model_dir = Path(model_dir)
         self._cache_dir = Path(cache_dir)
         self.corpus_dir = Path(corpus_dir)
