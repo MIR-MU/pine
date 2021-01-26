@@ -48,7 +48,7 @@ def evaluate(dataset_path: Path, language_model: LanguageModel, method: str) -> 
     except IOError:
         error_rates = []
     if len(error_rates) < len(datasets):  # Support partially serialized results
-        with result_path.open('wt') as wf:
+        with result_path.open('at') as wf:
             for dataset in datasets[len(error_rates):]:
                 from .evaluation import Evaluator
                 error_rate = Evaluator(dataset, language_model, method).evaluate()
