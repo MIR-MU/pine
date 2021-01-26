@@ -96,7 +96,8 @@ class LanguageModel:
         basename.append(self.corpus_name)
         basename.append(self.language)
         basename.append(MODEL_BASENAMES(self.subwords, self.positions))
-        basename.append(stringify_parameters(self.extra_fasttext_parameters))
+        if self.extra_fasttext_parameters is not None:
+            basename.append(stringify_parameters(self.extra_fasttext_parameters))
         basename = filter(len, basename)
         return '-'.join(basename)
 
