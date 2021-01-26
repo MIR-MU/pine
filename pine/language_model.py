@@ -22,22 +22,16 @@ LOGGER = getLogger(__name__)
 
 class LanguageModel:
     def __init__(self,
-                 corpus_name: str,
-                 model_dir: Union[Path, str],
-                 cache_dir: Union[Path, str],
-                 corpus_dir: Union[Path, str],
-                 dataset_dir: Union[Path, str],
+                 corpus: str,
+                 workspace: Union[Path, str] = '.',
                  language: str = 'en',
                  subwords: bool = True,
                  positions: Union[bool, str] = 'constrained',
                  use_vocab_from: LanguageModel = None,
                  extra_fasttext_parameters: Optional[Dict] = None):
 
-        self.corpus_name = corpus_name
-        self._model_dir = Path(model_dir)
-        self._cache_dir = Path(cache_dir)
-        self.corpus_dir = Path(corpus_dir)
-        self.dataset_dir = Path(dataset_dir)
+        self._corpus = corpus
+        self.workspace = Path(workspace)
         self.language = language
         self.subwords = subwords
         self.positions = positions
@@ -104,7 +98,7 @@ class LanguageModel:
 
     @property
     def corpus(self) -> Corpus:
-        return get_corpus(self.corpus_name, self.corpus_dir, self.language)
+        return get_corpus(self._corpus, self.corpus_dir, self.language)
 
     @property
     def fasttext_parameters(self) -> Dict:
@@ -118,7 +112,7 @@ class LanguageModel:
     @property
     def basename(self) -> str:
         basename = []
-        basename.append(self.corpus_name)
+        basename.append(self._corpus)
         basename.append(self.language)
         basename.append(MODEL_BASENAMES(self.subwords, self.positions))
         if self.extra_fasttext_parameters is not None:
@@ -128,11 +122,19 @@ class LanguageModel:
 
     @property
     def model_dir(self) -> str:
-        return self._model_dir / self.basename
+        return self.workspace / 'model' / self.basename
 
     @property
     def cache_dir(self) -> str:
-        return self._cache_dir / self.basename
+        return self.workspace / 'cache' / self.basename
+
+    @property
+    def corpus_dir(self) -> str:
+        return self.workspace / 'corpus'
+
+    @property
+    def dataset_dir(self) -> str:
+        return self.workspace / 'dataset'
 
     @property
     def _bare_model_path(self) -> Path:
