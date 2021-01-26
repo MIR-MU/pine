@@ -65,6 +65,8 @@ def train_and_evaluate(dataset: Dataset, language_model: LanguageModel) -> Resul
             clip = LANGUAGE_MODELING_PARAMETERS['clip']
             torch.nn.utils.clip_grad_norm_(model.parameters(), clip)
             for p in model.parameters():
+                if p.grad is None:
+                    continue
                 p.data.add_(p.grad, alpha=-lr)
 
             current_loss = loss.item()

@@ -123,7 +123,7 @@ TEXT_CLASSIFICATION_DATASET_SIZES = {
 LANGUAGE_MODELING_PARAMETERS = {
     'device': 'cuda',
     'tie_weights': True,
-    'freeze_embeddings': False,
+    'freeze_embeddings': True,
     'ninp': 300,
     'nhid': 300,
     'nlayers': 2,
