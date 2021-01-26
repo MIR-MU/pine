@@ -206,21 +206,27 @@ class ParallelCachingWmdSimilarity(SimilarityABC):
                     shelf[key] = value
 
             result = []
+            num_hits, num_misses = 0, 0
             for query in tqdm(queries, desc='Query', position=0):
                 futures = [load_from_shelf(query, document) for document in self.corpus]
                 distances = []
                 documents = tqdm(self.corpus, desc='Document', position=1, leave=False)
                 for document, future in zip(documents, futures):
                     if isinstance(future, Future):
+                        num_misses += 1
                         distance = future.result()
                         store_to_shelf(query, document, distance)
                     else:
+                        num_hits += 1
                         distance = future
                     distances.append(distance)
                 similarities = 1. / (1. + np.array(distances))
                 result.append(similarities)
                 _load_from_shelf.cache_clear()
             result = np.array(result)
+
+            hit_ratio = num_hits * 100.0 / num_misses if num_misses else 0.0
+            LOGGER.info('WMD cache hit ratio: {:.2f}%'.format(hit_ratio))
 
         COMMON_VECTORS = None
 
