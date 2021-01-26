@@ -11,6 +11,8 @@ try:
 except ImportError:
     raise ImportError('For training language models, please install PyTorch')
 
+from tqdm import tqdm
+
 from .language_modeling import Dataset, Result, TrainingResult, EvaluationResult
 from .data import Corpus
 from .model import PreinitializedRNNModel
