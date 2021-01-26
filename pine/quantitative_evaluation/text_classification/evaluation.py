@@ -69,7 +69,8 @@ class Evaluator:
             tfidf = TfidfModel(dictionary=dictionary, smartirs='nfn')
             termsim_index = WordEmbeddingSimilarityIndex(self.model.vectors,
                                                          **method_parameters['similarity_index'])
-            cache_path = cache_path / '{}-{}-{}'.format(self.dataset.name, self.method, level)
+            cache_path = cache_path / '{}-{}-{}-{}'.format(self.dataset.name, self.dataset.split_idx,
+                                                           self.method, level)
             try:
                 similarity_matrix = SparseTermSimilarityMatrix.load(str(cache_path))
             except IOError:
