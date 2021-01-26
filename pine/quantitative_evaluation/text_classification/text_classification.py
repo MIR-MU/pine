@@ -39,7 +39,7 @@ def evaluate(dataset_path: Path, language_model: LanguageModel, method: str) -> 
     datasets = load_kusner_datasets(dataset_path)
     dataset, *_ = datasets
     result_path = language_model.model_dir / 'text_classification'
-    dataset_path.mkdir(exist_ok=True)
+    result_path.mkdir(exist_ok=True)
     result_path = result_path / '{}-{}'.format(dataset.name, method)
     result_path = result_path.with_suffix('.txt')
     try:
