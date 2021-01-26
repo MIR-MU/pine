@@ -72,7 +72,7 @@ class Evaluator:
             cache_path = cache_path / '{}-{}-{}-{}'.format(self.dataset.name, self.dataset.split_idx,
                                                            self.method, level)
             try:
-                similarity_matrix = SparseTermSimilarityMatrix.load(str(cache_path))
+                similarity_matrix = SparseTermSimilarityMatrix.load(str(cache_path), mmap='r')
             except IOError:
                 similarity_matrix = SparseTermSimilarityMatrix(termsim_index, dictionary, tfidf,
                                                                **method_parameters['similarity_matrix'])
