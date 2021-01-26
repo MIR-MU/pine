@@ -1,11 +1,9 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-import pip
-
-try: # for pip >= 10
+try:  # for pip >= 10
     from pip._internal.req import parse_requirements
-except ImportError: # for pip <= 9.0.3
+except ImportError:  # for pip <= 9.0.3
     from pip.req import parse_requirements
 
 try:
@@ -20,7 +18,6 @@ with open('README.rst') as readme_file:
 with open('HISTORY.rst') as history_file:
     history = history_file.read().replace('.. :changelog:', '')
 
-## workaround derived from: https://github.com/pypa/pip/issues/7645#issuecomment-578210649
 parsed_requirements = parse_requirements(
     'requirements/prod.txt',
     session='workaround'
@@ -39,7 +36,7 @@ test_requirements = [str(tr.requirement) for tr in parsed_test_requirements]
 setup(
     name='pine',
     version='0.1.0',
-    description="A python package that allows you to train, use, and evaluate position-independent word embeddings (PInE).",
+    description='A python package that allows you to train, use, and evaluate position-independent word embeddings',
     long_description=readme + '\n\n' + history,
     author="Vítek Novotný",
     author_email='witiko@mail.muni.cz',
