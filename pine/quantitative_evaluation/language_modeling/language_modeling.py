@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import json
-from typing import Dict, Literal, Tuple, Iterable
+from typing import Dict, Tuple, Iterable
 from pathlib import Path
 
 from ...configuration import LANGUAGE_MODELING_DATASETS, JSON_DUMP_PARAMETERS
@@ -54,7 +54,7 @@ def evaluate(dataset_paths: Dataset, language_model: LanguageModel) -> Result:
     return result
 
 
-Dataset = Dict[Literal['vocab', 'train', 'validation', 'test'], Path]
+Dataset = Dict[str, Path]
 Perplexity = float
 Loss = float
 LearningRate = float

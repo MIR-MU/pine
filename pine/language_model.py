@@ -5,7 +5,7 @@ from __future__ import annotations
 from logging import getLogger
 from pathlib import Path
 import pickle
-from typing import Dict, Optional, Literal, Union
+from typing import Dict, Optional, Union
 
 from .configuration import FASTTEXT_PARAMETERS, MODEL_BASENAMES, PICKLE_PROTOCOL
 from .util import stringify_parameters
@@ -27,7 +27,7 @@ class LanguageModel:
                  corpus_dir: Union[Path, str],
                  dataset_dir: Union[Path, str],
                  subwords: bool = True,
-                 positions: Literal[False, 'full', 'constrained'] = 'constrained',
+                 positions: Union[bool, str] = 'constrained',
                  use_vocab_from: LanguageModel = None,
                  extra_fasttext_parameters: Optional[Dict] = None):
 

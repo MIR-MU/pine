@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import json
-from typing import Tuple, List, Dict, Literal
+from typing import Tuple, List, Dict
 from pathlib import Path
 
 from ..configuration import WORD_ANALOGY_PARAMETERS, WORD_ANALOGY_DATASETS, JSON_DUMP_PARAMETERS
@@ -43,12 +43,6 @@ def evaluate(dataset_path: Path, language_model: LanguageModel) -> Result:
     return result
 
 
-Result = Tuple[
-    float,
-    List[
-        Dict[
-            Literal['correct', 'incorrect'],
-            List[Tuple[str, str, str, str]],
-        ],
-    ],
-]
+TotalAccuracy = float
+Category = Dict[str, List[Tuple[str, str, str, str]]]
+Result = Tuple[TotalAccuracy, List[Category]]
