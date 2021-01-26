@@ -6,7 +6,7 @@ import datetime
 from logging import getLogger
 from pathlib import Path
 import pickle
-from typing import Dict, Optional, Union
+from typing import Dict, Optional, Union, Sequence, Tuple
 
 from .configuration import FASTTEXT_PARAMETERS, MODEL_BASENAMES, PICKLE_PROTOCOL
 from .util import stringify_parameters
@@ -15,6 +15,7 @@ from .corpus import get_corpus, Corpus
 from gensim.models import FastText, KeyedVectors
 from gensim.models.callbacks import CallbackAny2Vec
 import humanize
+import numpy as np
 
 
 LOGGER = getLogger(__name__)
@@ -48,18 +49,21 @@ class LanguageModel:
     @property
     def model(self) -> FastText:
         try:
-            return self._load_model()
+            return self._load_model()[0]
         except IOError:
             self._train_model()
-            return self._load_model()
+            return self._load_model()[0]
 
     @property
     def vectors(self) -> KeyedVectors:
         try:
-            return self._load_vectors()
+            return self._load_model()[1]
         except IOError:
-            self._train_model()
-            return self._load_vectors()
+            try:
+                return self._load_vectors()
+            except IOError:
+                self._train_model()
+                return self._load_vectors()
 
     @property
     def training_duration(self) -> float:
@@ -68,6 +72,26 @@ class LanguageModel:
         except IOError:
             self._train_model()
             return self._load_training_duration()
+
+    @property
+    def input_vectors(self) -> np.ndarray:
+        return self.vectors.vectors
+
+    @property
+    def positional_vectors(self) -> Optional[np.ndarray]:
+        if 'vectors_positions' in vars(self.model.wv):
+            return self.model.wv.vectors_positions
+        return None
+
+    @property
+    def output_vectors(self) -> np.ndarray:
+        if 'syn1' in vars(self.model):
+            return self.model.syn1
+        return self.model.syn1neg
+
+    @property
+    def words(self) -> Sequence[str]:
+        return self.vectors.index2word
 
     @property
     def word_analogy(self):
@@ -161,13 +185,13 @@ class LanguageModel:
         vectors_path = vectors_path.with_suffix('.txt')
         return vectors_path
 
-    def _load_model(self) -> FastText:
+    def _load_model(self) -> Tuple[FastText, KeyedVectors]:
         if self._model is not None:
-            return self._model
+            return (self._model, self._vectors)
         LOGGER.debug('Loading model from {}'.format(self._model_path))
         self._model = FastText.load(str(self._model_path), mmap='r')
         self._vectors = self._model.wv
-        return self._model
+        return (self._model, self._vectors)
 
     def _load_vectors(self) -> KeyedVectors:
         if self._vectors is not None:

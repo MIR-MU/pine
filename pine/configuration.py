@@ -153,3 +153,5 @@ JSON_DUMP_PARAMETERS = {
     'indent': 4,
     'sort_keys': True,
 }
+
+NUM_PRINTED_TOP_WORDS = 5
