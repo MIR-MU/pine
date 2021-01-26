@@ -86,7 +86,7 @@ class PreinitializedRNNModel(RNNModel):
             LOGGER.warn(message)
 
         vocab_words = ['<eos>']
-        vocab_vecs = [vectors.vectors.mean(axis=0)]
+        vocab_vecs = [vectors.vectors.mean(axis=0)[:ninp]]
         for word in read_text_file(dataset['vocab']):
             if word not in vectors:
                 continue
