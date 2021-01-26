@@ -16,7 +16,7 @@ def get_dataset_paths(language: str, dataset_dir: Path) -> Dataset:
     dataset_path.mkdir(parents=True, exist_ok=True)
     dataset_readme_path = dataset_path / 'icml14-data.readme'
     if not dataset_readme_path.exists():
-        dataset_tarfile_path = (dataset_path / 'icml14-data').with_suffix('.tar.bz2')
+        dataset_tarfile_path = (dataset_path / 'icml14-data').with_suffix('.tar')
         download_to(path=dataset_tarfile_path, **LANGUAGE_MODELING_DATASETS)
         unzip_to(dataset_tarfile_path, dataset_path, unlink_after=True)
 

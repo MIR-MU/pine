@@ -33,7 +33,10 @@ class Dictionary:
 class Corpus:
     def __init__(self, dataset: Dataset, dictionary: Optional[Dictionary] = None):
         self.train, self.valid, self.test = None, None, None
-        self.dictionary = dictionary
+        if dictionary is not None:
+            self.dictionary = dictionary
+        else:
+            self.dictionary = Dictionary()
         self.dataset = dataset
 
     def tokenize_all(self):

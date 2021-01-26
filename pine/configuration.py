@@ -90,7 +90,7 @@ TEXT_CLASSIFICATION_DATASETS = {
 
 LANGUAGE_MODELING_DATASETS = {
     'url': 'https://github.com/bothameister/bothameister.github.io/raw/master/icml14-data.tar.bz2',
-    'size': 10803893,
+    'size': 52346880,
 }
 
 TEXT_CLASSIFICATION_METHOD_PARAMETERS = {

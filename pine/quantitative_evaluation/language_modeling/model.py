@@ -74,7 +74,7 @@ class PreinitializedRNNModel(RNNModel):
         ninp = LANGUAGE_MODELING_PARAMETERS['ninp']
         freeze = LANGUAGE_MODELING_PARAMETERS['freeze_embeddings']
 
-        ndims = vectors.shape[1]
+        ndims = vectors.vectors.shape[1]
 
         if ninp > ndims:
             message = 'Can\'t create a lookup table with {} dims from word vectors with {} dims'
