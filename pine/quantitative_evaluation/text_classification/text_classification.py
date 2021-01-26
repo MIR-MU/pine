@@ -11,7 +11,7 @@ import numpy as np
 from ...language_model import LanguageModel
 from ...configuration import TEXT_CLASSIFICATION_DATASETS
 from ...util import download_to, unzip_to
-from .data import load_kusner_datasets, Dataset
+from .data import load_kusner_datasets
 
 
 LOGGER = getLogger(__name__)
@@ -60,21 +60,21 @@ def evaluate(dataset_path: Path, language_model: LanguageModel, method: str) -> 
                 error_rate = Evaluator(dataset, language_model, method).evaluate()
                 error_rates.append(error_rate)
                 print(error_rate, file=wf, flush=True)
-    print_error_rate_analysis(dataset, error_rates)
-
-    return error_rates
+    return Result(error_rates)
 
 
-Result = List[float]
+RawResult = List[float]
 
 
-def print_error_rate_analysis(dataset: Dataset, error_rates: List[float]):
-    error_rate = np.mean(error_rates) * 100.0
-    if len(error_rates) > 1:
-        sem = np.std(error_rates, ddof=1) * 100.0 / np.sqrt(len(error_rates))
-        ci = 1.96 * sem
-        message = 'Test error rate for dataset {}: {:.2f}% (SEM: {:g}%, 95% CI: ±{:g}%)'
-        LOGGER.info(message.format(dataset.name, error_rate, sem, ci))
-    else:
-        message = 'Test error rate for dataset {}: {:.2f}%'
-        LOGGER.info(message.format(dataset.name, error_rate))
+class Result:
+    def __init__(self, result: RawResult):
+        self.result = result
+
+    def __str__(self) -> str:
+        error_rate = np.mean(self.result) * 100.0
+        if len(self.result) > 1:
+            sem = np.std(self.result, ddof=1) * 100.0 / np.sqrt(len(self.result))
+            ci = 1.96 * sem
+            return '{:.2f}% (SEM: {:g}%, 95% CI: ±{:g}%)'.format(error_rate, sem, ci)
+        else:
+            return '{:.2f}%'.format(error_rate)
