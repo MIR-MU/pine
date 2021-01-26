@@ -155,8 +155,8 @@ class Evaluator:
 
 def wmdistance(query: List[str], document: List[str]) -> float:
     from logging import WARNING
-    logger = getLogger('gensim.corpora.dictionary')
-    logger.setLevel(WARNING)
+    getLogger('gensim.corpora.dictionary').setLevel(WARNING)
+    getLogger('gensim.models.keyedvectors').setLevel(WARNING)
     return COMMON_VECTORS.wmdistance(query, document)
 
 
