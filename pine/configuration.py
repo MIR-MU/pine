@@ -94,15 +94,15 @@ LANGUAGE_MODELING_DATASETS = {
 }
 
 TEXT_CLASSIFICATION_METHOD_PARAMETERS = {
-    'scm': {  # Parameters from paper <https://arxiv.org/abs/2003.05019v1>, Table 2
+    'scm': {  # Parameters from paper <https://www.aclweb.org/anthology/S17-2051/>, Section 2.1
         'similarity_matrix': {
             'nonzero_limit': 100,
             'symmetric': True,
-            'positive_definite': True,
+            'positive_definite': False,
         },
         'similarity_index': {
-            'threshold': -1.0,
-            'exponent': 4.0,
+            'threshold': 0.0,
+            'exponent': 2.0,
         },
     },
     'wmd': {
