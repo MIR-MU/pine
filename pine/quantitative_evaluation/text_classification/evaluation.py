@@ -17,8 +17,8 @@ import numpy as np
 from scipy.stats import mode
 from tqdm import tqdm
 
-from ..language_model import LanguageModel
-from ..configuration import TEXT_CLASSIFICATION_METHODS
+from ...language_model import LanguageModel
+from ...configuration import TEXT_CLASSIFICATION_METHODS
 from .data import Dataset, Document
 
 

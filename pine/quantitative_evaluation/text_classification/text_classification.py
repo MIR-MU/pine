@@ -8,9 +8,9 @@ from typing import List
 
 import numpy as np
 
-from ..language_model import LanguageModel
-from ..configuration import TEXT_CLASSIFICATION_DATASETS
-from ..util import download_to, unzip_to
+from ...language_model import LanguageModel
+from ...configuration import TEXT_CLASSIFICATION_DATASETS
+from ...util import download_to, unzip_to
 from .data import load_kusner_datasets, Dataset
 
 

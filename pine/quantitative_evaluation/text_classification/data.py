@@ -10,7 +10,7 @@ from typing import List
 import numpy as np
 from scipy.io import loadmat
 
-from ..configuration import TEXT_CLASSIFICATION_DATASET_SIZES
+from ...configuration import TEXT_CLASSIFICATION_DATASET_SIZES
 
 
 LOGGER = getLogger(__name__)
