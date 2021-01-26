@@ -46,6 +46,7 @@ class LanguageModel:
 
         self._model = None
         self._vectors = None
+        self._training_duration = None
 
     @property
     def model(self) -> FastText:
@@ -65,10 +66,11 @@ class LanguageModel:
 
     @property
     def training_duration(self) -> float:
-        for callback in self.model.callbacks:
-            if isinstance(callback, TrainingDurationMeasure):
-                return callback.total_seconds
-        raise ValueError('Training duration not found in model {}'.format(self._model_path))
+        try:
+            return self._load_training_duration()
+        except IOError:
+            self._train_model()
+            return self._load_training_duration()
 
     def __repr__(self) -> str:
         return '<<{} {}>>'.format(self.__class__.__name__, self.basename)
@@ -129,6 +131,12 @@ class LanguageModel:
         vectors_path = vectors_path.with_suffix('.vec')
         return vectors_path
 
+    @property
+    def _training_duration_path(self) -> Path:
+        vectors_path = self.model_dir / 'training_duration'
+        vectors_path = vectors_path.with_suffix('.txt')
+        return vectors_path
+
     def _load_model(self) -> FastText:
         if self._model is not None:
             return self._model
@@ -143,6 +151,16 @@ class LanguageModel:
         LOGGER.debug('Loading vectors for {} from {}'.format(self, self._vectors_path))
         self._vectors = KeyedVectors.load_word2vec_format(str(self._vectors_path))
         return self._vectors
+
+    def _load_training_duration(self) -> float:
+        if self._training_duration is not None:
+            return self._training_duration
+        message = 'Loading training duration for {} from {}'
+        message = message.format(self, self._training_duration_path)
+        LOGGER.debug(message)
+        with self._training_duration_path.open('rt') as f:
+            self._training_duration = float(f)
+        return self._training_duration
 
     def _build_vocab(self) -> FastText:
         try:
@@ -210,16 +228,23 @@ class LanguageModel:
         }
         LOGGER.info('Training {}'.format(self))
         model.train(corpus_iterable=self.corpus, **train_parameters)
+        model.callbacks = ()
         if not self.subwords:
             model.wv.vectors = model.wv.vectors_vocab  # Apply fix from Gensim issue #2891
 
         self._model = model
         self._vectors = model.wv
+        self._training_duration = training_duration_measure.total_seconds
 
         LOGGER.info('Saving model for {} to {}'.format(self, self._model_path))
-        model.save(str(self._model_path))
+        self._model.save(str(self._model_path))
         LOGGER.debug('Saving vectors for {} to {}'.format(self, self._vectors_path))
-        model.wv.save_word2vec_format(str(self._vectors_path))
+        self._vectors.save_word2vec_format(str(self._vectors_path))
+        message = 'Saving training duration for {} to {}'
+        message = message.format(self, self._training_duration_path)
+        LOGGER.debug(message)
+        with self._training_duration_path.open('wt') as f:
+            print(self._training_duration, file=f)
 
 
 class TrainingDurationMeasure(CallbackAny2Vec):
