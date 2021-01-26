@@ -99,6 +99,12 @@ class LanguageModel:
         dataset = get_word_analogy_dataset(self.language, self.dataset_dir)
         return evaluate_word_analogy(dataset, self)
 
+    @property
+    def language_modeling(self):
+        from .quantitative_evaluation import get_language_modeling_dataset, evaluate_language_modeling
+        dataset = get_language_modeling_dataset(self.language, self.dataset_dir)
+        return evaluate_language_modeling(dataset, self)
+
     def __str__(self) -> str:
         return self.basename
 
@@ -109,6 +115,7 @@ class LanguageModel:
             'Language model: {}'.format(self.basename),
             'Training duration: {}'.format(training_duration),
             'Word analogy accuracy: {}'.format(self.word_analogy),
+            'Test perplexity: {}'.format(self.language_modeling),
             'Model files:',
         ]
         lines = ['\n'.join(lines)]

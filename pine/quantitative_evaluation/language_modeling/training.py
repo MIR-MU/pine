@@ -14,7 +14,7 @@ except ImportError:
 
 from tqdm import tqdm
 
-from .language_modeling import Dataset, Result, TrainingResult, EvaluationResult
+from .language_modeling import Dataset, RawResult, TrainingResult, EvaluationResult
 from .data import Corpus
 from .model import PreinitializedRNNModel
 from ...configuration import LANGUAGE_MODELING_PARAMETERS
@@ -24,7 +24,7 @@ from ...language_model import LanguageModel
 LOGGER = getLogger(__name__)
 
 
-def train_and_evaluate(dataset: Dataset, language_model: LanguageModel) -> Result:
+def train_and_evaluate(dataset: Dataset, language_model: LanguageModel) -> RawResult:
     cache_path = language_model.cache_dir / 'language_modeling'
     cache_path = cache_path.with_suffix('.pt')
 
@@ -115,8 +115,6 @@ def train_and_evaluate(dataset: Dataset, language_model: LanguageModel) -> Resul
         model.rnn.flatten_parameters()
 
     test_result = evaluate(test_data)
-    test_perplexity, _ = test_result
-    LOGGER.info('Test perplexity: {:.2f}'.format(test_perplexity))
     language_modeling_result = (test_result, epoch_results)
     return language_modeling_result
 

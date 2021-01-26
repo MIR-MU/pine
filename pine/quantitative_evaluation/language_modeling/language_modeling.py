@@ -51,7 +51,7 @@ def evaluate(dataset_paths: Dataset, language_model: LanguageModel) -> Result:
         result = train_and_evaluate(dataset_paths, language_model)
         with result_path.open('wt') as wf:
             json.dump(result, wf, **JSON_DUMP_PARAMETERS)
-    return result
+    return Result(result)
 
 
 Dataset = Dict[str, Path]
@@ -63,4 +63,14 @@ TrainingResult = Iterable[EvaluationResult]
 ValidationResult = EvaluationResult
 TestResult = EvaluationResult
 EpochResult = Tuple[TrainingResult, ValidationResult, LearningRate]
-Result = Tuple[TestResult, Iterable[EpochResult]]
+RawResult = Tuple[TestResult, Iterable[EpochResult]]
+
+
+class Result:
+    def __init__(self, result: RawResult):
+        self.result = result
+
+    def __str__(self) -> str:
+        test_result, _ = self.result
+        test_perplexity, _ = test_result
+        return '{:.2f}'.format(test_perplexity)
