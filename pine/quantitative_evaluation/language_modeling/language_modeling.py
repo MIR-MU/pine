@@ -6,6 +6,8 @@ import json
 from typing import Dict, Tuple, Iterable
 from pathlib import Path
 
+from tqdm import tqdm
+
 from ...configuration import LANGUAGE_MODELING_DATASETS, JSON_DUMP_PARAMETERS
 from ...language_model import LanguageModel
 from ...util import download_to, unzip_to
