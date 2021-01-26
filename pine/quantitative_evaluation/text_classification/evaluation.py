@@ -47,7 +47,7 @@ class Evaluator:
     def _preprocess_dataset(self, level: str) -> Tuple[
                 List[Document], List[Document], np.ndarray, List[Tuple[int, float]]
             ]:
-        LOGGER.debug('Preprocessing {} ({})'.format(self.dataset, level))
+        LOGGER.info('Preprocessing {} ({})'.format(self.dataset, level))
 
         if level == 'validation':
             pivot = int(round(len(self.dataset.train_documents) * 0.8))
@@ -131,7 +131,7 @@ class Evaluator:
         message = 'Best/worst value of k for {}: {}/{} (validation error rate: {:.2f}/{:.2f}%)'
         message = message.format(self.dataset, best_knn, worst_knn,
                                  best_error_rate * 100.0, worst_error_rate * 100.0)
-        LOGGER.debug(message)
+        LOGGER.info(message)
         return best_knn
 
     def evaluate(self) -> float:
@@ -140,7 +140,7 @@ class Evaluator:
         error_rate = self._evaluate(knn, level='test')
         self._preprocess_dataset.cache_clear()
         message = 'Test error rate for {}: {:.2f}%'.format(self.dataset, error_rate * 100.0)
-        LOGGER.debug(message)
+        LOGGER.info(message)
         return error_rate
 
 
