@@ -174,11 +174,15 @@ class ParallelCachingWmdSimilarity(SimilarityABC):
                     query, document = document, query
                 return repr((query, document))
 
-            def load_from_shelf(query: List[str], document: List[str]) -> float:
-                key = make_key(query, document)
+            @lru_cache(maxsize=None)
+            def _load_from_shelf(key: str) -> float:
                 if key in shelf:
                     return shelf[key]
                 return EXECUTOR.submit(wmdistance, query, document)
+
+            def load_from_shelf(query: List[str], document: List[str]) -> float:
+                key = make_key(query, document)
+                return _load_from_shelf(key)
 
             def store_to_shelf(query: List[str], document: List[str], value: float):
                 key = make_key(query, document)
@@ -186,10 +190,11 @@ class ParallelCachingWmdSimilarity(SimilarityABC):
                 shelf[key] = value
 
             result = []
-            for query in tqdm(queries):
+            for query in tqdm(queries, desc='Query', position=0):
                 futures = [load_from_shelf(query, document) for document in self.corpus]
                 distances = []
-                for document, future in zip(self.corpus, futures):
+                documents = tqdm(self.corpus, desc='Document', position=1, leave=False)
+                for document, future in zip(documents, futures):
                     if isinstance(future, Future):
                         distance = future.result()
                         store_to_shelf(query, document, distance)
@@ -198,6 +203,7 @@ class ParallelCachingWmdSimilarity(SimilarityABC):
                     distances.append(distance)
                 similarities = 1. / (1. + np.array(distances))
                 result.append(similarities)
+                _load_from_shelf.cache_clear()
             result = np.array(result)
 
         COMMON_VECTORS = None
