@@ -66,6 +66,7 @@ class Evaluator:
             tfidf = TfidfModel(dictionary=dictionary, smartirs='nfn')
             termsim_index = WordEmbeddingSimilarityIndex(self.model.vectors)
             similarity_matrix = SparseTermSimilarityMatrix(termsim_index, dictionary, tfidf)
+            similarity_matrix.matrix.eliminate_zeros()  # Apply fix from Gensim issue #2783
             train_corpus = [dictionary.doc2bow(document) for document in train_corpus]
             train_corpus = tfidf[train_corpus]
             similarity_model = SoftCosineSimilarity(train_corpus, similarity_matrix)
