@@ -169,21 +169,21 @@ class ParallelCachingWmdSimilarity(SimilarityABC):
 
         with shelve.open(str(self.cache_path), 'c') as shelf:
 
-            def make_symmetric(query: List[str], document: List[str]) -> Tuple[List[str], List[str]]:
+            def make_key(query: List[str], document: List[str]) -> str:
                 if query < document:  # Enforce symmetric caching
-                    return (document, query)
-                return (query, document)
+                    query, document = document, query
+                return repr((query, document))
 
             def load_from_shelf(query: List[str], document: List[str]) -> float:
-                query, document = make_symmetric(query, document)
-                if (query, document) in shelf:
-                    return shelf[query, document]
+                key = make_key(query, document)
+                if key in shelf:
+                    return shelf[key]
                 return EXECUTOR.submit(wmdistance, query, document)
 
             def store_to_shelf(query: List[str], document: List[str], value: float):
-                query, document = make_symmetric(query, document)
-                assert (query, document) not in shelf
-                shelf[query, document] = value
+                key = make_key(query, document)
+                assert key not in shelf
+                shelf[key] = value
 
             result = []
             for query in tqdm(queries):
