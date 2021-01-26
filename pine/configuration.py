@@ -93,10 +93,21 @@ LANGUAGE_MODELING_DATASETS = {
     'size': 10803893,
 }
 
-TEXT_CLASSIFICATION_METHODS = set([
-    'scm',
-    'wmd',
-])
+TEXT_CLASSIFICATION_METHOD_PARAMETERS = {
+    'scm': {  # Parameters from paper <https://arxiv.org/abs/2003.05019v1>, Table 2
+        'similarity_matrix': {
+            'nonzero_limit': 100,
+            'symmetric': True,
+            'positive_definite': True,
+        },
+        'similarity_index': {
+            'threshold': -1.0,
+            'exponent': 4.0,
+        },
+    },
+    'wmd': {
+    }
+}
 
 TEXT_CLASSIFICATION_DATASET_SIZES = {
     'bbcsport': 517,

@@ -18,7 +18,7 @@ from scipy.stats import mode
 from tqdm import tqdm
 
 from ...language_model import LanguageModel
-from ...configuration import TEXT_CLASSIFICATION_METHODS
+from ...configuration import TEXT_CLASSIFICATION_METHOD_PARAMETERS
 from .data import Dataset, Document
 
 
@@ -30,8 +30,8 @@ LOGGER = getLogger(__name__)
 class Evaluator:
     def __init__(self, dataset: Dataset, model: LanguageModel, method: str):
         self.dataset = dataset
-        if method not in TEXT_CLASSIFICATION_METHODS:
-            known_methods = ', '.join(TEXT_CLASSIFICATION_METHODS)
+        if method not in TEXT_CLASSIFICATION_METHOD_PARAMETERS:
+            known_methods = ', '.join(TEXT_CLASSIFICATION_METHOD_PARAMETERS)
             message = 'Unknown method {} (known methods: {})'.format(method, known_methods)
             raise ValueError(message)
         self.model = model
@@ -60,12 +60,15 @@ class Evaluator:
             message = 'Expected validation or test level, but got {}'
             raise ValueError(message.format(level))
 
+        method_parameters = TEXT_CLASSIFICATION_METHOD_PARAMETERS[self.method]
         if self.method == 'scm':
             train_corpus = [document.words for document in train_documents]
             dictionary = Dictionary(train_corpus, prune_at=None)
             tfidf = TfidfModel(dictionary=dictionary, smartirs='nfn')
-            termsim_index = WordEmbeddingSimilarityIndex(self.model.vectors)
-            similarity_matrix = SparseTermSimilarityMatrix(termsim_index, dictionary, tfidf)
+            termsim_index = WordEmbeddingSimilarityIndex(self.model.vectors,
+                                                         **method_parameters['similarity_index'])
+            similarity_matrix = SparseTermSimilarityMatrix(termsim_index, dictionary, tfidf,
+                                                           **method_parameters['similarity_matrix'])
             similarity_matrix.matrix.eliminate_zeros()  # Apply fix from Gensim issue #2783
             train_corpus = [dictionary.doc2bow(document) for document in train_corpus]
             train_corpus = tfidf[train_corpus]
