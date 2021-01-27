@@ -6,11 +6,14 @@ from datetime import datetime, timedelta
 from logging import getLogger
 from pathlib import Path
 import pickle
-from typing import Dict, Optional, Union, Sequence, Tuple
+from typing import Dict, Optional, Union, Sequence, Tuple, TYPE_CHECKING
 
 from .configuration import FASTTEXT_PARAMETERS, MODEL_BASENAMES, PICKLE_PROTOCOL
 from .util import stringify_parameters
 from .corpus import get_corpus, Corpus
+
+if TYPE_CHECKING:
+    from .quantitative_evaluation import WordAnalogyResult, LanguageModelingResult
 
 from gensim.models import FastText, KeyedVectors
 from gensim.models.callbacks import CallbackAny2Vec
@@ -94,13 +97,13 @@ class LanguageModel:
         return self.vectors.index2word
 
     @property
-    def word_analogy(self):
+    def word_analogy(self) -> 'WordAnalogyResult':
         from .quantitative_evaluation import get_word_analogy_dataset, evaluate_word_analogy
         dataset = get_word_analogy_dataset(self.language, self.dataset_dir)
         return evaluate_word_analogy(dataset, self)
 
     @property
-    def language_modeling(self):
+    def language_modeling(self) -> 'LanguageModelingResult':
         from .quantitative_evaluation import get_language_modeling_dataset, evaluate_language_modeling
         dataset = get_language_modeling_dataset(self.language, self.dataset_dir)
         return evaluate_language_modeling(dataset, self)
