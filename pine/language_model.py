@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-import datetime
+from datetime import datetime, timedelta
 from logging import getLogger
 from pathlib import Path
 import pickle
@@ -109,7 +109,7 @@ class LanguageModel:
         return self.basename
 
     def __repr__(self) -> str:
-        training_duration = datetime.timedelta(seconds=self.training_duration)
+        training_duration = timedelta(seconds=self.training_duration)
         training_duration = humanize.naturaldelta(training_duration)
         lines = [
             'Language model: {}'.format(self.basename),
@@ -306,10 +306,8 @@ class TrainingDurationMeasure(CallbackAny2Vec):
         self.total_seconds = 0.0
 
     def on_epoch_begin(self, model):
-        from datetime import datetime
         self.start_time = datetime.now()
 
     def on_epoch_end(self, model):
-        from datetime import datetime
         finish_time = datetime.now()
         self.total_seconds += (finish_time - self.start_time).total_seconds()
