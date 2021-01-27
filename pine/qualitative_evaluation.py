@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from logging import getLogger
 from itertools import chain
-from typing import List, Optional
+from typing import Sequence, Optional, Iterable
 
 import numpy as np
 
@@ -15,7 +15,7 @@ from .language_model import LanguageModel
 LOGGER = getLogger(__name__)
 
 
-def predict_masked_words(language_model: LanguageModel, sentence: List[Optional[str]]) -> List[str]:
+def predict_masked_words(language_model: LanguageModel, sentence: Sequence[Optional[str]]) -> Iterable[str]:
     num_masked_words = 0
     masked_word_index = None
     for word_index, word in enumerate(sentence):

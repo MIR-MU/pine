@@ -91,6 +91,10 @@ class LanguageModel:
         from .qualitative_evaluation import importance_of_positions
         return importance_of_positions(self)
 
+    def predict_masked_words(self, sentence: Sequence[Optional[str]]) -> Iterable[str]:
+        from .qualitative_evaluation import predict_masked_words
+        return predict_masked_words(self, sentence)
+
     @property
     def output_vectors(self) -> np.ndarray:
         if 'syn1' in vars(self.model):
@@ -125,8 +129,6 @@ class LanguageModel:
             'Language model: {}'.format(self.basename),
             'Disk size: {} (+ {} in cache)'.format(model_files_size, cache_files_size),
             'Training duration: {}'.format(training_duration),
-            'Word analogy accuracy: {}'.format(self.word_analogy),
-            'Test perplexity: {}'.format(self.language_modeling),
         ]
         return '\n'.join(lines)
 
