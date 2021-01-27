@@ -225,7 +225,8 @@ class ParallelCachingWmdSimilarity(SimilarityABC):
                 _load_from_shelf.cache_clear()
             result = np.array(result)
 
-            hit_ratio = num_hits * 100.0 / num_misses if num_misses else 0.0
+            total = num_hits + num_misses
+            hit_ratio = num_hits * 100.0 / total if total else 0.0
             LOGGER.info('WMD cache hit ratio: {:.2f}%'.format(hit_ratio))
 
         COMMON_VECTORS = None
