@@ -58,3 +58,9 @@ def predict_masked_words(language_model: LanguageModel, sentence: List[Optional[
             )
             LOGGER.info(message)
         yield top_word
+
+
+def importance_of_positions(language_model: LanguageModel) -> np.ndarray:
+    if not language_model.positions:
+        raise ValueError('{} is not a positional model'.format(language_model))
+    return np.linalg.norm(language_model.positional_vectors, axis=1)

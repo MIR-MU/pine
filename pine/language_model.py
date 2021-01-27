@@ -87,6 +87,11 @@ class LanguageModel:
         return None
 
     @property
+    def importance_of_positions(self) -> np.ndarray:
+        from .qualitative_evaluation import importance_of_positions
+        return importance_of_positions(self)
+
+    @property
     def output_vectors(self) -> np.ndarray:
         if 'syn1' in vars(self.model):
             return self.model.syn1
