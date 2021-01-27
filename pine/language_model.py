@@ -6,7 +6,7 @@ from datetime import datetime, timedelta
 from logging import getLogger
 from pathlib import Path
 import pickle
-from typing import Dict, Optional, Union, Sequence, Tuple, TYPE_CHECKING
+from typing import Dict, Optional, Union, Sequence, Tuple, Iterable, TYPE_CHECKING
 
 from .configuration import FASTTEXT_PARAMETERS, MODEL_BASENAMES, PICKLE_PROTOCOL
 from .util import stringify_parameters
@@ -114,24 +114,43 @@ class LanguageModel:
     def __repr__(self) -> str:
         training_duration = timedelta(seconds=self.training_duration)
         training_duration = humanize.naturaldelta(training_duration)
+        model_files_size = humanize.naturalsize(sum(size for _, size in self.model_files))
+        cache_files_size = humanize.naturalsize(sum(size for _, size in self.cache_files))
         lines = [
             'Language model: {}'.format(self.basename),
+            'Disk size: {} (+ {} in cache)'.format(model_files_size, cache_files_size),
             'Training duration: {}'.format(training_duration),
             'Word analogy accuracy: {}'.format(self.word_analogy),
             'Test perplexity: {}'.format(self.language_modeling),
-            'Model files:',
         ]
-        lines = ['\n'.join(lines)]
-        for path in self.model_dir, self.cache_dir:
-            for path in path.glob('**/*'):
-                if not path.is_file():
-                    continue
-                if len(lines) == 1:
-                    lines.append('')
-                size = path.stat().st_size
-                size = humanize.naturalsize(size)
-                lines.append('\t{:10}\t{}'.format(size, path))
         return '\n'.join(lines)
+
+    def _files(self, dir_path: Path) -> Iterable[Tuple[Path, int]]:
+        for path in dir_path.glob('**/*'):
+            if not path.is_file():
+                continue
+            size = path.stat().st_size
+            yield (path, size)
+
+    @property
+    def model_files(self) -> Iterable[Tuple[Path, int]]:
+        return self._files(self.model_dir)
+
+    @property
+    def cache_files(self) -> Iterable[Tuple[Path, int]]:
+        return self._files(self.cache_dir)
+
+    def print_files(self):
+        lines = []
+        lines.extend(['Model files:', ''])
+        for path, size in self.model_files:
+            size = humanize.naturalsize(size)
+            lines.append('\t{:10}\t{}'.format(size, path))
+        lines.extend(['', 'Cache files:', ''])
+        for path, size in self.cache_files:
+            size = humanize.naturalsize(size)
+            lines.append('\t{:10}\t{}'.format(size, path))
+        print('\n'.join(lines))
 
     @property
     def corpus(self) -> Corpus:
