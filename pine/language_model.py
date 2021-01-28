@@ -6,7 +6,7 @@ from datetime import datetime, timedelta
 from logging import getLogger
 from pathlib import Path
 import pickle
-from typing import Dict, Optional, Union, Sequence, Tuple, Iterable, TYPE_CHECKING
+from typing import Dict, Optional, Union, Sequence, Tuple, Iterable, List, TYPE_CHECKING
 
 from .configuration import FASTTEXT_PARAMETERS, MODEL_BASENAMES, PICKLE_PROTOCOL
 from .util import stringify_parameters
@@ -88,8 +88,13 @@ class LanguageModel:
 
     @property
     def importance_of_positions(self) -> np.ndarray:
-        from .qualitative_evaluation import importance_of_positions
-        return importance_of_positions(self)
+        from .qualitative_evaluation import get_importance_of_positions
+        return get_importance_of_positions(self)
+
+    @property
+    def positional_feature_clusters(self) -> Dict[str, List[int]]:
+        from .qualitative_evaluation import cluster_positional_features
+        return cluster_positional_features(self)
 
     def predict_masked_words(self, sentence: Sequence[Optional[str]]) -> Iterable[str]:
         from .qualitative_evaluation import predict_masked_words

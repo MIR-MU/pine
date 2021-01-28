@@ -4,11 +4,12 @@ from __future__ import annotations
 
 from logging import getLogger
 from itertools import chain
-from typing import Sequence, Optional, Iterable
+from typing import Sequence, Optional, Iterable, List, Dict
 
 import numpy as np
+from sklearn.cluster import AgglomerativeClustering
 
-from .configuration import NUM_PRINTED_TOP_WORDS
+from .configuration import NUM_PRINTED_TOP_WORDS, FEATURE_CLUSTERING_PARAMETERS, NUM_FEATURE_CLUSTERS
 from .language_model import LanguageModel
 
 
@@ -60,7 +61,52 @@ def predict_masked_words(language_model: LanguageModel, sentence: Sequence[Optio
         yield top_word
 
 
-def importance_of_positions(language_model: LanguageModel) -> np.ndarray:
+def get_importance_of_positions(language_model: LanguageModel) -> np.ndarray:
     if not language_model.positions:
         raise ValueError('{} is not a positional model'.format(language_model))
     return np.linalg.norm(language_model.positional_vectors, axis=1)
+
+
+def cluster_positional_features(language_model: LanguageModel) -> Dict[str, List[int]]:
+    if not language_model.positions:
+        raise ValueError('{} is not a positional model'.format(language_model))
+
+    absolute_positional_vectors = np.abs(language_model.positional_vectors)
+    window_center = len(absolute_positional_vectors) // 2
+    left_context_features = absolute_positional_vectors[:window_center][::-1].T
+    right_context_features = absolute_positional_vectors[window_center:].T
+    context_difference = right_context_features - left_context_features
+
+    num_feature_clusters = NUM_FEATURE_CLUSTERS[language_model.positions]
+    clustering = AgglomerativeClustering(n_clusters=num_feature_clusters, **FEATURE_CLUSTERING_PARAMETERS)
+    labels = clustering.fit(context_difference).labels_
+
+    if language_model.positions == 'full':
+        means = np.array([
+            np.mean(absolute_positional_vectors.T[labels == label])
+            for label in range(num_feature_clusters)
+        ])
+        informational_cluster_label = np.argmax(means)
+    else:
+        informational_cluster_label = None
+
+    clusters = dict()
+    num_antepositional, num_postpositional = 0, 0
+    for index, label in enumerate(labels):
+        if label == informational_cluster_label:
+            label = 'informational'
+        else:
+            if np.mean(context_difference[labels == label]) < 0:
+                if num_antepositional == 0:
+                    label = 'antepositional'
+                else:
+                    label = 'antepositional #{}'.format(num_antepositional)
+            else:
+                if num_postpositional == 0:
+                    label = 'postpositional'
+                else:
+                    label = 'postpositional #{}'.format(num_postpositional)
+        if label not in clusters:
+            clusters[label] = []
+        clusters[label].append(index)
+    return clusters

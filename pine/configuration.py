@@ -143,6 +143,16 @@ LANGUAGE_MODELING_PARAMETERS = {
     'seed': 21,
 }
 
+FEATURE_CLUSTERING_PARAMETERS = {
+    'linkage': 'average',
+    'affinity': 'cosine',
+}
+
+NUM_FEATURE_CLUSTERS = {
+    'full': 3,
+    'constrained': 2,
+}
+
 CORPUS_SIZES = {
     'wikipedia': {
         'en': 249230825,
