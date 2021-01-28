@@ -89,9 +89,9 @@ class LanguageModel:
         return None
 
     @property
-    def importance_of_positions(self) -> np.ndarray:
-        from .qualitative_evaluation import get_importance_of_positions
-        return get_importance_of_positions(self)
+    def relative_position_importance(self) -> np.ndarray:
+        from .qualitative_evaluation import get_relative_importance_of_positions
+        return get_relative_importance_of_positions(self)
 
     @property
     def positional_feature_clusters(self) -> Dict[str, List[int]]:

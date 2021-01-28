@@ -61,10 +61,12 @@ def predict_masked_words(language_model: LanguageModel, sentence: Sequence[Optio
         yield top_word
 
 
-def get_importance_of_positions(language_model: LanguageModel) -> np.ndarray:
+def get_relative_importance_of_positions(language_model: LanguageModel) -> np.ndarray:
     if not language_model.positions:
         raise ValueError('{} is not a positional model'.format(language_model))
-    return np.linalg.norm(language_model.positional_vectors, axis=1)
+    importance = np.linalg.norm(language_model.positional_vectors, axis=1)
+    relative_importance = np.interp(importance, (importance.min(), importance.max()), (0.0, 1.0))
+    return relative_importance
 
 
 def cluster_positional_features(language_model: LanguageModel) -> Dict[str, List[int]]:
