@@ -8,7 +8,7 @@ from pathlib import Path
 import pickle
 from typing import Dict, Optional, Union, Sequence, Tuple, Iterable, List, TYPE_CHECKING
 
-from .configuration import FASTTEXT_PARAMETERS, MODEL_BASENAMES, PICKLE_PROTOCOL
+from .configuration import FASTTEXT_PARAMETERS, MODEL_BASENAMES, MODEL_FRIENDLY_NAMES, PICKLE_PROTOCOL
 from .util import stringify_parameters
 from .corpus import get_corpus, Corpus
 
@@ -32,6 +32,7 @@ class LanguageModel:
                  subwords: bool = True,
                  positions: Union[bool, str] = 'constrained',
                  use_vocab_from: LanguageModel = None,
+                 friendly_name: str = None,
                  extra_fasttext_parameters: Optional[Dict] = None):
 
         self._corpus = corpus
@@ -40,6 +41,7 @@ class LanguageModel:
         self.subwords = subwords
         self.positions = positions
         self.use_vocab_from = use_vocab_from
+        self._friendly_name = friendly_name
         self.extra_fasttext_parameters = extra_fasttext_parameters
 
         self.model_dir.mkdir(parents=True, exist_ok=True)
@@ -187,6 +189,12 @@ class LanguageModel:
             basename.append(stringify_parameters(self.extra_fasttext_parameters))
         basename = filter(len, basename)
         return '-'.join(basename)
+
+    @property
+    def friendly_name(self) -> str:
+        if self._friendly_name is not None:
+            return self._friendly_name
+        return MODEL_FRIENDLY_NAMES(self.subwords, self.positions)
 
     @property
     def model_dir(self) -> str:

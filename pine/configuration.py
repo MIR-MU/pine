@@ -73,6 +73,16 @@ def MODEL_BASENAMES(subwords, positions):
     return '_'.join(parts)
 
 
+def MODEL_FRIENDLY_NAMES(subwords, positions):
+    if positions == 'constrained':
+        return 'constrained'
+    if positions == 'full':
+        return 'positional'
+    if subwords:
+        return 'fastText'
+    return 'word2vec'
+
+
 WORD_ANALOGY_PARAMETERS = {
     'case_insensitive': True,
     'dummy4unknown': False,
