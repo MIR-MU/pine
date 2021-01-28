@@ -154,8 +154,8 @@ LANGUAGE_MODELING_PARAMETERS = {
 }
 
 FEATURE_CLUSTERING_PARAMETERS = {
-    'linkage': 'average',
-    'affinity': 'cosine',
+    'linkage': 'ward',
+    'affinity': 'euclidean',
 }
 
 NUM_FEATURE_CLUSTERS = {
