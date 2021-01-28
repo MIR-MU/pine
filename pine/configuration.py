@@ -1,5 +1,8 @@
 # -*- coding: utf-8 -*-
 
+from collections import defaultdict
+
+
 FASTTEXT_PARAMETERS = {
     'baseline': {  # Parameters from paper <https://arxiv.org/abs/1712.09405v1>
         'sg': 0,
@@ -163,6 +166,15 @@ NUM_FEATURE_CLUSTERS = {
     'constrained': 2,
 }
 
+FEATURE_CLUSTER_COLORS = defaultdict(
+    lambda _: 4,
+    {
+        'antepositional': 0,
+        'postpositional': 1,
+        'informational': 2,
+    },
+)
+
 CORPUS_SIZES = {
     'wikipedia': {
         'en': 249230825,
@@ -177,7 +189,8 @@ PLOT_PARAMETERS = {
         'kind': 'cubic',
         'num_points': 500,
     },
-    'gamma': 0.3,
+    'axis_gamma': 0.3,
+    'line_gamma': 0.7,
 }
 
 PICKLE_PROTOCOL = 3

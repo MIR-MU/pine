@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from logging import getLogger
 from itertools import chain
-from typing import Sequence, Optional, Iterable, List, Dict, TYPE_CHECKING
+from typing import Sequence, Optional, Iterable, List, Dict, Tuple, TYPE_CHECKING
 
 import numpy as np
 from sklearn.cluster import AgglomerativeClustering
@@ -81,8 +81,8 @@ class RelativePositionImportance:
         return iter(self.data)
 
     def plot(self) -> 'Figure':
-        from .view import plot_relative_importance_of_positions
-        return plot_relative_importance_of_positions(self.language_model)
+        from .view import plot_relative_position_importance
+        return plot_relative_position_importance(self.language_model)
 
     def __repr__(self) -> str:
         return 'Relative position importance of {}'.format(self.language_model)
@@ -92,7 +92,7 @@ class RelativePositionImportance:
         return figure._repr_html_()
 
 
-def cluster_positional_features(language_model: LanguageModel) -> Dict[str, List[int]]:
+def cluster_positional_features(language_model: LanguageModel) -> ClusteredPositionalFeatures:
     if not language_model.positions:
         raise ValueError('{} is not a positional model'.format(language_model))
 
@@ -134,4 +134,30 @@ def cluster_positional_features(language_model: LanguageModel) -> Dict[str, List
         if label not in clusters:
             clusters[label] = []
         clusters[label].append(index)
-    return clusters
+    return ClusteredPositionalFeatures(language_model, clusters)
+
+
+class ClusteredPositionalFeatures:
+    def __init__(self, language_model: LanguageModel, data: Dict[str, List[int]]):
+        self.language_model = language_model
+        self.data = data
+
+    def __iter__(self) -> Iterable[Tuple[str, List[int]]]:
+        return iter(self.data.items())
+
+    def __contains__(self, label: str) -> bool:
+        return label in self.data
+
+    def __getitem__(self, label: str) -> List[int]:
+        return self.data[label]
+
+    def plot(self) -> 'Figure':
+        from .view import plot_clustered_positional_features
+        return plot_clustered_positional_features(self.language_model)
+
+    def __repr__(self) -> str:
+        return 'Clustered positional features of {}'.format(self.language_model)
+
+    def _repr_html_(self) -> str:
+        figure = self.plot()
+        return figure._repr_html_()

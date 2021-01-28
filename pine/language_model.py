@@ -6,14 +6,14 @@ from datetime import datetime, timedelta
 from logging import getLogger
 from pathlib import Path
 import pickle
-from typing import Dict, Optional, Union, Sequence, Tuple, Iterable, List, TYPE_CHECKING
+from typing import Dict, Optional, Union, Sequence, Tuple, Iterable, TYPE_CHECKING
 
 from .configuration import FASTTEXT_PARAMETERS, MODEL_BASENAMES, MODEL_FRIENDLY_NAMES, PICKLE_PROTOCOL
 from .util import stringify_parameters
 from .corpus import get_corpus, Corpus
 
 if TYPE_CHECKING:
-    from .qualitative_evaluation import RelativePositionImportance
+    from .qualitative_evaluation import RelativePositionImportance, ClusteredPositionalFeatures
     from .quantitative_evaluation import WordAnalogyResult, LanguageModelingResult
 
 from gensim.models import FastText, KeyedVectors
@@ -95,7 +95,7 @@ class LanguageModel:
         return get_relative_position_importance(self)
 
     @property
-    def positional_feature_clusters(self) -> Dict[str, List[int]]:
+    def positional_feature_clusters(self) -> 'ClusteredPositionalFeatures':
         from .qualitative_evaluation import cluster_positional_features
         return cluster_positional_features(self)
 
