@@ -4,13 +4,16 @@ from __future__ import annotations
 
 from logging import getLogger
 from itertools import chain
-from typing import Sequence, Optional, Iterable, List, Dict
+from typing import Sequence, Optional, Iterable, List, Dict, TYPE_CHECKING
 
 import numpy as np
 from sklearn.cluster import AgglomerativeClustering
 
-from .configuration import NUM_PRINTED_TOP_WORDS, FEATURE_CLUSTERING_PARAMETERS, NUM_FEATURE_CLUSTERS
-from .language_model import LanguageModel
+if TYPE_CHECKING:
+    from matplotlib.figure import Figure
+
+from ..configuration import NUM_PRINTED_TOP_WORDS, FEATURE_CLUSTERING_PARAMETERS, NUM_FEATURE_CLUSTERS
+from ..language_model import LanguageModel
 
 
 LOGGER = getLogger(__name__)
@@ -61,12 +64,32 @@ def predict_masked_words(language_model: LanguageModel, sentence: Sequence[Optio
         yield top_word
 
 
-def get_relative_importance_of_positions(language_model: LanguageModel) -> np.ndarray:
+def get_relative_position_importance(language_model: LanguageModel) -> RelativePositionImportance:
     if not language_model.positions:
         raise ValueError('{} is not a positional model'.format(language_model))
     importance = np.linalg.norm(language_model.positional_vectors, axis=1)
     relative_importance = np.interp(importance, (importance.min(), importance.max()), (0.0, 1.0))
-    return relative_importance
+    return RelativePositionImportance(language_model, relative_importance)
+
+
+class RelativePositionImportance:
+    def __init__(self, language_model: LanguageModel, data: np.ndarray):
+        self.language_model = language_model
+        self.data = data
+
+    def __iter__(self) -> Iterable[float]:
+        return iter(self.data)
+
+    def plot(self) -> 'Figure':
+        from .view import plot_relative_importance_of_positions
+        return plot_relative_importance_of_positions(self.language_model)
+
+    def __repr__(self) -> str:
+        return 'Relative position importance of {}'.format(self.language_model)
+
+    def _repr_html_(self) -> str:
+        figure = self.plot()
+        return figure._repr_html_()
 
 
 def cluster_positional_features(language_model: LanguageModel) -> Dict[str, List[int]]:

@@ -13,6 +13,7 @@ from .util import stringify_parameters
 from .corpus import get_corpus, Corpus
 
 if TYPE_CHECKING:
+    from .qualitative_evaluation import RelativePositionImportance
     from .quantitative_evaluation import WordAnalogyResult, LanguageModelingResult
 
 from gensim.models import FastText, KeyedVectors
@@ -89,9 +90,9 @@ class LanguageModel:
         return None
 
     @property
-    def relative_position_importance(self) -> np.ndarray:
-        from .qualitative_evaluation import get_relative_importance_of_positions
-        return get_relative_importance_of_positions(self)
+    def relative_position_importance(self) -> 'RelativePositionImportance':
+        from .qualitative_evaluation import get_relative_position_importance
+        return get_relative_position_importance(self)
 
     @property
     def positional_feature_clusters(self) -> Dict[str, List[int]]:

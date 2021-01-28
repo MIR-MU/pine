@@ -172,6 +172,14 @@ CORPUS_SIZES = {
     },
 }
 
+PLOT_PARAMETERS = {
+    'interpolation': {
+        'kind': 'cubic',
+        'num_points': 500,
+    },
+    'gamma': 0.3,
+}
+
 PICKLE_PROTOCOL = 3
 
 JSON_DUMP_PARAMETERS = {
