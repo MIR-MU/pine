@@ -76,7 +76,6 @@ class Evaluator:
             except IOError:
                 similarity_matrix = SparseTermSimilarityMatrix(termsim_index, dictionary, tfidf,
                                                                **method_parameters['similarity_matrix'])
-                similarity_matrix.matrix.eliminate_zeros()  # Apply fix from Gensim issue #2783
                 similarity_matrix.save(str(cache_path))
             train_corpus = [dictionary.doc2bow(document) for document in train_corpus]
             train_corpus = tfidf[train_corpus]
