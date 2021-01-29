@@ -50,7 +50,6 @@ def plot_relative_position_importance(*language_models: LanguageModel) -> Figure
         X, Y = interpolate(X, gamma_forward(Y))
         label = language_model.friendly_name
         ax.plot(X, gamma_inverse(Y), label=label.capitalize(), zorder=3)
-    ax.grid(True, axis='both')
     ax.legend()
     ax.set_yscale('function', functions=(gamma_forward, gamma_inverse))
     return fig
@@ -87,6 +86,5 @@ def plot_clustered_positional_features(language_model: LanguageModel) -> Figure:
         label = '{} features ({})'.format(label, cluster_size)
         ax.scatter(X, Y, color=color, zorder=2)
         ax.plot(*interpolate(X, Y), label=label.capitalize(), color=color, zorder=3)
-    ax.grid(True, axis='both')
     ax.legend()
     return fig
