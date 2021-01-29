@@ -14,7 +14,7 @@ from ..language_model import LanguageModel
 
 
 def get_position_numbers(language_model: LanguageModel) -> np.ndarray:
-    position_numbers = np.arange(language_model.model.window * 2)
+    position_numbers = np.arange(len(language_model.positional_vectors))
     position_numbers -= len(language_model.positional_vectors) // 2
     position_numbers[position_numbers >= 0] += 1
     return position_numbers
@@ -36,16 +36,16 @@ def gamma_inverse(x):
     return np.sign(x) * np.abs(x)**(1.0 / PLOT_PARAMETERS['axis_gamma'])
 
 
-def plot_relative_position_importance(*language_models: LanguageModel) -> Figure:
+def plot_position_importance(*language_models: LanguageModel) -> Figure:
     if len(language_models) < 1:
         message = 'Expected at least one language model, got {}'
         message = message.format(len(language_models))
         raise ValueError(message)
     fig, ax = plt.subplots(1, 1)
     for language_model in language_models:
-        relative_importance = language_model.relative_position_importance
+        importance = language_model.position_importance
         X = get_position_numbers(language_model)
-        Y = relative_importance.data
+        Y = importance.data
         ax.scatter(X, Y, zorder=2)
         X, Y = interpolate(X, gamma_forward(Y))
         label = language_model.friendly_name

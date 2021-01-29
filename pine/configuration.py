@@ -193,6 +193,11 @@ PLOT_PARAMETERS = {
     'line_gamma': 0.7,
 }
 
+WORD_KINDS = [
+    'context',
+    'masked',
+]
+
 PICKLE_PROTOCOL = 3
 
 JSON_DUMP_PARAMETERS = {
@@ -200,4 +205,5 @@ JSON_DUMP_PARAMETERS = {
     'sort_keys': True,
 }
 
-NUM_PRINTED_TOP_WORDS = 5
+NUM_PRINTED_TOP_WORDS = 10
+NUM_PRINTED_BOTTOM_WORDS = 5

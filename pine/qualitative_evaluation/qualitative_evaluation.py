@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from collections import deque
 from logging import getLogger
 from itertools import chain
 from typing import Sequence, Optional, Iterable, List, Dict, Tuple, TYPE_CHECKING
@@ -12,7 +13,13 @@ from sklearn.cluster import AgglomerativeClustering
 if TYPE_CHECKING:
     from matplotlib.figure import Figure
 
-from ..configuration import NUM_PRINTED_TOP_WORDS, FEATURE_CLUSTERING_PARAMETERS, NUM_FEATURE_CLUSTERS
+from ..configuration import (
+    NUM_PRINTED_TOP_WORDS,
+    NUM_PRINTED_BOTTOM_WORDS,
+    FEATURE_CLUSTERING_PARAMETERS,
+    NUM_FEATURE_CLUSTERS,
+    WORD_KINDS,
+)
 from ..language_model import LanguageModel
 
 
@@ -48,32 +55,64 @@ def predict_masked_words(language_model: LanguageModel, sentence: Sequence[Optio
     context_vector = np.mean(input_vectors * positional_vectors, axis=0)
 
     inner_products = language_model.output_vectors.dot(context_vector)
-    top_indices = inner_products.argsort()[::-1]
-    printed_top_words, num_printed_top_words = [], min(NUM_PRINTED_TOP_WORDS, len(top_indices))
-    for index in top_indices:
-        top_word = language_model.words[index]
-        if len(printed_top_words) <= num_printed_top_words:
-            printed_top_words.append(top_word)
-        if len(printed_top_words) == num_printed_top_words:
-            message = '{}[{}]{}'.format(
-                ' '.join((*left_context, '') if left_context else left_context),
-                ', '.join((*printed_top_words, '...')),
-                ' '.join(('', *right_context) if right_context else right_context),
-            )
-            LOGGER.info(message)
-        yield top_word
+    sorted_indices = inner_products.argsort()[::-1]
+    log_message_format = '{}[{{}}]{}'.format(
+        ' '.join((*left_context, '') if left_context else left_context),
+        ' '.join(('', *right_context) if right_context else right_context),
+    )
+    return _yield_ranked_words(language_model, sorted_indices, log_message_format)
 
 
-def get_relative_position_importance(language_model: LanguageModel) -> RelativePositionImportance:
+def classify_words(language_model: LanguageModel, kind: str) -> Dict[str, str]:
+    if kind not in WORD_KINDS:
+        message = 'Unknown kind {} (known kinds: {})'
+        message = message.format(kind, ', '.join(WORD_KINDS))
+        raise ValueError(message)
+
+    if kind == 'context':
+        word_vectors = language_model.input_vectors
+    elif kind == 'masked':
+        word_vectors = language_model.output_vectors
+    else:
+        raise ValueError('Vectors for kind {} not yet implemented'.format(kind))
+
+    cluster_labels, clusters = zip(*iter(language_model.positional_feature_clusters))
+    word_importances = np.vstack([
+        np.abs(word_vectors.T[cluster].T).sum(axis=1) * 1.0 / len(cluster)
+        for cluster
+        in clusters
+    ])
+    predicted_cluster_indices = np.argmax(word_importances, axis=0)
+    predicted_clusters = dict()
+    predicted_cluster_counts = dict()
+    for word, predicted_cluster_index in zip(language_model.words, predicted_cluster_indices):
+        cluster_label = cluster_labels[predicted_cluster_index]
+        predicted_clusters[word] = cluster_label
+        if cluster_label not in predicted_cluster_counts:
+            predicted_cluster_counts[cluster_label] = 0
+        predicted_cluster_counts[cluster_label] += 1
+
+    message = ', '.join(
+        '{:.2f}% {}'.format(count * 100.0 / len(language_model.words), cluster_label)
+        for cluster_label, count
+        in sorted(predicted_cluster_counts.items(), key=lambda x: x[1], reverse=True)
+    )
+    message = 'Predicted word classes: {}'.format(message)
+    LOGGER.info(message)
+
+    return predicted_clusters
+
+
+def get_position_importance(language_model: LanguageModel) -> PositionImportance:
     if not language_model.positions:
         raise ValueError('{} is not a positional model'.format(language_model))
     importance = np.linalg.norm(language_model.positional_vectors, axis=1)
     max_importance = importance.max()
-    relative_importance = importance / max_importance if max_importance > 0 else importance
-    return RelativePositionImportance(language_model, relative_importance)
+    importance = importance / max_importance if max_importance > 0 else importance
+    return PositionImportance(language_model, importance)
 
 
-class RelativePositionImportance:
+class PositionImportance:
     def __init__(self, language_model: LanguageModel, data: np.ndarray):
         self.language_model = language_model
         self.data = data
@@ -82,11 +121,11 @@ class RelativePositionImportance:
         return iter(self.data)
 
     def plot(self) -> 'Figure':
-        from .view import plot_relative_position_importance
-        return plot_relative_position_importance(self.language_model)
+        from .view import plot_position_importance
+        return plot_position_importance(self.language_model)
 
     def __repr__(self) -> str:
-        return 'Relative position importance of {}'.format(self.language_model)
+        return ' position importance of {}'.format(self.language_model)
 
     def _repr_html_(self) -> str:
         figure = self.plot()
@@ -162,3 +201,28 @@ class ClusteredPositionalFeatures:
     def _repr_html_(self) -> str:
         figure = self.plot()
         return figure._repr_html_()
+
+
+def _yield_ranked_words(language_model: LanguageModel, sorted_indices: Iterable[int],
+                        log_message_format: str = '{}') -> Iterable[str]:
+    printed_top_words, printed_bottom_words = [], deque([], NUM_PRINTED_BOTTOM_WORDS)
+    num_words = 0
+    for index in sorted_indices:
+        word = language_model.words[index]
+        num_words += 1
+        if num_words <= NUM_PRINTED_TOP_WORDS:
+            printed_top_words.append(word)
+        printed_bottom_words.append(word)
+        yield word
+    if num_words <= NUM_PRINTED_TOP_WORDS:
+        message = log_message_format.format(', '.join(printed_top_words))
+    elif num_words <= NUM_PRINTED_BOTTOM_WORDS:
+        message = log_message_format.format(', '.join(printed_bottom_words))
+    elif num_words <= NUM_PRINTED_TOP_WORDS + NUM_PRINTED_BOTTOM_WORDS:
+        remaining_words_below_top = num_words - NUM_PRINTED_TOP_WORDS
+        printed_words = [*printed_top_words, *printed_bottom_words[-remaining_words_below_top:]]
+        message = log_message_format.format(', '.join(printed_words))
+    else:
+        printed_words = [*printed_top_words, '...', *printed_bottom_words]
+        message = log_message_format.format(', '.join(printed_words))
+    LOGGER.info(message)

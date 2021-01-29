@@ -13,7 +13,7 @@ from .util import stringify_parameters
 from .corpus import get_corpus, Corpus
 
 if TYPE_CHECKING:
-    from .qualitative_evaluation import RelativePositionImportance, ClusteredPositionalFeatures
+    from .qualitative_evaluation import PositionImportance, ClusteredPositionalFeatures
     from .quantitative_evaluation import WordAnalogyResult, LanguageModelingResult
 
 from gensim.models import FastText, KeyedVectors
@@ -51,6 +51,9 @@ class LanguageModel:
         self._model = None
         self._vectors = None
         self._training_duration = None
+        self._position_importance = None
+        self._positional_feature_clusters = None
+        self._classified_context_words = None
 
     @property
     def model(self) -> FastText:
@@ -90,28 +93,42 @@ class LanguageModel:
         return None
 
     @property
-    def relative_position_importance(self) -> 'RelativePositionImportance':
-        from .qualitative_evaluation import get_relative_position_importance
-        return get_relative_position_importance(self)
-
-    @property
-    def positional_feature_clusters(self) -> 'ClusteredPositionalFeatures':
-        from .qualitative_evaluation import cluster_positional_features
-        return cluster_positional_features(self)
-
-    def predict_masked_words(self, sentence: Sequence[Optional[str]]) -> Iterable[str]:
-        from .qualitative_evaluation import predict_masked_words
-        return predict_masked_words(self, sentence)
-
-    @property
     def output_vectors(self) -> np.ndarray:
         if 'syn1' in vars(self.model):
             return self.model.syn1
         return self.model.syn1neg
 
     @property
+    def position_importance(self) -> 'PositionImportance':
+        if self._position_importance is None:
+            from .qualitative_evaluation import get_position_importance
+            self._position_importance = get_position_importance(self)
+        return self._position_importance
+
+    @property
+    def positional_feature_clusters(self) -> 'ClusteredPositionalFeatures':
+        if self._positional_feature_clusters is None:
+            from .qualitative_evaluation import cluster_positional_features
+            self._positional_feature_clusters = cluster_positional_features(self)
+        return self._positional_feature_clusters
+
+    def predict_masked_words(self, sentence: Sequence[Optional[str]]) -> Iterable[str]:
+        from .qualitative_evaluation import predict_masked_words
+        return predict_masked_words(self, sentence)
+
+    @property
+    def classified_context_words(self) -> Dict[str, str]:
+        if self._classified_context_words is None:
+            from .qualitative_evaluation import classify_words
+            self._classified_context_words = classify_words(self, 'context')
+        return self._classified_context_words
+
+    def classify_context_word(self, word: str) -> str:
+        return self.classified_context_words[word]
+
+    @property
     def words(self) -> Sequence[str]:
-        return self.vectors.index2word
+        return self.vectors.index_to_key
 
     @property
     def word_analogy(self) -> 'WordAnalogyResult':
