@@ -158,11 +158,11 @@ class LanguageModel:
     def print_files(self):
         lines = []
         lines.extend(['Model files:', ''])
-        for path, size in self.model_files:
+        for path, size in sorted(self.model_files, key=lambda x: x[1], reverse=True):
             size = humanize.naturalsize(size)
             lines.append('\t{:10}\t{}'.format(size, path))
         lines.extend(['', 'Cache files:', ''])
-        for path, size in self.cache_files:
+        for path, size in sorted(self.cache_files, key=lambda x: x[1], reverse=True):
             size = humanize.naturalsize(size)
             lines.append('\t{:10}\t{}'.format(size, path))
         print('\n'.join(lines))
