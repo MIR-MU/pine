@@ -3,6 +3,8 @@
 from .qualitative_evaluation import (
     predict_masked_words,
     classify_words,
+    produce_example_sentences,
+    ExampleSentences,
     cluster_positional_features,
     ClusteredPositionalFeatures,
     get_position_importance,
@@ -16,6 +18,8 @@ from .view import (
 __all__ = [
     'predict_masked_words',
     'classify_words',
+    'produce_example_sentences',
+    'ExampleSentences',
     'cluster_positional_features',
     'ClusteredPositionalFeatures',
     'get_position_importance',

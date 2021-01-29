@@ -13,7 +13,7 @@ from .util import stringify_parameters
 from .corpus import get_corpus, Corpus
 
 if TYPE_CHECKING:
-    from .qualitative_evaluation import PositionImportance, ClusteredPositionalFeatures
+    from .qualitative_evaluation import PositionImportance, ClusteredPositionalFeatures, ExampleSentences
     from .quantitative_evaluation import WordAnalogyResult, LanguageModelingResult
 
 from gensim.models import FastText, KeyedVectors
@@ -87,10 +87,10 @@ class LanguageModel:
         return self.vectors.vectors
 
     @property
-    def positional_vectors(self) -> Optional[np.ndarray]:
-        if 'vectors_positions' in vars(self.model.wv):
-            return self.model.wv.vectors_positions
-        return None
+    def positional_vectors(self) -> np.ndarray:
+        if self.positions is None:
+            raise ValueError('{} is not a positional model'.format(self))
+        return self.model.wv.vectors_positions
 
     @property
     def output_vectors(self) -> np.ndarray:
@@ -125,6 +125,10 @@ class LanguageModel:
 
     def classify_context_word(self, word: str) -> str:
         return self.classified_context_words[word]
+
+    def produce_example_sentences(self, cluster_label: str) -> 'ExampleSentences':
+        from .qualitative_evaluation import produce_example_sentences
+        return produce_example_sentences(self, cluster_label)
 
     @property
     def words(self) -> Sequence[str]:

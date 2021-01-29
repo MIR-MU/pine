@@ -2,6 +2,12 @@
 
 from collections import defaultdict
 
+import nltk
+import nltk.corpus
+
+
+nltk.download('brown', quiet=True)
+
 
 FASTTEXT_PARAMETERS = {
     'baseline': {  # Parameters from paper <https://arxiv.org/abs/1712.09405v1>
@@ -82,8 +88,8 @@ def MODEL_FRIENDLY_NAMES(subwords, positions):
     if positions == 'full':
         return 'positional'
     if subwords:
-        return 'fastText'
-    return 'word2vec'
+        return 'subword'
+    return 'baseline'
 
 
 WORD_ANALOGY_PARAMETERS = {
@@ -207,3 +213,22 @@ JSON_DUMP_PARAMETERS = {
 
 NUM_PRINTED_TOP_WORDS = 10
 NUM_PRINTED_BOTTOM_WORDS = 5
+
+EXAMPLE_SENTENCES = {
+    'restrict_vocab': 10**3,
+    'restrict_positions': (-3, 3),
+    'whitelist': defaultdict(
+        lambda _: None,
+        {
+            'en': set([
+                *(word.lower() for word in nltk.corpus.brown.words()),
+            ]),
+        },
+    ),
+    'blacklist': defaultdict(
+        lambda _: None,
+        {
+            'en': lambda word: word in ('a', 'an', 'the'),
+        },
+    ),
+}
