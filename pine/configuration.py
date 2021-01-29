@@ -189,7 +189,7 @@ PLOT_PARAMETERS = {
         'kind': 'cubic',
         'num_points': 500,
     },
-    'axis_gamma': 0.3,
+    'axis_gamma': 0.8,
     'line_gamma': 0.7,
 }
 
