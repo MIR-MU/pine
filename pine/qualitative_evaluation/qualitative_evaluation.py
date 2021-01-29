@@ -68,7 +68,8 @@ def get_relative_position_importance(language_model: LanguageModel) -> RelativeP
     if not language_model.positions:
         raise ValueError('{} is not a positional model'.format(language_model))
     importance = np.linalg.norm(language_model.positional_vectors, axis=1)
-    relative_importance = np.interp(importance, (importance.min(), importance.max()), (0.0, 1.0))
+    max_importance = importance.max()
+    relative_importance = importance / max_importance if max_importance > 0 else importance
     return RelativePositionImportance(language_model, relative_importance)
 
 
