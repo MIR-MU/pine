@@ -75,6 +75,6 @@ class Result:
         if len(self.result) > 1:
             sem = np.std(self.result, ddof=1) * 100.0 / np.sqrt(len(self.result))
             ci = 1.96 * sem
-            return '{:.2f}% (SEM: {:g}%, 95% CI: ±{:g}%)'.format(error_rate, sem, ci)
+            return '{:.2f}% (SEM: {:.2f}%, 95% CI: ±{:.2f}%)'.format(error_rate, sem, ci)
         else:
             return '{:.2f}%'.format(error_rate)
