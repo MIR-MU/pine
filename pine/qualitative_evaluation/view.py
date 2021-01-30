@@ -2,15 +2,13 @@
 
 from __future__ import annotations
 
-from typing import Tuple
-
 from matplotlib.figure import Figure
 import matplotlib.pyplot as plt
 import numpy as np
-from scipy.interpolate import interp1d
 
 from ..configuration import PLOT_PARAMETERS, FEATURE_CLUSTER_COLORS
 from ..language_model import LanguageModel
+from ..util import interpolate
 
 
 def get_position_numbers(language_model: LanguageModel) -> np.ndarray:
@@ -18,14 +16,6 @@ def get_position_numbers(language_model: LanguageModel) -> np.ndarray:
     position_numbers -= len(language_model.positional_vectors) // 2
     position_numbers[position_numbers >= 0] += 1
     return position_numbers
-
-
-def interpolate(X: np.ndarray, Y: np.ndarray) -> Tuple[np.ndarray, np.ndarray]:
-    parameters = PLOT_PARAMETERS['interpolation']
-    interpolation_function = interp1d(X, Y, kind=parameters['kind'])
-    X = np.linspace(min(X), max(X), num=parameters['num_points'], endpoint=True)
-    Y = interpolation_function(X)
-    return (X, Y)
 
 
 def gamma_forward(x):

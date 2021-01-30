@@ -3,8 +3,9 @@
 from __future__ import annotations
 
 import json
-from typing import Dict, Tuple, Iterable
+from typing import Dict, Tuple, Sequence, Any
 from pathlib import Path
+from matplotlib.figure import Figure
 
 from ...configuration import LANGUAGE_MODELING_DATASETS, JSON_DUMP_PARAMETERS
 from ...language_model import LanguageModel
@@ -51,7 +52,7 @@ def evaluate(dataset_paths: Dataset, language_model: LanguageModel) -> Result:
         result = train_and_evaluate(dataset_paths, language_model)
         with result_path.open('wt') as wf:
             json.dump(result, wf, **JSON_DUMP_PARAMETERS)
-    return Result(result)
+    return Result(language_model, result)
 
 
 Dataset = Dict[str, Path]
@@ -59,18 +60,27 @@ Perplexity = float
 Loss = float
 LearningRate = float
 EvaluationResult = Tuple[Perplexity, Loss]
-TrainingResult = Iterable[EvaluationResult]
+TrainingResult = Sequence[EvaluationResult]
 ValidationResult = EvaluationResult
 TestResult = EvaluationResult
 EpochResult = Tuple[TrainingResult, ValidationResult, LearningRate]
-RawResult = Tuple[TestResult, Iterable[EpochResult]]
+RawResult = Tuple[TestResult, Sequence[EpochResult]]
 
 
 class Result:
-    def __init__(self, result: RawResult):
+    def __init__(self, language_model: LanguageModel, result: RawResult):
+        self.language_model = language_model
         self.result = result
 
-    def __str__(self) -> str:
+    def plot(self, *args: Any, **kwargs: Any) -> 'Figure':
+        from .view import plot_language_modeling_results
+        return plot_language_modeling_results(self.language_model, *args, **kwargs)
+
+    def __repr__(self) -> str:
         test_result, _ = self.result
         test_perplexity, _ = test_result
-        return '{:.2f}'.format(test_perplexity)
+        return 'Test perplexity of {}: {:.2f}'.format(self.language_model, test_perplexity)
+
+    def _repr_html_(self) -> str:
+        figure = self.plot()
+        return figure._repr_html_()

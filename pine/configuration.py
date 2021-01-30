@@ -195,13 +195,29 @@ PLOT_PARAMETERS = {
         'kind': 'cubic',
         'num_points': 500,
     },
+    'batch_smoothing': 800,
     'axis_gamma': 0.8,
     'line_gamma': 0.7,
+    'language_modeling': {
+        'kind': 'perplexity',
+        'subset': 'validation',
+    },
 }
 
 WORD_KINDS = [
     'context',
     'masked',
+]
+
+LANGUAGE_MODELING_RESULT_KINDS = [
+    'loss',
+    'perplexity',
+    'learning_rate',
+]
+
+LANGUAGE_MODELING_RESULT_SUBSETS = [
+    'train',
+    'validation',
 ]
 
 PICKLE_PROTOCOL = 3

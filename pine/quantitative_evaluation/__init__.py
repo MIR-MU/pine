@@ -14,6 +14,7 @@ from .language_modeling import (
     evaluate as evaluate_language_modeling,
     get_dataset_paths as get_language_modeling_dataset,
     Result as LanguageModelingResult,
+    plot_language_modeling_results,
 )
 
 __all__ = [
@@ -28,4 +29,5 @@ __all__ = [
     'get_language_modeling_dataset',
     'evaluate_language_modeling',
     'LanguageModelingResult',
+    'plot_language_modeling_results',
 ]

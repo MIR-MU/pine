@@ -6,12 +6,16 @@ from numbers import Integral
 from pathlib import Path
 from logging import getLogger
 from functools import partial
-from typing import Dict, Any
+from typing import Dict, Any, Tuple, Optional
 
+import numpy as np
 import smart_open
 from tqdm import tqdm
 import tarfile
 from zipfile import ZipFile
+from scipy.interpolate import interp1d
+
+from .configuration import PLOT_PARAMETERS
 
 
 LOGGER = getLogger(__name__)
@@ -68,3 +72,13 @@ def stringify_parameters(parameters: Dict) -> str:
     parameters = sorted(parameters.items())
     parameters = ('{}={}'.format(stringify(key), stringify(value)) for key, value in parameters)
     return '_'.join(parameters)
+
+
+def interpolate(X: np.ndarray, Y: np.ndarray, kind: Optional[str] = None) -> Tuple[np.ndarray, np.ndarray]:
+    parameters = PLOT_PARAMETERS['interpolation']
+    if kind is None:
+        kind = parameters['kind']
+    interpolation_function = interp1d(X, Y, kind=kind)
+    X = np.linspace(min(X), max(X), num=parameters['num_points'], endpoint=True)
+    Y = interpolation_function(X)
+    return (X, Y)
