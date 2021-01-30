@@ -18,7 +18,7 @@ from scipy.stats import mode
 from tqdm import tqdm
 
 from ...language_model import LanguageModel
-from ...configuration import TEXT_CLASSIFICATION_METHOD_PARAMETERS
+from ...configuration import TEXT_CLASSIFICATION_METHOD_PARAMETERS, PICKLE_PROTOCOL
 from .data import Dataset, Document
 
 
@@ -179,7 +179,7 @@ class ParallelCachingWmdSimilarity(SimilarityABC):
 
         COMMON_VECTORS = self.vectors
 
-        with shelve.open(str(self.cache_path), 'c') as shelf:
+        with shelve.open(str(self.cache_path), 'c', PICKLE_PROTOCOL, writeback=False) as shelf:
 
             def make_symmetric(query: List[str], document: List[str]) -> Tuple[List[str]]:
                 if query < document:  # Enforce symmetric caching
