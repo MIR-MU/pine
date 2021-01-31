@@ -23,7 +23,6 @@ from .data import Dataset, Document
 
 
 COMMON_VECTORS = None
-EXECUTOR = ProcessPoolExecutor(None)
 LOGGER = getLogger(__name__)
 
 
@@ -180,53 +179,54 @@ class ParallelCachingWmdSimilarity(SimilarityABC):
         COMMON_VECTORS = self.vectors
 
         with shelve.open(str(self.cache_path), 'c', PICKLE_PROTOCOL, writeback=False) as shelf:
+            with ProcessPoolExecutor(None) as executor:
 
-            def make_symmetric(query: List[str], document: List[str]) -> Tuple[List[str]]:
-                if query < document:  # Enforce symmetric caching
-                    query, document = document, query
-                return (query, document)
+                def make_symmetric(query: List[str], document: List[str]) -> Tuple[List[str]]:
+                    if query < document:  # Enforce symmetric caching
+                        query, document = document, query
+                    return (query, document)
 
-            def make_key(query: List[str], document: List[str]) -> str:
-                return repr((query, document))
+                def make_key(query: List[str], document: List[str]) -> str:
+                    return repr((query, document))
 
-            @lru_cache(maxsize=None)
-            def _load_from_shelf(query: List[str], document: List[str]) -> float:
-                key = make_key(query, document)
-                if key in shelf:
-                    return shelf[key]
-                return EXECUTOR.submit(wmdistance, query, document)
+                @lru_cache(maxsize=None)
+                def _load_from_shelf(query: List[str], document: List[str]) -> float:
+                    key = make_key(query, document)
+                    if key in shelf:
+                        return shelf[key]
+                    return executor.submit(wmdistance, query, document)
 
-            def load_from_shelf(query: List[str], document: List[str]) -> float:
-                query, document = make_symmetric(query, document)
-                return _load_from_shelf(query, document)
+                def load_from_shelf(query: List[str], document: List[str]) -> float:
+                    query, document = make_symmetric(query, document)
+                    return _load_from_shelf(query, document)
 
-            def store_to_shelf(query: List[str], document: List[str], value: float):
-                key = make_key(*make_symmetric(query, document))
-                if key not in shelf:
-                    shelf[key] = value
+                def store_to_shelf(query: List[str], document: List[str], value: float):
+                    key = make_key(*make_symmetric(query, document))
+                    if key not in shelf:
+                        shelf[key] = value
 
-            result = []
-            num_hits, num_misses = 0, 0
-            for query in tqdm(queries, desc='Query'):
-                futures = [load_from_shelf(query, document) for document in self.corpus]
-                distances = []
-                for document, future in zip(self.corpus, futures):
-                    if isinstance(future, Future):
-                        num_misses += 1
-                        distance = future.result()
-                        store_to_shelf(query, document, distance)
-                    else:
-                        num_hits += 1
-                        distance = future
-                    distances.append(distance)
-                similarities = 1. / (1. + np.array(distances))
-                result.append(similarities)
-                _load_from_shelf.cache_clear()
-            result = np.array(result)
+                result = []
+                num_hits, num_misses = 0, 0
+                for query in tqdm(queries, desc='Query'):
+                    futures = [load_from_shelf(query, document) for document in self.corpus]
+                    distances = []
+                    for document, future in zip(self.corpus, futures):
+                        if isinstance(future, Future):
+                            num_misses += 1
+                            distance = future.result()
+                            store_to_shelf(query, document, distance)
+                        else:
+                            num_hits += 1
+                            distance = future
+                        distances.append(distance)
+                    similarities = 1. / (1. + np.array(distances))
+                    result.append(similarities)
+                    _load_from_shelf.cache_clear()
+                result = np.array(result)
 
-            total = num_hits + num_misses
-            hit_ratio = num_hits * 100.0 / total if total else 0.0
-            LOGGER.info('WMD cache hit ratio: {:.2f}%'.format(hit_ratio))
+                total = num_hits + num_misses
+                hit_ratio = num_hits * 100.0 / total if total else 0.0
+                LOGGER.info('WMD cache hit ratio: {:.2f}%'.format(hit_ratio))
 
         COMMON_VECTORS = None
 
