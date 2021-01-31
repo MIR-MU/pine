@@ -195,7 +195,7 @@ PLOT_PARAMETERS = {
         'kind': 'cubic',
         'num_points': 500,
     },
-    'batch_smoothing': 800,
+    'batch_smoothing': 1.0,
     'axis_gamma': 0.8,
     'line_gamma': 0.7,
     'language_modeling': {

@@ -52,18 +52,20 @@ def plot_language_modeling_results(*language_models: LanguageModel,
                         X.append(epoch + 1)
                         Y.append(learning_rate)
                 elif kind == 'loss' or kind == 'perplexity':
-                    last_batch = len(training_results) - 1
                     for batch, training_result in enumerate(training_results):
-                        if batch % PLOT_PARAMETERS['batch_smoothing'] != 0 and \
-                                (batch < last_batch or epoch < last_epoch):
-                            continue
                         training_perplexity, training_loss = training_result
-                        batch = epoch + float(batch + 1) / len(training_results)
-                        X.append(batch)
+                        batch = epoch + float(batch) / len(training_results)
+                        if batch % PLOT_PARAMETERS['batch_smoothing'] != 0:
+                            continue
                         if kind == 'loss':
-                            Y.append(training_loss)
+                            value = training_loss
                         elif kind == 'perplexity':
-                            Y.append(training_perplexity)
+                            value = training_perplexity
+                        X.append(batch)
+                        Y.append(value)
+                    if epoch == last_epoch:
+                        X.append(epoch + 1)
+                        Y.append(value)
                 else:
                     message = 'Plotting language modeling {} results of kind {} not yet implemented'
                     message = message.format(subset, kind)
