@@ -2,6 +2,9 @@
 
 from .qualitative_evaluation import (
     predict_masked_words,
+    get_masked_word_probability,
+    Sentence,
+    SentenceProbability,
     classify_words,
     produce_example_sentences,
     ExampleSentences,
@@ -17,6 +20,9 @@ from .view import (
 
 __all__ = [
     'predict_masked_words',
+    'get_masked_word_probability',
+    'Sentence',
+    'SentenceProbability',
     'classify_words',
     'produce_example_sentences',
     'ExampleSentences',

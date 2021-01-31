@@ -30,11 +30,58 @@ from ..language_model import LanguageModel
 LOGGER = getLogger(__name__)
 
 
-def predict_masked_words(language_model: LanguageModel, sentence: Sequence[Optional[str]]) -> Iterable[str]:
+def predict_masked_words(language_model: LanguageModel, sentence: Sentence,
+                         cluster_label: Optional[str] = None) -> Iterable[str]:
+    context = _sentence_to_context(language_model, sentence)
+    left_context, right_context = context
+    context_vector = _context_to_vector(language_model, context, cluster_label)
+    inner_products = language_model.output_vectors.dot(context_vector)
+    sorted_indices = inner_products.argsort()[::-1]
+    log_message_format = '{}[MASKED: {{}}]{}'.format(
+        ' '.join((*left_context, '') if left_context else left_context),
+        ' '.join(('', *right_context) if right_context else right_context),
+    )
+    return _yield_ranked_words(language_model, sorted_indices, log_message_format)
+
+
+Sentence = Sequence[str]
+
+
+def get_masked_word_probability(language_model: LanguageModel, sentence: Sentence,
+                                masked_word: str,
+                                cluster_label: Optional[str] = None) -> SentenceProbability:
+    context = _sentence_to_context(language_model, sentence)
+    context_vector = _context_to_vector(language_model, context, cluster_label)
+    output_vector = _masked_word_to_vector(language_model, masked_word, cluster_label)
+    score = context_vector.T.dot(output_vector)
+    return SentenceProbability(sentence, masked_word, score)
+
+
+class SentenceProbability:
+    def __init__(self, sentence: Sentence, masked_word: str, score: float):
+        self.sentence = sentence
+        self.masked_word = masked_word
+        self.score = score
+
+    def __repr__(self) -> str:
+        probability = 100.0 * _sigmoid(self.score)
+        sentence = ' '.join(
+            word if word != '[MASK]' else '[MASKED: {}]'.format(self.masked_word)
+            for word
+            in self.sentence
+        )
+        return '{} (score {:.2f}, probability {:.2f}%)'.format(sentence, self.score, probability)
+
+
+def _sigmoid(value: np.array) -> np.array:
+    return np.exp(-np.logaddexp(0, -value))
+
+
+def _sentence_to_context(language_model: LanguageModel, sentence: Sentence) -> Context:
     num_masked_words = 0
     masked_word_index = None
     for word_index, word in enumerate(sentence):
-        if word is None:
+        if word == '[MASK]':
             masked_word_index = word_index
             num_masked_words += 1
 
@@ -44,27 +91,80 @@ def predict_masked_words(language_model: LanguageModel, sentence: Sequence[Optio
     window = language_model.model.window
     left_context = sentence[max(0, masked_word_index-window):masked_word_index]
     right_context = sentence[masked_word_index+1:min(len(sentence), masked_word_index+1+window)]
+    return (left_context, right_context)
 
+
+LeftContext = Sequence[str]
+RightContext = Sequence[str]
+Context = Tuple[LeftContext, RightContext]
+
+
+def _context_to_vector(language_model: LanguageModel, context: Context,
+                       cluster_label: Optional[str] = None) -> np.ndarray:
+    left_context, right_context = context
+    words = chain(left_context, right_context)
+    if language_model.positions:
+        min_position = -len(left_context)
+        max_position = len(right_context)
+        positions = range(min_position, max_position + 1)
+        positions = filter(lambda x: x != 0, positions)
+        positions_and_words = zip(positions, words)
+    else:
+        positions_and_words = enumerate(words)
     input_vectors, positional_vectors = [], []
-    for position, word in enumerate(chain(left_context, right_context)):
+    for position, word in positions_and_words:
+        if word == '[PAD]':
+            continue
         input_vector = language_model.vectors[word]
         input_vectors.append(input_vector)
         positional_vector = np.ones(len(input_vector), dtype=input_vector.dtype)
         if language_model.positions:
-            positional_vector[:language_model.positional_vectors.shape[1]] = \
-                language_model.positional_vectors[position]
+            index = _position_to_index(language_model, position)
+            positional_dimensions = language_model.positional_vectors.shape[1]
+            positional_vector[:positional_dimensions] = language_model.positional_vectors[index]
         positional_vectors.append(positional_vector)
-    input_vectors = np.array(input_vectors)
-    positional_vectors = np.array(positional_vectors)
+    input_vectors, positional_vectors = np.array(input_vectors), np.array(positional_vectors)
+    if cluster_label is not None:
+        cluster = language_model.positional_feature_clusters[cluster_label]
+        input_vectors = input_vectors.T[cluster].T
+        positional_vectors = positional_vectors.T[cluster].T
     context_vector = np.mean(input_vectors * positional_vectors, axis=0)
+    return context_vector
 
-    inner_products = language_model.output_vectors.dot(context_vector)
-    sorted_indices = inner_products.argsort()[::-1]
-    log_message_format = '{}[{{}}]{}'.format(
-        ' '.join((*left_context, '') if left_context else left_context),
-        ' '.join(('', *right_context) if right_context else right_context),
-    )
-    return _yield_ranked_words(language_model, sorted_indices, log_message_format)
+
+def _context_word_to_vector(language_model: LanguageModel, context_word: str,
+                            cluster_label: Optional[str] = None) -> np.ndarray:
+    input_vector = language_model.vectors[context_word]
+    if cluster_label is not None:
+        cluster = language_model.positional_feature_clusters[cluster_label]
+        input_vector = input_vector.T[cluster].T
+    return input_vector
+
+
+def _masked_word_to_vector(language_model: LanguageModel, masked_word: str,
+                           cluster_label: Optional[str] = None) -> np.ndarray:
+    masked_word_index = language_model.vectors.get_index(masked_word)
+    output_vector = language_model.output_vectors[masked_word_index]
+    if cluster_label is not None:
+        cluster = language_model.positional_feature_clusters[cluster_label]
+        output_vector = output_vector.T[cluster].T
+    return output_vector
+
+
+def _position_index_to_vector(language_model: LanguageModel, index: int,
+                              cluster_label: Optional[str] = None) -> np.ndarray:
+    positional_vector = language_model.positional_vectors[index]
+    if cluster_label is not None:
+        cluster = language_model.positional_feature_clusters[cluster_label]
+        positional_vector = positional_vector.T[cluster].T
+    return positional_vector
+
+
+def _position_to_vector(language_model: LanguageModel, position: int,
+                        cluster_label: Optional[str] = None) -> np.ndarray:
+    index = _position_to_index(language_model, position)
+    positional_vector = _position_index_to_vector(language_model, index, cluster_label)
+    return positional_vector
 
 
 def _yield_ranked_words(language_model: LanguageModel, sorted_indices: Iterable[int],
@@ -132,6 +232,37 @@ def classify_words(language_model: LanguageModel, kind: str) -> Dict[str, str]:
     return predicted_clusters
 
 
+def _position_to_index(language_model: LanguageModel, position: int) -> int:
+    if position == 0:
+        message = 'Position {} is not a valid position of a context word'
+        message = message.format(position)
+        raise ValueError(message)
+    min_position = _index_to_position(language_model, 0)
+    max_position = _index_to_position(language_model, len(language_model.positional_vectors) - 1)
+    if position < min_position or position > max_position:
+        message = 'Position {} is outside the interval [{}; {}]'
+        message = message.format(position, min_position, max_position)
+        raise ValueError(message)
+    window_center = len(language_model.positional_vectors) // 2
+    index = position + window_center
+    if position > 0:
+        index -= 1
+    return index
+
+
+def _index_to_position(language_model: LanguageModel, index: int) -> int:
+    min_index, max_index = 0, len(language_model.positional_vectors) - 1
+    if index < min_index or index > max_index:
+        message = 'Position index {} is outside the interval [{}; {}]'
+        message = message.format(index, min_index, max_index)
+        raise ValueError(message)
+    window_center = len(language_model.positional_vectors) // 2
+    position = index - window_center
+    if position >= 0:
+        position += 1
+    return position
+
+
 def produce_example_sentences(language_model: LanguageModel, cluster_label: str) -> ExampleSentences:
     result_path = language_model.model_dir / 'example_sentences'
     result_path.mkdir(exist_ok=True)
@@ -170,10 +301,9 @@ def produce_example_sentences(language_model: LanguageModel, cluster_label: str)
         output_vectors = language_model.output_vectors.T[cluster].T[:restrict_vocab]
         output_vectors = np.ma.array(output_vectors, mask=mask)
 
-        window_center = len(positional_vectors) // 2
         min_position, max_position = EXAMPLE_SENTENCES['restrict_positions']
-        min_position = min_position + window_center - (1 if min_position > 0 else 0)
-        max_position = max_position + window_center - (1 if max_position > 0 else 0)
+        min_position = _position_to_index(language_model, min_position)
+        max_position = _position_to_index(language_model, max_position)
 
         positions = range(len(positional_vectors))
         positions = filter(lambda x: x >= min_position and x <= max_position, positions)
@@ -191,80 +321,63 @@ def produce_example_sentences(language_model: LanguageModel, cluster_label: str)
             second_scores = input_vectors[second_position].dot(output_vectors.T)
             effects = np.abs(_sigmoid(first_scores) - _sigmoid(second_scores))
             context_word_index, masked_word_index = np.unravel_index(effects.argmax(), effects.shape)
-            first_score = first_scores[context_word_index, masked_word_index]
-            second_score = second_scores[context_word_index, masked_word_index]
             effect = effects[context_word_index, masked_word_index]
             if effect > best_effect:
                 best_context_word_index, best_masked_word_index = context_word_index, masked_word_index
                 best_first_position, best_second_position = first_position, second_position
-                best_first_score, best_second_score = first_score, second_score
                 best_effect = effect
 
         best_context_word = language_model.words[best_context_word_index]
         best_masked_word = language_model.words[best_masked_word_index]
+        best_first_position = _index_to_position(language_model, best_first_position)
+        best_second_position = _index_to_position(language_model, best_second_position)
+        best_first_sentence, best_second_sentence = [], []
+        for position in range(min(0, best_first_position), max(0, best_second_position) + 1):
+            if position == 0:
+                best_first_sentence.append('[MASK]')
+                best_second_sentence.append('[MASK]')
+            else:
+                if position == best_first_position:
+                    best_first_sentence.append(best_context_word)
+                else:
+                    best_first_sentence.append('[PAD]')
+                if position == best_second_position:
+                    best_second_sentence.append(best_context_word)
+                else:
+                    best_second_sentence.append('[PAD]')
+
         result = (
-            window_center,
-            best_context_word,
             best_masked_word,
-            best_first_position,
-            float(best_first_score),
-            best_second_position,
-            float(best_second_score),
-            float(best_effect),
+            best_first_sentence,
+            best_second_sentence,
         )
         with result_path.open('wt') as wf:
             json.dump(result, wf, **JSON_DUMP_PARAMETERS)
 
-    return ExampleSentences(cluster_label, *result)
+    return ExampleSentences(language_model, cluster_label, *result)
 
 
 class ExampleSentences:
-    def __init__(self, cluster_label: str, window_center: int, context_word: str,
-                 masked_word: str, first_position: int, first_score: float,
-                 second_position: int, second_score: float, effect: float):
+    def __init__(self, language_model: LanguageModel, cluster_label: str,
+                 masked_word: str, first_sentence: Sentence,
+                 second_sentence: Sentence):
+        self.language_model = language_model
         self.cluster_label = cluster_label
-        self.window_center = window_center
-        self.context_word = context_word
         self.masked_word = masked_word
-        self.first_position = first_position
-        self.first_score = first_score
-        self.second_position = second_position
-        self.second_score = second_score
-        self.effect = effect
+        self.first_sentence = first_sentence
+        self.second_sentence = second_sentence
 
     def __repr__(self) -> str:
-        first_position, second_position = self.first_position, self.second_position
-        if self.first_position >= self.window_center:
-            first_position += 1
-        if self.second_position >= self.window_center:
-            second_position += 1
-        positions = (first_position, second_position)
-        positions = range(min(self.window_center, *positions), max(self.window_center, *positions) + 1)
-
-        first_sentence, second_sentence = [], []
-        for position in positions:
-            if position == self.window_center:
-                masked_word = '[{}]'.format(self.masked_word)
-                first_sentence.append(masked_word)
-                second_sentence.append(masked_word)
-            else:
-                first_sentence.append(self.context_word if position == first_position else '?')
-                second_sentence.append(self.context_word if position == second_position else '?')
-
-        scores = [self.first_score, self.second_score]
-        sentences = [first_sentence, second_sentence]
-        message = 'Example sentences with the largest difference in probability ({:.2f}%) for cluster {}:'
-        message = [message.format(self.effect * 100.0, self.cluster_label)]
-        for score, sentence in sorted(zip(scores, sentences), reverse=False):
-            sentence = ' '.join(sentence)
-            probability = 100.0 * _sigmoid(score)
-            message.append('- {} (score {:.2f}, probability {:.2f}%)'.format(sentence, score, probability))
+        first_result = get_masked_word_probability(self.language_model, self.first_sentence,
+                                                   self.masked_word, self.cluster_label)
+        second_result = get_masked_word_probability(self.language_model, self.second_sentence,
+                                                    self.masked_word, self.cluster_label)
+        results = [first_result, second_result]
+        message = 'Example sentences for model {} using {} features:'
+        message = message.format(self.language_model, self.cluster_label)
+        message = [message, *map(repr, sorted(results, key=lambda x: x.score, reverse=True))]
         message = '\n'.join(message)
         return message
-
-
-def _sigmoid(value: np.array) -> np.array:
-    return np.exp(-np.logaddexp(0, -value))
 
 
 def get_position_importance(language_model: LanguageModel) -> PositionImportance:
@@ -287,7 +400,7 @@ class PositionImportance:
         return plot_position_importance(self.language_model)
 
     def __repr__(self) -> str:
-        return ' position importance of {}'.format(self.language_model)
+        return 'Position importance of {}'.format(self.language_model)
 
     def _repr_html_(self) -> str:
         figure = self.plot()

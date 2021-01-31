@@ -13,7 +13,13 @@ from .util import stringify_parameters
 from .corpus import get_corpus, Corpus
 
 if TYPE_CHECKING:
-    from .qualitative_evaluation import PositionImportance, ClusteredPositionalFeatures, ExampleSentences
+    from .qualitative_evaluation import (
+        PositionImportance,
+        ClusteredPositionalFeatures,
+        ExampleSentences,
+        Sentence,
+        SentenceProbability,
+    )
     from .quantitative_evaluation import WordAnalogyResult, LanguageModelingResult
 
 from gensim.models import FastText, KeyedVectors
@@ -88,7 +94,7 @@ class LanguageModel:
 
     @property
     def positional_vectors(self) -> np.ndarray:
-        if self.positions is None:
+        if not self.positions:
             raise ValueError('{} is not a positional model'.format(self))
         return self.model.wv.vectors_positions
 
@@ -112,9 +118,14 @@ class LanguageModel:
             self._positional_feature_clusters = cluster_positional_features(self)
         return self._positional_feature_clusters
 
-    def predict_masked_words(self, sentence: Sequence[Optional[str]]) -> Iterable[str]:
+    def predict_masked_words(self, sentence: 'Sentence') -> Iterable[str]:
         from .qualitative_evaluation import predict_masked_words
         return predict_masked_words(self, sentence)
+
+    def get_masked_word_probability(self, sentence: 'Sentence', masked_word: str,
+                                    cluster_label: Optional[str] = None) -> 'SentenceProbability':
+        from .qualitative_evaluation import get_masked_word_probability
+        return get_masked_word_probability(self, sentence, masked_word, cluster_label)
 
     @property
     def classified_context_words(self) -> Dict[str, str]:

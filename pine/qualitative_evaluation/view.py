@@ -6,6 +6,7 @@ from matplotlib.figure import Figure
 import matplotlib.pyplot as plt
 import numpy as np
 
+from .qualitative_evaluation import _index_to_position
 from ..configuration import PLOT_PARAMETERS, FEATURE_CLUSTER_COLORS
 from ..language_model import LanguageModel
 from ..util import interpolate
@@ -13,8 +14,11 @@ from ..util import interpolate
 
 def get_position_numbers(language_model: LanguageModel) -> np.ndarray:
     position_numbers = np.arange(len(language_model.positional_vectors))
-    position_numbers -= len(language_model.positional_vectors) // 2
-    position_numbers[position_numbers >= 0] += 1
+    position_numbers = [
+        _index_to_position(language_model, index)
+        for index
+        in position_numbers
+    ]
     return position_numbers
 
 
