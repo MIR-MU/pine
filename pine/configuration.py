@@ -202,7 +202,8 @@ PLOT_PARAMETERS = {
         'num_points': 500,
     },
     'batch_smoothing': 1.0,
-    'axis_gamma': 0.8,
+    'axis_gamma': 0.5,
+    'line_alpha': 0.4,
     'line_gamma': 0.7,
     'language_modeling': {
         'kind': 'perplexity',

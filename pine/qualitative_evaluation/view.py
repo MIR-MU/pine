@@ -75,7 +75,7 @@ def plot_clustered_positional_features(language_model: LanguageModel) -> Figure:
         cluster_size = len(indexes)
         linewidth = plt.rcParams['lines.linewidth'] / cluster_size**PLOT_PARAMETERS['line_gamma']
         for Y in absolute_positional_features[indexes]:
-            ax.plot(*interpolate(X, Y), color=color, linewidth=linewidth)
+            ax.plot(*interpolate(X, Y), color=color, linewidth=linewidth, alpha=PLOT_PARAMETERS['line_alpha'])
         Y = np.mean(absolute_positional_features[indexes], axis=0)
         label = '{} features ({})'.format(label, cluster_size)
         ax.scatter(X, Y, color=color, zorder=2)
