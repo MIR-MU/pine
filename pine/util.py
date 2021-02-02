@@ -6,7 +6,7 @@ from numbers import Integral
 from pathlib import Path
 from logging import getLogger
 from functools import partial
-from typing import Dict, Any, Tuple, Optional
+from typing import Dict, Any, Tuple, Optional, List
 
 import numpy as np
 import smart_open
@@ -14,8 +14,9 @@ from tqdm import tqdm
 import tarfile
 from zipfile import ZipFile
 from scipy.interpolate import interp1d
+import gensim.utils
 
-from .configuration import PLOT_PARAMETERS
+from .configuration import PLOT_PARAMETERS, SIMPLE_PREPROCESS_PARAMETERS
 
 
 LOGGER = getLogger(__name__)
@@ -82,3 +83,7 @@ def interpolate(X: np.ndarray, Y: np.ndarray, kind: Optional[str] = None) -> Tup
     X = np.linspace(min(X), max(X), num=parameters['num_points'], endpoint=True)
     Y = interpolation_function(X)
     return (X, Y)
+
+
+def simple_preprocess(document: str) -> List[str]:
+    return gensim.utils.simple_preprocess(document, **SIMPLE_PREPROCESS_PARAMETERS)

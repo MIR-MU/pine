@@ -67,6 +67,12 @@ FASTTEXT_PARAMETERS = {
     ]),
 }
 
+SIMPLE_PREPROCESS_PARAMETERS = {
+    'deacc': False,
+    'min_len': 0,
+    'max_len': 15,
+}
+
 
 def MODEL_BASENAMES(subwords, positions):
     parts = []

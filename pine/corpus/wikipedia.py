@@ -7,7 +7,7 @@ from multiprocessing import Pool
 from pathlib import Path
 from typing import Iterable, Dict, List
 
-from gensim.utils import simple_preprocess
+from ..util import simple_preprocess
 import gensim.downloader
 from tqdm import tqdm
 
