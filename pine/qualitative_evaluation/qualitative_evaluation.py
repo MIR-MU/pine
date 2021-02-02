@@ -10,6 +10,7 @@ from typing import Sequence, Optional, Iterable, List, Dict, Tuple, TYPE_CHECKIN
 
 import numpy as np
 from sklearn.cluster import AgglomerativeClustering
+from sklearn.preprocessing import minmax_scale
 from tqdm import tqdm
 
 if TYPE_CHECKING:
@@ -382,8 +383,7 @@ class ExampleSentences:
 
 def get_position_importance(language_model: LanguageModel) -> PositionImportance:
     importance = np.linalg.norm(language_model.positional_vectors, axis=1)
-    max_importance = importance.max()
-    importance = importance / max_importance if max_importance > 0 else importance
+    importance = minmax_scale(importance)
     return PositionImportance(language_model, importance)
 
 
