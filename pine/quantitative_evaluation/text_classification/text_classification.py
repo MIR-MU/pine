@@ -70,7 +70,7 @@ class Result:
     def __init__(self, result: RawResult):
         self.result = result
 
-    def __str__(self) -> str:
+    def __repr__(self) -> str:
         error_rate = np.mean(self.result) * 100.0
         if len(self.result) > 1:
             sem = np.std(self.result, ddof=1) * 100.0 / np.sqrt(len(self.result))
