@@ -167,6 +167,7 @@ class LanguageModel:
         cache_files_size = humanize.naturalsize(sum(size for _, size in self.cache_files))
         lines = [
             'Language model: {}'.format(self.basename),
+            'Word analogy accuracy: {}'.format(self.word_analogy),
             'Disk size: {} (+ {} in cache)'.format(model_files_size, cache_files_size),
             'Training duration: {}'.format(training_duration),
         ]
