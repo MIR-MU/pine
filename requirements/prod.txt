@@ -3,5 +3,5 @@ tqdm~=4.56.0
 humanize~=3.2.0
 scikit-learn~=0.24.1
 matplotlib~=3.3.3
-pyemd~=1.19.5
+pyemd~=0.5.1
 nltk~=3.5
