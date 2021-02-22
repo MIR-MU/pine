@@ -1,0 +1,44 @@
+image: python:3.7
+
+cache:
+  paths:
+  - ~/.cache/pip/
+
+stages:
+  - build
+
+Style check:
+  stage: build
+  tags:
+    - shared-fi
+  before_script:
+    - python -V
+    - pip install -U pip
+    - pip install .
+    - pip install flake8
+  script:
+    - flake8
+
+Type check:
+  stage: build
+  when: manual
+  tags:
+    - shared-fi
+  before_script:
+    - python -V
+    - pip install -U pip
+    - pip install .
+    - pip install mypy
+  script:
+    - mypy .
+
+Unit tests:
+  stage: build
+  tags:
+    - shared-fi
+  before_script:
+    - python -V
+    - pip install -U pip
+    - pip install .
+  script:
+    - python setup.py test
