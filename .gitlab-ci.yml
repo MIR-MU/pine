@@ -40,5 +40,6 @@ Unit tests:
     - python -V
     - pip install -U pip
     - pip install .
+    - pip install pytest
   script:
-    - python setup.py test
+    - python -m pytest
