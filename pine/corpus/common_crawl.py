@@ -5,8 +5,7 @@ from __future__ import annotations
 from pathlib import Path
 from typing import Iterable, List
 
-from ..util import simple_preprocess
-import smart_open
+from ..util import simple_preprocess, smart_open
 from tqdm import tqdm
 
 

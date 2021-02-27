@@ -2,6 +2,7 @@
 
 import re
 import math
+from lzma import LZMAFile, FORMAT_XZ
 from numbers import Integral
 from pathlib import Path
 from logging import getLogger
@@ -87,3 +88,10 @@ def interpolate(X: np.ndarray, Y: np.ndarray, kind: Optional[str] = None) -> Tup
 
 def simple_preprocess(document: str) -> List[str]:
     return gensim.utils.simple_preprocess(document, **SIMPLE_PREPROCESS_PARAMETERS)
+
+
+def _handle_xz(file_obj, mode):
+    return LZMAFile(filename=file_obj, mode=mode, format=FORMAT_XZ)
+
+
+smart_open.register_compressor('.xz', _handle_xz)
