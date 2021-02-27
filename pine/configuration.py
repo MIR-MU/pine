@@ -18,7 +18,7 @@ FASTTEXT_PARAMETERS = {
         'min_alpha': 0,
         'sample': 10**-5,
         'min_count': 5,
-        'workers': 4,
+        'workers': 8,
         'epochs': 1,
         'vector_size': 300,
     },
