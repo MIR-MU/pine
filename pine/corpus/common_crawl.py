@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from pathlib import Path
 from typing import Iterable, List
+from multiprocessing import Pool
 
 from ..util import simple_preprocess, smart_open
 from tqdm import tqdm
@@ -34,11 +35,12 @@ class EnglishCommonCrawlSentences:
         self.desc = desc
 
     def __iter__(self) -> Iterable[List[str]]:
-        shards = [SHARD_URL.format(shard_number) for shard_number in range(100)]
-        shards = tqdm(shards, desc=self.desc)
-        for shard in shards:
-            with smart_open.open(shard, 'rt') as f:
-                sentences = map(simple_preprocess, f)
-                sentences = filter(len, sentences)
-                for sentence in sentences:
-                    yield sentence
+        with Pool(None) as pool:
+            shards = [SHARD_URL.format(shard_number) for shard_number in range(100)]
+            shards = tqdm(shards, desc=self.desc)
+            for shard in shards:
+                with smart_open.open(shard, 'rt') as f:
+                    sentences = pool.imap(simple_preprocess, f)
+                    sentences = filter(len, sentences)
+                    for sentence in sentences:
+                        yield sentence
