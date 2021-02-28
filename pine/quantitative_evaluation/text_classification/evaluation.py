@@ -127,8 +127,8 @@ class Evaluator:
 
     def _get_best_knn(self, knns: Tuple[int] = (1, 3, 5, 7, 9, 11, 13, 15, 17, 19)) -> int:
         self._preprocess_dataset('validation')
-        best_knn, best_error_rate = None, float('inf')
-        worst_knn, worst_error_rate = None, float('-inf')
+        best_knn, best_error_rate = 1, float('inf')
+        worst_knn, worst_error_rate = 1, float('-inf')
         error_rates = zip(knns, map(self._evaluate, knns))
         error_rates = tqdm(error_rates, desc='Optimizing k for kNN', total=len(knns))
         for knn, error_rate in error_rates:
@@ -181,22 +181,23 @@ class ParallelCachingWmdSimilarity(SimilarityABC):
         with shelve.open(str(self.cache_path), 'c', PICKLE_PROTOCOL, writeback=False) as shelf:
             with ProcessPoolExecutor(None) as executor:
 
-                def make_symmetric(query: List[str], document: List[str]) -> Tuple[List[str]]:
+                def make_symmetric(query: List[str], document: List[str]) -> Tuple[Tuple[str], Tuple[str]]:
+                    query, document = tuple(query), tuple(document)
                     if query < document:  # Enforce symmetric caching
                         query, document = document, query
                     return (query, document)
 
-                def make_key(query: List[str], document: List[str]) -> str:
+                def make_key(query: Tuple[str], document: Tuple[str]) -> str:
                     return repr((query, document))
 
                 @lru_cache(maxsize=None)
-                def _load_from_shelf(query: List[str], document: List[str]) -> float:
+                def _load_from_shelf(query: Tuple[str], document: Tuple[str]) -> Future[float]:
                     key = make_key(query, document)
                     if key in shelf:
                         return shelf[key]
                     return executor.submit(wmdistance, query, document)
 
-                def load_from_shelf(query: List[str], document: List[str]) -> float:
+                def load_from_shelf(query: List[str], document: List[str]) -> Future[float]:
                     query, document = make_symmetric(query, document)
                     return _load_from_shelf(query, document)
 

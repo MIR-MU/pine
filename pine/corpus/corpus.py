@@ -37,7 +37,7 @@ def get_corpus(name: str, corpus_dir: Path, language: str = 'en') -> Corpus:
 Corpus = Iterable[Iterable[str]]
 
 
-class LineSentence:
+class LineSentence(Iterable):
     def __init__(self, name: str, path: Path, size: int):
         self.name = name
         self.path = path
@@ -59,5 +59,5 @@ class LineSentence:
     def __hash__(self) -> int:
         return hash(self.name)
 
-    def __eq__(self, other: Corpus) -> bool:
+    def __eq__(self, other: LineSentence) -> bool:
         return self.name == other.name

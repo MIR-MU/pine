@@ -1,15 +1,8 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-try:  # for pip >= 10
-    from pip._internal.req import parse_requirements
-except ImportError:  # for pip <= 9.0.3
-    from pip.req import parse_requirements
-
-try:
-    from setuptools import setup
-except ImportError:
-    from distutils.core import setup
+from pip._internal.req import parse_requirements
+from setuptools import setup, find_packages
 
 
 with open('README.rst') as readme_file:
@@ -20,12 +13,12 @@ with open('HISTORY.rst') as history_file:
 
 parsed_requirements = parse_requirements(
     'requirements/prod.txt',
-    session='workaround'
+    session='workaround',
 )
 
 parsed_test_requirements = parse_requirements(
     'requirements/test.txt',
-    session='workaround'
+    session='workaround',
 )
 
 
@@ -40,15 +33,12 @@ setup(
     long_description=readme + '\n\n' + history,
     author="Vítek Novotný",
     author_email='witiko@mail.muni.cz',
-    url='https://github.com/witiko/pine',
-    packages=[
-        'pine',
-    ],
-    package_dir={'pine':
-                 'pine'},
+    url='https://github.com/MIR-MU/pine',
+    packages=find_packages(exclude=['tests', 'tests.*']),
     include_package_data=True,
+    setup_requires=['setuptools', 'pip'],
     install_requires=requirements,
-    license="ISCL",
+    license='LGPLv2+',
     zip_safe=False,
     keywords='pine',
     classifiers=[
@@ -68,5 +58,5 @@ setup(
         'Programming Language :: Python :: 3.7',
     ],
     test_suite='tests',
-    tests_require=test_requirements
+    tests_require=test_requirements,
 )

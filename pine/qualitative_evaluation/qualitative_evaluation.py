@@ -26,7 +26,7 @@ from ..configuration import (
     JSON_DUMP_PARAMETERS,
 )
 from ..language_model import LanguageModel
-
+from .util import index_to_position, position_to_index
 
 LOGGER = getLogger(__name__)
 
@@ -65,7 +65,7 @@ class SentenceProbability:
         self.score = score
 
     def __repr__(self) -> str:
-        probability = 100.0 * _sigmoid(self.score)
+        probability, = 100.0 * _sigmoid(np.array(self.score))
         sentence = ' '.join(
             word if word != '[MASK]' else '[MASKED: {}]'.format(self.masked_word)
             for word
@@ -74,7 +74,7 @@ class SentenceProbability:
         return '{} (score {:.2f}, probability {:.2f}%)'.format(sentence, self.score, probability)
 
 
-def _sigmoid(value: np.array) -> np.array:
+def _sigmoid(value: np.ndarray) -> np.ndarray:
     return np.exp(-np.logaddexp(0, -value))
 
 
@@ -120,7 +120,7 @@ def _context_to_vector(language_model: LanguageModel, context: Context,
         input_vectors.append(input_vector)
         positional_vector = np.ones(len(input_vector), dtype=input_vector.dtype)
         if language_model.positions:
-            index = _position_to_index(language_model, position)
+            index = position_to_index(language_model, position)
             positional_dimensions = language_model.positional_vectors.shape[1]
             positional_vector[:positional_dimensions] = language_model.positional_vectors[index]
         positional_vectors.append(positional_vector)
@@ -163,7 +163,7 @@ def _position_index_to_vector(language_model: LanguageModel, index: int,
 
 def _position_to_vector(language_model: LanguageModel, position: int,
                         cluster_label: Optional[str] = None) -> np.ndarray:
-    index = _position_to_index(language_model, position)
+    index = position_to_index(language_model, position)
     positional_vector = _position_index_to_vector(language_model, index, cluster_label)
     return positional_vector
 
@@ -233,37 +233,6 @@ def classify_words(language_model: LanguageModel, kind: str) -> Dict[str, str]:
     return predicted_clusters
 
 
-def _position_to_index(language_model: LanguageModel, position: int) -> int:
-    if position == 0:
-        message = 'Position {} is not a valid position of a context word'
-        message = message.format(position)
-        raise ValueError(message)
-    min_position = _index_to_position(language_model, 0)
-    max_position = _index_to_position(language_model, len(language_model.positional_vectors) - 1)
-    if position < min_position or position > max_position:
-        message = 'Position {} is outside the interval [{}; {}]'
-        message = message.format(position, min_position, max_position)
-        raise ValueError(message)
-    window_center = len(language_model.positional_vectors) // 2
-    index = position + window_center
-    if position > 0:
-        index -= 1
-    return index
-
-
-def _index_to_position(language_model: LanguageModel, index: int) -> int:
-    min_index, max_index = 0, len(language_model.positional_vectors) - 1
-    if index < min_index or index > max_index:
-        message = 'Position index {} is outside the interval [{}; {}]'
-        message = message.format(index, min_index, max_index)
-        raise ValueError(message)
-    window_center = len(language_model.positional_vectors) // 2
-    position = index - window_center
-    if position >= 0:
-        position += 1
-    return position
-
-
 def produce_example_sentences(language_model: LanguageModel, cluster_label: str) -> ExampleSentences:
     result_path = language_model.model_dir / 'example_sentences'
     result_path.mkdir(exist_ok=True)
@@ -303,8 +272,9 @@ def produce_example_sentences(language_model: LanguageModel, cluster_label: str)
         output_vectors = np.ma.array(output_vectors, mask=mask)
 
         min_position, max_position = EXAMPLE_SENTENCES['restrict_positions']
-        min_position = _position_to_index(language_model, min_position)
-        max_position = _position_to_index(language_model, max_position)
+        min_position, max_position = int(min_position), int(max_position)
+        min_position = position_to_index(language_model, min_position)
+        max_position = position_to_index(language_model, max_position)
 
         positions = range(len(positional_vectors))
         positions = filter(lambda x: x >= min_position and x <= max_position, positions)
@@ -330,8 +300,8 @@ def produce_example_sentences(language_model: LanguageModel, cluster_label: str)
 
         best_context_word = language_model.words[best_context_word_index]
         best_masked_word = language_model.words[best_masked_word_index]
-        best_first_position = _index_to_position(language_model, best_first_position)
-        best_second_position = _index_to_position(language_model, best_second_position)
+        best_first_position = index_to_position(language_model, best_first_position)
+        best_second_position = index_to_position(language_model, best_second_position)
         best_first_sentence, best_second_sentence = [], []
         for position in range(min(0, best_first_position), max(0, best_second_position) + 1):
             if position == 0:

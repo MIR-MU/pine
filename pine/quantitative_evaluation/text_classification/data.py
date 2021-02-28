@@ -38,6 +38,8 @@ class Dataset:
         self.split_idx = split_idx
         self.path = path
         self.loaded = False
+        self.train_documents = []
+        self.test_documents = []
 
     def __str__(self) -> str:
         return 'dataset {}, split {}'.format(self.name, self.split_idx)
@@ -51,14 +53,12 @@ class Dataset:
     def load(self):
         if self.loaded:
             return
-        self.train_documents = []
-        self.test_documents = []
         LOGGER.debug('Loading {}'.format(self))
         data = loadmat(str(self.path))
         self._train_docs_per_split(data)
         if len(self.train_documents) != TEXT_CLASSIFICATION_DATASET_SIZES[self.name]:
             message = 'Expected {} train documents but loaded {}'
-            message = message.format(self.train_document_sizes[self.name], len(self.train_documents))
+            message = message.format(TEXT_CLASSIFICATION_DATASET_SIZES[self.name], len(self.train_documents))
             raise ValueError(message)
         self.loaded = True
 

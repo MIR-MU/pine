@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from matplotlib.figure import Figure
 import matplotlib.pyplot as plt
+import numpy as np
 
 from ...util import interpolate
 from ...language_model import LanguageModel
@@ -75,6 +76,7 @@ def plot_language_modeling_results(*language_models: LanguageModel,
                 message = message.format(subset)
                 raise ValueError(message)
         interpolation_kind = 'previous' if kind == 'learning_rate' else None
+        X, Y = np.array(X), np.array(Y)
         X, Y = interpolate(X, Y, interpolation_kind)
         ax.plot(X, Y, label=language_model.friendly_name.capitalize())
     ax.legend()

@@ -92,9 +92,10 @@ def train_and_evaluate(dataset: Dataset, language_model: LanguageModel) -> RawRe
         return evaluation_result
 
     lr = LANGUAGE_MODELING_PARAMETERS['initial_learning_rate']
+    lr = int(lr)
     best_validation_loss = None
     epoch_results = []
-    epochs = range(1, LANGUAGE_MODELING_PARAMETERS['epochs'] + 1)
+    epochs = range(1, float(LANGUAGE_MODELING_PARAMETERS['epochs']) + 1)
     epochs = tqdm(epochs, desc='Epoch')
     for epoch in epochs:
         training_result = train()
@@ -108,7 +109,7 @@ def train_and_evaluate(dataset: Dataset, language_model: LanguageModel) -> RawRe
                 torch.save(model, wf)
             best_validation_loss = validation_loss
         else:
-            lr /= LANGUAGE_MODELING_PARAMETERS['annealing']
+            lr /= float(LANGUAGE_MODELING_PARAMETERS['annealing'])
 
     with cache_path.open('rb') as rf:
         model = torch.load(rf)
@@ -121,7 +122,7 @@ def train_and_evaluate(dataset: Dataset, language_model: LanguageModel) -> RawRe
 
 def repackage_hidden(h: NestedTensor) -> NestedTensor:
     if isinstance(h, torch.Tensor):
-        return h.detach()
+        return h.detach()  # pytype: disable=attribute-error
     else:
         return tuple(repackage_hidden(v) for v in h)
 

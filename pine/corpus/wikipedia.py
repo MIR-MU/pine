@@ -32,7 +32,7 @@ def get_corpus_path(language: str, name: str, corpus_dir: Path) -> Path:
     return corpus_path
 
 
-def _read_sentences_helper(article: Dict[str, str]) -> List[str]:
+def _read_sentences_helper(article: Dict[str, str]) -> List[List[str]]:
     all_sentences = []
     for section_title, section_text in zip(article['section_titles'], article['section_texts']):
         sentences = section_text.splitlines()

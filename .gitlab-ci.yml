@@ -6,9 +6,20 @@ cache:
 
 stages:
   - build
+  - test
+
+Build package:
+  stage: build
+  tags:
+    - shared-fi
+  before_script:
+    - python -V
+    - pip install -U pip
+  script:
+    - pip install .
 
 Style check:
-  stage: build
+  stage: test
   tags:
     - shared-fi
   before_script:
@@ -20,20 +31,20 @@ Style check:
     - flake8
 
 Type check:
-  stage: build
-  when: manual
+  stage: test
   tags:
     - shared-fi
   before_script:
     - python -V
     - pip install -U pip
     - pip install .
-    - pip install mypy
+    - pip install pytype
   script:
-    - mypy .
+    - pytype .
 
 Unit tests:
-  stage: build
+  stage: test
+  when: manual
   tags:
     - shared-fi
   before_script:

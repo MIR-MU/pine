@@ -41,6 +41,6 @@ class EnglishCommonCrawlSentences:
             for shard in shards:
                 with smart_open.open(shard, 'rt') as f:
                     sentences = pool.imap(simple_preprocess, f)
-                    sentences = filter(len, sentences)
+                    sentences = filter(lambda x: x, sentences)
                     for sentence in sentences:
                         yield sentence

@@ -6,19 +6,18 @@ from matplotlib.figure import Figure
 import matplotlib.pyplot as plt
 import numpy as np
 
-from .qualitative_evaluation import _index_to_position
 from ..configuration import PLOT_PARAMETERS, FEATURE_CLUSTER_COLORS
-from ..language_model import LanguageModel
 from ..util import interpolate
+from ..language_model import LanguageModel
+from .util import index_to_position
 
 
 def get_position_numbers(language_model: LanguageModel) -> np.ndarray:
-    position_numbers = np.arange(len(language_model.positional_vectors))
-    position_numbers = [
-        _index_to_position(language_model, index)
+    position_numbers = np.array([
+        index_to_position(language_model, index)
         for index
-        in position_numbers
-    ]
+        in range(len(language_model.positional_vectors))
+    ])
     return position_numbers
 
 

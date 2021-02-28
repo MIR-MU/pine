@@ -231,19 +231,19 @@ class LanguageModel:
         return MODEL_FRIENDLY_NAMES(self.subwords, self.positions)
 
     @property
-    def model_dir(self) -> str:
+    def model_dir(self) -> Path:
         return self.workspace / 'model' / self.basename
 
     @property
-    def cache_dir(self) -> str:
+    def cache_dir(self) -> Path:
         return self.workspace / 'cache' / self.basename
 
     @property
-    def corpus_dir(self) -> str:
+    def corpus_dir(self) -> Path:
         return self.workspace / 'corpus'
 
     @property
-    def dataset_dir(self) -> str:
+    def dataset_dir(self) -> Path:
         return self.workspace / 'dataset'
 
     @property

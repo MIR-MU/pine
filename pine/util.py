@@ -43,7 +43,7 @@ def unzip_to(archive: Path, result_dir: Path, unlink_after: bool = False):
         with ZipFile(archive, 'r') as zf:
             zf.extractall(result_dir)
     elif '.tar' in suffixes:
-        mode = 'r' if len(suffixes) == 1 else 'r:{}'.format(suffixes[-1])
+        mode = 'r' if len(suffixes) == 1 else 'r:{}'.format(archive.suffixes[-1])
         with tarfile.open(archive, mode) as tf:
             tf.extractall(result_dir)
     else:

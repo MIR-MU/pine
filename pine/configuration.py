@@ -179,7 +179,7 @@ NUM_FEATURE_CLUSTERS = {
 }
 
 FEATURE_CLUSTER_COLORS = defaultdict(
-    lambda _: 4,
+    lambda: 4,
     {
         'antepositional': 0,
         'postpositional': 1,
@@ -241,7 +241,7 @@ EXAMPLE_SENTENCES = {
     'restrict_vocab': 10**3,
     'restrict_positions': (-3, 3),
     'whitelist': defaultdict(
-        lambda _: None,
+        lambda: None,
         {
             'en': set([
                 *(word.lower() for word in nltk.corpus.brown.words()),
@@ -249,7 +249,7 @@ EXAMPLE_SENTENCES = {
         },
     ),
     'blacklist': defaultdict(
-        lambda _: None,
+        lambda: None,
         {
             'en': lambda word: word in ('a', 'an', 'the'),
         },

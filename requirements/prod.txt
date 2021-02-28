@@ -5,3 +5,4 @@ scikit-learn~=0.24.1
 matplotlib~=3.3.3
 pyemd~=0.5.1
 nltk~=3.5
+torch~=1.5.1
