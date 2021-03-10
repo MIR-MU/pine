@@ -151,6 +151,10 @@ WORD_ANALOGY_DATASETS = {
         'url': 'https://github.com/Witiko/linguistic-features-in-turkish-word-representations/releases/download/v1.0/tr.txt',
         'size': 1945224,
     },
+    'zh': {
+        'url': 'https://raw.githubusercontent.com/Leonard-Xu/CWE/master/data/analogy.txt',
+        'size': 30585,
+    },
 }
 
 TEXT_CLASSIFICATION_DATASETS = {
