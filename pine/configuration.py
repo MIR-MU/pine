@@ -129,6 +129,11 @@ WORD_ANALOGY_DATASETS = {
         'size': 250507,
         'extract_file': Path('analogies') / 'de_trans_Google_analogies.txt',
     },
+    'hi': {
+        'url': 'https://dl.fbaipublicfiles.com/fasttext/word-analogies/questions-words-hi.txt',
+        'size': 107676,
+        'transformation': lambda line: re.sub(r'^\s*:', ':', line)
+    },
 }
 
 TEXT_CLASSIFICATION_DATASETS = {
