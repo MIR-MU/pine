@@ -119,6 +119,10 @@ WORD_ANALOGY_DATASETS = {
         'size': 1073616,
         'transformation': lambda line: re.sub(r'^\s*:', ':', line)
     },
+    'cs': {
+        'url': 'https://raw.githubusercontent.com/Svobikl/cz_corpus/master/corpus/czech_emb_corpus_no_phrase.txt',
+        'size': 712906,
+    },
 }
 
 TEXT_CLASSIFICATION_DATASETS = {
