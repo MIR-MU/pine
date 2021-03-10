@@ -147,6 +147,10 @@ WORD_ANALOGY_DATASETS = {
         'url': 'https://github.com/Witiko/FinSemEvl/releases/download/v1.0/fi.txt',
         'size': 30439,
     },
+    'tr': {
+        'url': 'https://github.com/Witiko/linguistic-features-in-turkish-word-representations/releases/download/v1.0/tr.txt',
+        'size': 1945224,
+    },
 }
 
 TEXT_CLASSIFICATION_DATASETS = {
