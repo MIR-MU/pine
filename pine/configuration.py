@@ -139,6 +139,10 @@ WORD_ANALOGY_DATASETS = {
         'size': 825883,
         'transformation': lambda line: re.sub(r'^\s*:', ':', line)
     },
+    'pt': {
+        'url': 'https://raw.githubusercontent.com/nathanshartmann/portuguese_word_embeddings/master/analogies/testset/LX-4WAnalogies.txt',
+        'size': 598795,
+    },
 }
 
 TEXT_CLASSIFICATION_DATASETS = {
