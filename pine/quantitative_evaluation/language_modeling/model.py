@@ -27,11 +27,11 @@ class RNNModel(nn.Module):
     def __init__(self, ntoken: int):
         super(RNNModel, self).__init__()
 
-        ninp = LANGUAGE_MODELING_PARAMETERS['ninp']
-        nhid = LANGUAGE_MODELING_PARAMETERS['nhid']
-        nlayers = LANGUAGE_MODELING_PARAMETERS['nlayers']
-        dropout = LANGUAGE_MODELING_PARAMETERS['dropout']
-        tie_weights = LANGUAGE_MODELING_PARAMETERS['tie_weights']
+        ninp = int(LANGUAGE_MODELING_PARAMETERS['ninp'])
+        nhid = int(LANGUAGE_MODELING_PARAMETERS['nhid'])
+        nlayers = int(LANGUAGE_MODELING_PARAMETERS['nlayers'])
+        dropout = float(LANGUAGE_MODELING_PARAMETERS['dropout'])
+        tie_weights = bool(LANGUAGE_MODELING_PARAMETERS['tie_weights'])
 
         self.ntoken = ntoken
         self.drop = nn.Dropout(dropout)
@@ -71,8 +71,8 @@ class RNNModel(nn.Module):
 
 class PreinitializedRNNModel(RNNModel):
     def __init__(self, vectors: KeyedVectors, dataset: Dataset):
-        ninp = LANGUAGE_MODELING_PARAMETERS['ninp']
-        freeze = LANGUAGE_MODELING_PARAMETERS['freeze_embeddings']
+        ninp = int(LANGUAGE_MODELING_PARAMETERS['ninp'])
+        freeze = bool(LANGUAGE_MODELING_PARAMETERS['freeze_embeddings'])
 
         ndims = vectors.vectors.shape[1]
 

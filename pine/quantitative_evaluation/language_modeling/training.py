@@ -28,7 +28,7 @@ def train_and_evaluate(dataset: Dataset, language_model: LanguageModel) -> RawRe
     cache_path = language_model.cache_dir / 'language_modeling'
     cache_path = cache_path.with_suffix('.pt')
 
-    torch.manual_seed(LANGUAGE_MODELING_PARAMETERS['seed'])
+    torch.manual_seed(int(LANGUAGE_MODELING_PARAMETERS['seed']))
     device = torch.device(LANGUAGE_MODELING_PARAMETERS['device'])
     corpus = Corpus(dataset)
     model = PreinitializedRNNModel(language_model.vectors, dataset)
@@ -42,15 +42,15 @@ def train_and_evaluate(dataset: Dataset, language_model: LanguageModel) -> RawRe
         data = data.view(batch_size, -1).t().contiguous()
         return data.to(device)
 
-    train_data = batchify(corpus.train, LANGUAGE_MODELING_PARAMETERS['batch_size'])
-    validation_data = batchify(corpus.valid, LANGUAGE_MODELING_PARAMETERS['eval_batch_size'])
-    test_data = batchify(corpus.test, LANGUAGE_MODELING_PARAMETERS['eval_batch_size'])
+    train_data = batchify(corpus.train, int(LANGUAGE_MODELING_PARAMETERS['batch_size']))
+    validation_data = batchify(corpus.valid, int(LANGUAGE_MODELING_PARAMETERS['eval_batch_size']))
+    test_data = batchify(corpus.test, int(LANGUAGE_MODELING_PARAMETERS['eval_batch_size']))
     criterion = nn.NLLLoss()
 
     def train() -> TrainingResult:
         model.train()
-        hidden = model.init_hidden(LANGUAGE_MODELING_PARAMETERS['batch_size'])
-        sentence_length = LANGUAGE_MODELING_PARAMETERS['sentence_length']
+        hidden = model.init_hidden(int(LANGUAGE_MODELING_PARAMETERS['batch_size']))
+        sentence_length = int(LANGUAGE_MODELING_PARAMETERS['sentence_length'])
         training_result = []
         batches = range(0, train_data.size(0) - 1, sentence_length)
         batches = enumerate(batches)
@@ -62,7 +62,7 @@ def train_and_evaluate(dataset: Dataset, language_model: LanguageModel) -> RawRe
             loss = criterion(output, targets)
             loss.backward()
 
-            clip = LANGUAGE_MODELING_PARAMETERS['clip']
+            clip = float(LANGUAGE_MODELING_PARAMETERS['clip'])
             torch.nn.utils.clip_grad_norm_(model.parameters(), clip)
             for p in model.parameters():
                 if p.grad is None:
@@ -77,9 +77,9 @@ def train_and_evaluate(dataset: Dataset, language_model: LanguageModel) -> RawRe
     def evaluate(data_source: torch.Tensor) -> EvaluationResult:
         model.eval()
         total_loss = 0.0
-        hidden = model.init_hidden(LANGUAGE_MODELING_PARAMETERS['eval_batch_size'])
+        hidden = model.init_hidden(int(LANGUAGE_MODELING_PARAMETERS['eval_batch_size']))
         with torch.no_grad():
-            sentence_length = LANGUAGE_MODELING_PARAMETERS['sentence_length']
+            sentence_length = int(LANGUAGE_MODELING_PARAMETERS['sentence_length'])
             for i in range(0, data_source.size(0) - 1, sentence_length):
                 data, targets = get_batch(data_source, i)
                 output, hidden = model(data, hidden)
@@ -91,11 +91,10 @@ def train_and_evaluate(dataset: Dataset, language_model: LanguageModel) -> RawRe
         evaluation_result = (current_perplexity, current_loss)
         return evaluation_result
 
-    lr = LANGUAGE_MODELING_PARAMETERS['initial_learning_rate']
-    lr = int(lr)
+    lr = float(LANGUAGE_MODELING_PARAMETERS['initial_learning_rate'])
     best_validation_loss = None
     epoch_results = []
-    epochs = range(1, float(LANGUAGE_MODELING_PARAMETERS['epochs']) + 1)
+    epochs = range(1, int(LANGUAGE_MODELING_PARAMETERS['epochs']) + 1)
     epochs = tqdm(epochs, desc='Epoch')
     for epoch in epochs:
         training_result = train()
@@ -131,7 +130,7 @@ NestedTensor = Union[torch.Tensor, Iterable['NestedTensor']]
 
 
 def get_batch(source: torch.Tensor, i: int) -> torch.Tensor:
-    seq_len = min(LANGUAGE_MODELING_PARAMETERS['sentence_length'], len(source) - 1 - i)
+    seq_len = min(int(LANGUAGE_MODELING_PARAMETERS['sentence_length']), len(source) - 1 - i)
     data = source[i:i+seq_len]
     target = source[i+1:i+1+seq_len].view(-1)
     return data, target
