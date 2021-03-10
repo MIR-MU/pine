@@ -143,6 +143,10 @@ WORD_ANALOGY_DATASETS = {
         'url': 'https://raw.githubusercontent.com/nathanshartmann/portuguese_word_embeddings/master/analogies/testset/LX-4WAnalogies.txt',
         'size': 598795,
     },
+    'fi': {
+        'url': 'https://github.com/Witiko/FinSemEvl/releases/download/v1.0/fi.txt',
+        'size': 30439,
+    },
 }
 
 TEXT_CLASSIFICATION_DATASETS = {
