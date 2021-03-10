@@ -134,6 +134,11 @@ WORD_ANALOGY_DATASETS = {
         'size': 107676,
         'transformation': lambda line: re.sub(r'^\s*:', ':', line)
     },
+    'pl': {
+        'url': 'https://dl.fbaipublicfiles.com/fasttext/word-analogies/questions-words-pl.txt',
+        'size': 825883,
+        'transformation': lambda line: re.sub(r'^\s*:', ':', line)
+    },
 }
 
 TEXT_CLASSIFICATION_DATASETS = {
