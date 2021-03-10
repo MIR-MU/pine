@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from collections import defaultdict
+from pathlib import Path
 import re
 
 import nltk
@@ -122,6 +123,11 @@ WORD_ANALOGY_DATASETS = {
     'cs': {
         'url': 'https://raw.githubusercontent.com/Svobikl/cz_corpus/master/corpus/czech_emb_corpus_no_phrase.txt',
         'size': 712906,
+    },
+    'de': {
+        'url': 'https://www.ims.uni-stuttgart.de/documents/ressourcen/lexika/analogies_ims/analogies.zip',
+        'size': 250507,
+        'extract_file': Path('analogies') / 'de_trans_Google_analogies.txt',
     },
 }
 

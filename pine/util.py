@@ -8,7 +8,8 @@ from pathlib import Path
 from logging import getLogger
 from functools import partial
 from typing import Dict, Any, Tuple, Optional, List, Callable
-from tempfile import TemporaryFile
+from tempfile import TemporaryFile, TemporaryDirectory
+from shutil import copyfile
 
 import numpy as np
 import smart_open
@@ -26,6 +27,7 @@ LOGGER = getLogger(__name__)
 
 def download_to(url: str, size: int, path: Path,
                 transformation: Optional[Callable[[str], str]] = None,
+                extract_file: Optional[Path] = None,
                 buffer_size: int = 2**20):
     desc = 'Downloading {} to {}'.format(url, path)
     downloaded = 0
@@ -37,6 +39,11 @@ def download_to(url: str, size: int, path: Path,
                 pbar.update(len(data))
     if size != downloaded:
         raise ValueError('Downloaded {} bytes, expected {} bytes'.format(downloaded, size))
+    if extract_file is not None:
+        with TemporaryDirectory() as dirname:
+            dirname = Path(dirname)
+            unzip_to(path, dirname)
+            copyfile(dirname / extract_file, path)
     if transformation is not None:
         rwf = TemporaryFile('w+t')
         with path.open('rt') as rf:
