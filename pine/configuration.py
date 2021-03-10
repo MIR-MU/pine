@@ -107,19 +107,6 @@ WORD_ANALOGY_PARAMETERS = {
 }
 
 WORD_ANALOGY_DATASETS = {
-    'en': {
-        'url': 'https://github.com/tmikolov/word2vec/raw/master/questions-words.txt',
-        'size': 603955,
-    },
-    'es': {
-        'url': 'https://cs.famaf.unc.edu.ar/~ccardellino/SBWCE/questions-words_sp.txt',
-        'size': 490314,
-    },
-    'fr': {
-        'url': 'https://dl.fbaipublicfiles.com/fasttext/word-analogies/questions-words-fr.txt',
-        'size': 1073616,
-        'transformation': lambda line: re.sub(r'^\s*:', ':', line)
-    },
     'cs': {
         'url': 'https://raw.githubusercontent.com/Svobikl/cz_corpus/master/corpus/czech_emb_corpus_no_phrase.txt',
         'size': 712906,
@@ -128,6 +115,23 @@ WORD_ANALOGY_DATASETS = {
         'url': 'https://www.ims.uni-stuttgart.de/documents/ressourcen/lexika/analogies_ims/analogies.zip',
         'size': 250507,
         'extract_file': Path('analogies') / 'de_trans_Google_analogies.txt',
+    },
+    'en': {
+        'url': 'https://github.com/tmikolov/word2vec/raw/master/questions-words.txt',
+        'size': 603955,
+    },
+    'es': {
+        'url': 'https://cs.famaf.unc.edu.ar/~ccardellino/SBWCE/questions-words_sp.txt',
+        'size': 490314,
+    },
+    'fi': {
+        'url': 'https://github.com/Witiko/FinSemEvl/releases/download/v1.0/fi.txt',
+        'size': 30439,
+    },
+    'fr': {
+        'url': 'https://dl.fbaipublicfiles.com/fasttext/word-analogies/questions-words-fr.txt',
+        'size': 1073616,
+        'transformation': lambda line: re.sub(r'^\s*:', ':', line)
     },
     'hi': {
         'url': 'https://dl.fbaipublicfiles.com/fasttext/word-analogies/questions-words-hi.txt',
@@ -142,10 +146,6 @@ WORD_ANALOGY_DATASETS = {
     'pt': {
         'url': 'https://raw.githubusercontent.com/nathanshartmann/portuguese_word_embeddings/master/analogies/testset/LX-4WAnalogies.txt',
         'size': 598795,
-    },
-    'fi': {
-        'url': 'https://github.com/Witiko/FinSemEvl/releases/download/v1.0/fi.txt',
-        'size': 30439,
     },
     'tr': {
         'url': 'https://github.com/Witiko/linguistic-features-in-turkish-word-representations/releases/download/v1.0/tr.txt',
