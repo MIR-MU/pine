@@ -7,7 +7,8 @@ from numbers import Integral
 from pathlib import Path
 from logging import getLogger
 from functools import partial
-from typing import Dict, Any, Tuple, Optional, List
+from typing import Dict, Any, Tuple, Optional, List, Callable
+from tempfile import TemporaryFile
 
 import numpy as np
 import smart_open
@@ -23,7 +24,9 @@ from .configuration import PLOT_PARAMETERS, SIMPLE_PREPROCESS_PARAMETERS
 LOGGER = getLogger(__name__)
 
 
-def download_to(url: str, size: int, path: Path, buffer_size: int = 2**20):
+def download_to(url: str, size: int, path: Path,
+                transformation: Optional[Callable[[str], str]] = None,
+                buffer_size: int = 2**20):
     desc = 'Downloading {} to {}'.format(url, path)
     downloaded = 0
     with tqdm(total=size, unit='B', desc=desc) as pbar:
@@ -34,6 +37,19 @@ def download_to(url: str, size: int, path: Path, buffer_size: int = 2**20):
                 pbar.update(len(data))
     if size != downloaded:
         raise ValueError('Downloaded {} bytes, expected {} bytes'.format(downloaded, size))
+    if transformation is not None:
+        rwf = TemporaryFile('w+t')
+        with path.open('rt') as rf:
+            for line in rf:
+                line = line.rstrip('\r\n')
+                line = transformation(line)
+                print(line, file=rwf)
+        rwf.seek(0)
+        with path.open('wt') as wf:
+            for line in rwf:
+                line = line.rstrip('\r\n')
+                print(line, file=wf)
+        rwf.close()
 
 
 def unzip_to(archive: Path, result_dir: Path, unlink_after: bool = False):

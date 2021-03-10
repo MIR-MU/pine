@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from collections import defaultdict
+import re
 
 import nltk
 import nltk.corpus
@@ -108,6 +109,15 @@ WORD_ANALOGY_DATASETS = {
     'en': {
         'url': 'https://github.com/tmikolov/word2vec/raw/master/questions-words.txt',
         'size': 603955,
+    },
+    'es': {
+        'url': 'https://cs.famaf.unc.edu.ar/~ccardellino/SBWCE/questions-words_sp.txt',
+        'size': 490314,
+    },
+    'fr': {
+        'url': 'https://dl.fbaipublicfiles.com/fasttext/word-analogies/questions-words-fr.txt',
+        'size': 1073616,
+        'transformation': lambda line: re.sub(r'^\s*:', ':', line)
     },
 }
 
