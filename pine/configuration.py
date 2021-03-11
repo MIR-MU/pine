@@ -135,7 +135,7 @@ WORD_ANALOGY_DATASETS = {
     },
     'hi': {
         'url': 'https://dl.fbaipublicfiles.com/fasttext/word-analogies/questions-words-hi.txt',
-        'size': 107676,
+        'size': 2213485,
         'transformation': lambda line: re.sub(r'^\s*:', ':', line)
     },
     'pl': {
@@ -149,7 +149,7 @@ WORD_ANALOGY_DATASETS = {
     },
     'tr': {
         'url': 'https://github.com/Witiko/linguistic-features-in-turkish-word-representations/releases/download/v1.0/tr.txt',
-        'size': 1945224,
+        'size': 1944843,
     },
     'zh': {
         'url': 'https://raw.githubusercontent.com/Leonard-Xu/CWE/master/data/analogy.txt',
