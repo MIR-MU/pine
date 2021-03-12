@@ -25,7 +25,7 @@ from .configuration import PLOT_PARAMETERS, SIMPLE_PREPROCESS_PARAMETERS
 LOGGER = getLogger(__name__)
 
 
-def download_to(url: str, size: int, path: Path,
+def download_to(url: str, path: Path, size: Optional[int] = None,
                 transformation: Optional[Callable[[str], str]] = None,
                 extract_file: Optional[Path] = None,
                 buffer_size: int = 2**20):
@@ -37,7 +37,7 @@ def download_to(url: str, size: int, path: Path,
                 wf.write(data)
                 downloaded += len(data)
                 pbar.update(len(data))
-    if size != downloaded:
+    if size is not None and size != downloaded:
         raise ValueError('Downloaded {} bytes, expected {} bytes'.format(downloaded, size))
     if extract_file is not None:
         with TemporaryDirectory() as dirname:
