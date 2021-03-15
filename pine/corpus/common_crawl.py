@@ -39,7 +39,8 @@ class EnglishCommonCrawlSentences:
         for shard_number, shard in enumerate(shards):
             shard_path = '{:02d}.txt'.format(shard_number)
             shard_path = self.corpus_dir / shard_path
-            download_to(path=shard_path, **shard)
+            if not shard_path.exists():
+                download_to(path=shard_path, **shard)
             shard_paths.append(shard_path)
 
         print([
