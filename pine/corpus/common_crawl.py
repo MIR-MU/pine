@@ -43,15 +43,6 @@ class EnglishCommonCrawlSentences:
                 download_to(path=shard_path, **shard)
             shard_paths.append(shard_path)
 
-        print([
-            {
-                'url': shard['url'],
-                'size': shard_path.stat().st_size,
-            }
-            for shard, shard_path
-            in zip(shards, shard_paths)
-        ])
-
         with Pool(None) as pool:
             shard_paths = tqdm(shard_paths, desc=self.desc)
             for shard_path in shard_paths:
