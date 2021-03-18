@@ -7,7 +7,7 @@ from typing import Iterable, List
 from multiprocessing import Pool
 
 from ..util import simple_preprocess, download_to
-from ..configuration import CORPORA
+from ..configuration import CORPORA, SIMPLE_PREPROCESS_CHUNKSIZE
 from tqdm import tqdm
 
 
@@ -56,7 +56,7 @@ class EnglishCommonCrawlSentences:
             shard_paths = tqdm(shard_paths, desc=self.desc)
             for shard_path in shard_paths:
                 with shard_path.open('rt') as f:
-                    sentences = pool.imap(simple_preprocess, f)
+                    sentences = pool.imap(simple_preprocess, f, SIMPLE_PREPROCESS_CHUNKSIZE)
                     sentences = filter(lambda x: x, sentences)
                     for sentence in sentences:
                         yield sentence
