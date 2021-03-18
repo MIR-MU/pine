@@ -111,303 +111,403 @@ CORPORA = {
         'en': [
             {
                 'url': 'http://web-language-models.s3-website-us-east-1.amazonaws.com/ngrams/en/deduped/en.00.deduped.xz',
+                'size': 54681964538,
             },
             {
                 'url': 'http://web-language-models.s3-website-us-east-1.amazonaws.com/ngrams/en/deduped/en.01.deduped.xz',
+                'size': 54644557217,
             },
             {
                 'url': 'http://web-language-models.s3-website-us-east-1.amazonaws.com/ngrams/en/deduped/en.02.deduped.xz',
+                'size': 54588468745,
             },
             {
                 'url': 'http://web-language-models.s3-website-us-east-1.amazonaws.com/ngrams/en/deduped/en.03.deduped.xz',
+                'size': 54656022604,
             },
             {
                 'url': 'http://web-language-models.s3-website-us-east-1.amazonaws.com/ngrams/en/deduped/en.04.deduped.xz',
+                'size': 54688752674,
             },
             {
                 'url': 'http://web-language-models.s3-website-us-east-1.amazonaws.com/ngrams/en/deduped/en.05.deduped.xz',
+                'size': 54618180009,
             },
             {
                 'url': 'http://web-language-models.s3-website-us-east-1.amazonaws.com/ngrams/en/deduped/en.06.deduped.xz',
+                'size': 54583196498,
             },
             {
                 'url': 'http://web-language-models.s3-website-us-east-1.amazonaws.com/ngrams/en/deduped/en.07.deduped.xz',
+                'size': 54630588731,
             },
             {
                 'url': 'http://web-language-models.s3-website-us-east-1.amazonaws.com/ngrams/en/deduped/en.08.deduped.xz',
+                'size': 54722104137,
             },
             {
                 'url': 'http://web-language-models.s3-website-us-east-1.amazonaws.com/ngrams/en/deduped/en.09.deduped.xz',
+                'size': 54625329333,
             },
             {
                 'url': 'http://web-language-models.s3-website-us-east-1.amazonaws.com/ngrams/en/deduped/en.10.deduped.xz',
+                'size': 54586240210,
             },
             {
                 'url': 'http://web-language-models.s3-website-us-east-1.amazonaws.com/ngrams/en/deduped/en.11.deduped.xz',
+                'size': 54618792966,
             },
             {
                 'url': 'http://web-language-models.s3-website-us-east-1.amazonaws.com/ngrams/en/deduped/en.12.deduped.xz',
+                'size': 54695296092,
             },
             {
                 'url': 'http://web-language-models.s3-website-us-east-1.amazonaws.com/ngrams/en/deduped/en.13.deduped.xz',
+                'size': 54596609581,
             },
             {
                 'url': 'http://web-language-models.s3-website-us-east-1.amazonaws.com/ngrams/en/deduped/en.14.deduped.xz',
+                'size': 54552727082,
             },
             {
                 'url': 'http://web-language-models.s3-website-us-east-1.amazonaws.com/ngrams/en/deduped/en.15.deduped.xz',
+                'size': 54618991504,
             },
             {
                 'url': 'http://web-language-models.s3-website-us-east-1.amazonaws.com/ngrams/en/deduped/en.16.deduped.xz',
+                'size': 54679938310,
             },
             {
                 'url': 'http://web-language-models.s3-website-us-east-1.amazonaws.com/ngrams/en/deduped/en.17.deduped.xz',
+                'size': 54624063752,
             },
             {
                 'url': 'http://web-language-models.s3-website-us-east-1.amazonaws.com/ngrams/en/deduped/en.18.deduped.xz',
+                'size': 54587488121,
             },
             {
                 'url': 'http://web-language-models.s3-website-us-east-1.amazonaws.com/ngrams/en/deduped/en.19.deduped.xz',
+                'size': 54645590115,
             },
             {
                 'url': 'http://web-language-models.s3-website-us-east-1.amazonaws.com/ngrams/en/deduped/en.20.deduped.xz',
+                'size': 54697645266,
             },
             {
                 'url': 'http://web-language-models.s3-website-us-east-1.amazonaws.com/ngrams/en/deduped/en.21.deduped.xz',
+                'size': 54605873561,
             },
             {
                 'url': 'http://web-language-models.s3-website-us-east-1.amazonaws.com/ngrams/en/deduped/en.22.deduped.xz',
+                'size': 54582002735,
             },
             {
                 'url': 'http://web-language-models.s3-website-us-east-1.amazonaws.com/ngrams/en/deduped/en.23.deduped.xz',
+                'size': 54639037521,
             },
             {
                 'url': 'http://web-language-models.s3-website-us-east-1.amazonaws.com/ngrams/en/deduped/en.24.deduped.xz',
+                'size': 54674331896,
             },
             {
                 'url': 'http://web-language-models.s3-website-us-east-1.amazonaws.com/ngrams/en/deduped/en.25.deduped.xz',
+                'size': 54626449354,
             },
             {
                 'url': 'http://web-language-models.s3-website-us-east-1.amazonaws.com/ngrams/en/deduped/en.26.deduped.xz',
+                'size': 54592818458,
             },
             {
                 'url': 'http://web-language-models.s3-website-us-east-1.amazonaws.com/ngrams/en/deduped/en.27.deduped.xz',
+                'size': 54648713630,
             },
             {
                 'url': 'http://web-language-models.s3-website-us-east-1.amazonaws.com/ngrams/en/deduped/en.28.deduped.xz',
+                'size': 54682086222,
             },
             {
                 'url': 'http://web-language-models.s3-website-us-east-1.amazonaws.com/ngrams/en/deduped/en.29.deduped.xz',
+                'size': 54627905313,
             },
             {
                 'url': 'http://web-language-models.s3-website-us-east-1.amazonaws.com/ngrams/en/deduped/en.30.deduped.xz',
+                'size': 54596634097,
             },
             {
                 'url': 'http://web-language-models.s3-website-us-east-1.amazonaws.com/ngrams/en/deduped/en.31.deduped.xz',
+                'size': 54643899005,
             },
             {
                 'url': 'http://web-language-models.s3-website-us-east-1.amazonaws.com/ngrams/en/deduped/en.32.deduped.xz',
+                'size': 54690062047,
             },
             {
                 'url': 'http://web-language-models.s3-website-us-east-1.amazonaws.com/ngrams/en/deduped/en.33.deduped.xz',
+                'size': 54634712851,
             },
             {
                 'url': 'http://web-language-models.s3-website-us-east-1.amazonaws.com/ngrams/en/deduped/en.34.deduped.xz',
+                'size': 54582433564,
             },
             {
                 'url': 'http://web-language-models.s3-website-us-east-1.amazonaws.com/ngrams/en/deduped/en.35.deduped.xz',
+                'size': 54636960066,
             },
             {
                 'url': 'http://web-language-models.s3-website-us-east-1.amazonaws.com/ngrams/en/deduped/en.36.deduped.xz',
+                'size': 54693211416,
             },
             {
                 'url': 'http://web-language-models.s3-website-us-east-1.amazonaws.com/ngrams/en/deduped/en.37.deduped.xz',
+                'size': 54693211416,
             },
             {
                 'url': 'http://web-language-models.s3-website-us-east-1.amazonaws.com/ngrams/en/deduped/en.38.deduped.xz',
+                'size': 54568137017,
             },
             {
                 'url': 'http://web-language-models.s3-website-us-east-1.amazonaws.com/ngrams/en/deduped/en.39.deduped.xz',
+                'size': 54630209574,
             },
             {
                 'url': 'http://web-language-models.s3-website-us-east-1.amazonaws.com/ngrams/en/deduped/en.40.deduped.xz',
+                'size': 54674959986,
             },
             {
                 'url': 'http://web-language-models.s3-website-us-east-1.amazonaws.com/ngrams/en/deduped/en.41.deduped.xz',
+                'size': 54638303339,
             },
             {
                 'url': 'http://web-language-models.s3-website-us-east-1.amazonaws.com/ngrams/en/deduped/en.42.deduped.xz',
+                'size': 54586504049,
             },
             {
                 'url': 'http://web-language-models.s3-website-us-east-1.amazonaws.com/ngrams/en/deduped/en.43.deduped.xz',
+                'size': 54633265452,
             },
             {
                 'url': 'http://web-language-models.s3-website-us-east-1.amazonaws.com/ngrams/en/deduped/en.44.deduped.xz',
+                'size': 54693600380,
             },
             {
                 'url': 'http://web-language-models.s3-website-us-east-1.amazonaws.com/ngrams/en/deduped/en.45.deduped.xz',
+                'size': 54640945000,
             },
             {
                 'url': 'http://web-language-models.s3-website-us-east-1.amazonaws.com/ngrams/en/deduped/en.46.deduped.xz',
+                'size': 54571233855,
             },
             {
                 'url': 'http://web-language-models.s3-website-us-east-1.amazonaws.com/ngrams/en/deduped/en.47.deduped.xz',
+                'size': 54631860898,
             },
             {
                 'url': 'http://web-language-models.s3-website-us-east-1.amazonaws.com/ngrams/en/deduped/en.48.deduped.xz',
+                'size': 54688007878,
             },
             {
                 'url': 'http://web-language-models.s3-website-us-east-1.amazonaws.com/ngrams/en/deduped/en.49.deduped.xz',
+                'size': 54608162086,
             },
             {
                 'url': 'http://web-language-models.s3-website-us-east-1.amazonaws.com/ngrams/en/deduped/en.50.deduped.xz',
+                'size': 54584997673,
             },
             {
                 'url': 'http://web-language-models.s3-website-us-east-1.amazonaws.com/ngrams/en/deduped/en.51.deduped.xz',
+                'size': 54632875586,
             },
             {
                 'url': 'http://web-language-models.s3-website-us-east-1.amazonaws.com/ngrams/en/deduped/en.52.deduped.xz',
+                'size': 54680908614,
             },
             {
                 'url': 'http://web-language-models.s3-website-us-east-1.amazonaws.com/ngrams/en/deduped/en.53.deduped.xz',
+                'size': 54628413373,
             },
             {
                 'url': 'http://web-language-models.s3-website-us-east-1.amazonaws.com/ngrams/en/deduped/en.54.deduped.xz',
+                'size': 54574203953,
             },
             {
                 'url': 'http://web-language-models.s3-website-us-east-1.amazonaws.com/ngrams/en/deduped/en.55.deduped.xz',
+                'size': 54637936694,
             },
             {
                 'url': 'http://web-language-models.s3-website-us-east-1.amazonaws.com/ngrams/en/deduped/en.56.deduped.xz',
+                'size': 54698063874,
             },
             {
                 'url': 'http://web-language-models.s3-website-us-east-1.amazonaws.com/ngrams/en/deduped/en.57.deduped.xz',
+                'size': 54651300685,
             },
             {
                 'url': 'http://web-language-models.s3-website-us-east-1.amazonaws.com/ngrams/en/deduped/en.58.deduped.xz',
+                'size': 54574091470,
             },
             {
                 'url': 'http://web-language-models.s3-website-us-east-1.amazonaws.com/ngrams/en/deduped/en.59.deduped.xz',
+                'size': 54609649933,
             },
             {
                 'url': 'http://web-language-models.s3-website-us-east-1.amazonaws.com/ngrams/en/deduped/en.60.deduped.xz',
+                'size': 54685098657,
             },
             {
                 'url': 'http://web-language-models.s3-website-us-east-1.amazonaws.com/ngrams/en/deduped/en.61.deduped.xz',
+                'size': 54633920844,
             },
             {
                 'url': 'http://web-language-models.s3-website-us-east-1.amazonaws.com/ngrams/en/deduped/en.62.deduped.xz',
+                'size': 54567715839,
             },
             {
                 'url': 'http://web-language-models.s3-website-us-east-1.amazonaws.com/ngrams/en/deduped/en.63.deduped.xz',
+                'size': 54604235875,
             },
             {
                 'url': 'http://web-language-models.s3-website-us-east-1.amazonaws.com/ngrams/en/deduped/en.64.deduped.xz',
+                'size': 54697160671,
             },
             {
                 'url': 'http://web-language-models.s3-website-us-east-1.amazonaws.com/ngrams/en/deduped/en.65.deduped.xz',
+                'size': 54605303741,
             },
             {
                 'url': 'http://web-language-models.s3-website-us-east-1.amazonaws.com/ngrams/en/deduped/en.66.deduped.xz',
+                'size': 54584844928,
             },
             {
                 'url': 'http://web-language-models.s3-website-us-east-1.amazonaws.com/ngrams/en/deduped/en.67.deduped.xz',
+                'size': 54643617778,
             },
             {
                 'url': 'http://web-language-models.s3-website-us-east-1.amazonaws.com/ngrams/en/deduped/en.68.deduped.xz',
+                'size': 54693282790,
             },
             {
                 'url': 'http://web-language-models.s3-website-us-east-1.amazonaws.com/ngrams/en/deduped/en.69.deduped.xz',
+                'size': 54613196419,
             },
             {
                 'url': 'http://web-language-models.s3-website-us-east-1.amazonaws.com/ngrams/en/deduped/en.70.deduped.xz',
+                'size': 54584304014,
             },
             {
                 'url': 'http://web-language-models.s3-website-us-east-1.amazonaws.com/ngrams/en/deduped/en.71.deduped.xz',
+                'size': 54626921571,
             },
             {
                 'url': 'http://web-language-models.s3-website-us-east-1.amazonaws.com/ngrams/en/deduped/en.72.deduped.xz',
+                'size': 54686659496,
             },
             {
                 'url': 'http://web-language-models.s3-website-us-east-1.amazonaws.com/ngrams/en/deduped/en.73.deduped.xz',
+                'size': 54611138604,
             },
             {
                 'url': 'http://web-language-models.s3-website-us-east-1.amazonaws.com/ngrams/en/deduped/en.74.deduped.xz',
+                'size': 54582758189,
             },
             {
                 'url': 'http://web-language-models.s3-website-us-east-1.amazonaws.com/ngrams/en/deduped/en.75.deduped.xz',
+                'size': 54634343779,
             },
             {
                 'url': 'http://web-language-models.s3-website-us-east-1.amazonaws.com/ngrams/en/deduped/en.76.deduped.xz',
+                'size': 54692512399,
             },
             {
                 'url': 'http://web-language-models.s3-website-us-east-1.amazonaws.com/ngrams/en/deduped/en.77.deduped.xz',
+                'size': 54616360009,
             },
             {
                 'url': 'http://web-language-models.s3-website-us-east-1.amazonaws.com/ngrams/en/deduped/en.78.deduped.xz',
+                'size': 54587854101,
             },
             {
                 'url': 'http://web-language-models.s3-website-us-east-1.amazonaws.com/ngrams/en/deduped/en.79.deduped.xz',
+                'size': 54638620443,
             },
             {
                 'url': 'http://web-language-models.s3-website-us-east-1.amazonaws.com/ngrams/en/deduped/en.80.deduped.xz',
+                'size': 54679963510,
             },
             {
                 'url': 'http://web-language-models.s3-website-us-east-1.amazonaws.com/ngrams/en/deduped/en.81.deduped.xz',
+                'size': 54631909126,
             },
             {
                 'url': 'http://web-language-models.s3-website-us-east-1.amazonaws.com/ngrams/en/deduped/en.82.deduped.xz',
+                'size': 54595818030,
             },
             {
                 'url': 'http://web-language-models.s3-website-us-east-1.amazonaws.com/ngrams/en/deduped/en.83.deduped.xz',
+                'size': 54645420020,
             },
             {
                 'url': 'http://web-language-models.s3-website-us-east-1.amazonaws.com/ngrams/en/deduped/en.84.deduped.xz',
+                'size': 54698083834,
             },
             {
                 'url': 'http://web-language-models.s3-website-us-east-1.amazonaws.com/ngrams/en/deduped/en.85.deduped.xz',
+                'size': 54645228558,
             },
             {
                 'url': 'http://web-language-models.s3-website-us-east-1.amazonaws.com/ngrams/en/deduped/en.86.deduped.xz',
+                'size': 54560002804,
             },
             {
                 'url': 'http://web-language-models.s3-website-us-east-1.amazonaws.com/ngrams/en/deduped/en.87.deduped.xz',
+                'size': 54637682712,
             },
             {
                 'url': 'http://web-language-models.s3-website-us-east-1.amazonaws.com/ngrams/en/deduped/en.88.deduped.xz',
+                'size': 54692595268,
             },
             {
                 'url': 'http://web-language-models.s3-website-us-east-1.amazonaws.com/ngrams/en/deduped/en.89.deduped.xz',
+                'size': 54622162387,
             },
             {
                 'url': 'http://web-language-models.s3-website-us-east-1.amazonaws.com/ngrams/en/deduped/en.90.deduped.xz',
+                'size': 54558846611,
             },
             {
                 'url': 'http://web-language-models.s3-website-us-east-1.amazonaws.com/ngrams/en/deduped/en.91.deduped.xz',
+                'size': 54646975295,
             },
             {
                 'url': 'http://web-language-models.s3-website-us-east-1.amazonaws.com/ngrams/en/deduped/en.92.deduped.xz',
+                'size': 54689943363,
             },
             {
                 'url': 'http://web-language-models.s3-website-us-east-1.amazonaws.com/ngrams/en/deduped/en.93.deduped.xz',
+                'size': 54646697971,
             },
             {
                 'url': 'http://web-language-models.s3-website-us-east-1.amazonaws.com/ngrams/en/deduped/en.94.deduped.xz',
+                'size': 54569812709,
             },
             {
                 'url': 'http://web-language-models.s3-website-us-east-1.amazonaws.com/ngrams/en/deduped/en.95.deduped.xz',
+                'size': 54633770649,
             },
             {
                 'url': 'http://web-language-models.s3-website-us-east-1.amazonaws.com/ngrams/en/deduped/en.96.deduped.xz',
+                'size': 54679618813,
             },
             {
                 'url': 'http://web-language-models.s3-website-us-east-1.amazonaws.com/ngrams/en/deduped/en.97.deduped.xz',
+                'size': 54636737844,
             },
             {
                 'url': 'http://web-language-models.s3-website-us-east-1.amazonaws.com/ngrams/en/deduped/en.98.deduped.xz',
+                'size': 54570116931,
             },
             {
                 'url': 'http://web-language-models.s3-website-us-east-1.amazonaws.com/ngrams/en/deduped/en.99.deduped.xz',
+                'size': 54643915526,
             },
         ],
     },
