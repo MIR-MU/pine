@@ -107,6 +107,7 @@ WORD_ANALOGY_PARAMETERS = {
 }
 
 CORPORA = {
+    'wikipedia': 4924894,
     'common_crawl': {
         'en': [
             {
@@ -710,3 +711,4 @@ EXAMPLE_SENTENCES = {
 }
 
 SIMPLE_PREPROCESS_CHUNKSIZE = 1024
+IO_QUEUE_SIZE = 1024

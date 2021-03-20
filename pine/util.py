@@ -7,7 +7,7 @@ from numbers import Integral
 from pathlib import Path
 from logging import getLogger
 from functools import partial
-from typing import Dict, Any, Tuple, Optional, List, Callable
+from typing import Dict, Any, Tuple, Optional, List, Callable, TypeVar, Iterable
 from tempfile import TemporaryFile, TemporaryDirectory
 from shutil import copyfile
 
@@ -19,7 +19,7 @@ from zipfile import ZipFile
 from scipy.interpolate import interp1d
 import gensim.utils
 
-from .configuration import PLOT_PARAMETERS, SIMPLE_PREPROCESS_PARAMETERS
+from .configuration import PLOT_PARAMETERS, SIMPLE_PREPROCESS_PARAMETERS, SIMPLE_PREPROCESS_CHUNKSIZE
 
 
 LOGGER = getLogger(__name__)
@@ -111,6 +111,23 @@ def interpolate(X: np.ndarray, Y: np.ndarray, kind: Optional[str] = None) -> Tup
 
 def simple_preprocess(document: str) -> List[str]:
     return gensim.utils.simple_preprocess(document, **SIMPLE_PREPROCESS_PARAMETERS)
+
+
+T = TypeVar('T')
+
+
+def produce(iterable: Iterable[T], semaphore) -> Iterable[T]:
+    for item in iterable:
+        semaphore.acquire()
+        yield item
+
+
+def parallel_simple_preprocess(pool, path: Path, semaphore) -> Iterable[List[str]]:
+    with path.open('rt') as f:
+        producer = produce(f, semaphore)
+        iterable = pool.imap(simple_preprocess, producer, SIMPLE_PREPROCESS_CHUNKSIZE)
+        for line in iterable:
+            yield line
 
 
 def _handle_xz(file_obj, mode):

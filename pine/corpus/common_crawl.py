@@ -4,10 +4,10 @@ from __future__ import annotations
 
 from pathlib import Path
 from typing import Iterable, List
-from multiprocessing import Pool
+from multiprocessing import Pool, Semaphore
 
-from ..util import simple_preprocess, download_to
-from ..configuration import CORPORA, SIMPLE_PREPROCESS_CHUNKSIZE
+from ..util import download_to, parallel_simple_preprocess
+from ..configuration import CORPORA, IO_QUEUE_SIZE
 from tqdm import tqdm
 
 
@@ -21,16 +21,20 @@ def get_corpus_path(language: str, name: str, corpus_dir: Path) -> Path:
     if corpus_path.exists():
         return corpus_path
     with corpus_path.open('wt') as f:
-        sentences = EnglishCommonCrawlSentences('Creating corpus {}'.format(corpus_path), corpus_dir)
+        desc = 'Creating corpus {}'.format(corpus_path)
+        semaphore = Semaphore(IO_QUEUE_SIZE)
+        sentences = EnglishCommonCrawlSentences(desc, semaphore, corpus_dir)
         for sentence in sentences:
             sentence = ' '.join(sentence)
             print(sentence, file=f)
+            semaphore.release()
     return corpus_path
 
 
 class EnglishCommonCrawlSentences:
-    def __init__(self, desc: str, corpus_dir: Path):
+    def __init__(self, desc: str, semaphore, corpus_dir: Path):
         self.desc = desc
+        self.semaphore = semaphore
         self.corpus_dir = corpus_dir
 
     def __iter__(self) -> Iterable[List[str]]:
@@ -46,9 +50,8 @@ class EnglishCommonCrawlSentences:
         with Pool(None) as pool:
             shard_paths = tqdm(shard_paths, desc=self.desc)
             for shard_path in shard_paths:
-                with shard_path.open('rt') as f:
-                    sentences = pool.imap(simple_preprocess, f, SIMPLE_PREPROCESS_CHUNKSIZE)
-                    sentences = filter(lambda x: x, sentences)
-                    for sentence in sentences:
-                        yield sentence
+                sentences = parallel_simple_preprocess(pool, shard_path, self.semaphore)
+                sentences = filter(lambda x: x, sentences)
+                for sentence in sentences:
+                    yield sentence
                 shard_path.unlink()
