@@ -295,7 +295,7 @@ class LanguageModel:
     def _build_vocab(self) -> FastText:
         try:
             with self._bare_model_path.open('rb') as rf:
-                LOGGER.debug('Loading vocab for {} from {}'.format(self, self._bare_model_path))
+                LOGGER.warn('Loading vocab for {} from {}'.format(self, self._bare_model_path))
                 saved_values = pickle.load(rf)
         except IOError:
             if self.use_vocab_from is None:
