@@ -315,7 +315,6 @@ class LanguageModel:
                     LOGGER.warn('Using vocab of uninitialized {}'.format(self.use_vocab_from))
                 LOGGER.debug('Using vocab of {} for {}'.format(self.use_vocab_from, self))
                 bare_model = self.use_vocab_from.model
-                self.use_vocab_from = None  # Free the reference to allow garbage collection
             saved_values = {'model_values': {}, 'wv_values': {}}
             for key in FASTTEXT_PARAMETERS['build_vocab_keys']:
                 if key in vars(bare_model):
