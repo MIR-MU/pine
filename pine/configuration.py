@@ -563,6 +563,10 @@ WORD_ANALOGY_DATASETS = {
         'url': 'https://raw.githubusercontent.com/Leonard-Xu/CWE/master/data/analogy.txt',
         'size': 30585,
     },
+    'ru': {
+        'url': 'https://rusvectores.org/static/testsets/ru_analogy.txt',
+        'size': 769508,
+    },
 }
 
 TEXT_CLASSIFICATION_DATASETS = {
