@@ -50,7 +50,7 @@ FASTTEXT_PARAMETERS = {
     },
     'build_vocab': {
         'trim_rule': None,
-        'progress_per': 10000,
+        'progress_per': 1000000,
     },
     'build_vocab_keys': [
         'key_to_index',
