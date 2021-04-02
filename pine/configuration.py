@@ -15,6 +15,8 @@ FASTTEXT_PARAMETERS = {
     'baseline': {  # Parameters from paper <https://arxiv.org/abs/1712.09405v1>
         'sg': 0,
         'bucket': 2 * 10**6,
+        'max_vocab_size': 2 * 10**8,  # The maximum size during build_vocab()
+        'max_final_vocab': 2 * 10**6,  # The maximum size after build_vocab()
         'negative': 10,
         'alpha': 0.05,
         'min_alpha': 0,
