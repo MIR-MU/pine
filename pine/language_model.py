@@ -7,6 +7,7 @@ from logging import getLogger
 from pathlib import Path
 import pickle
 from typing import Dict, Optional, Union, Sequence, Tuple, Iterable, TYPE_CHECKING
+from shutil import copy
 
 from .configuration import FASTTEXT_PARAMETERS, MODEL_BASENAMES, MODEL_FRIENDLY_NAMES, PICKLE_PROTOCOL
 from .util import stringify_parameters
@@ -294,12 +295,13 @@ class LanguageModel:
 
     def _build_vocab(self) -> FastText:
         try:
-            if self.use_vocab_from is None:
-                bare_model_path = self._bare_model_path
-            else:
-                bare_model_path = self.use_vocab_from._bare_model_path
-            with bare_model_path.open('rb') as rf:
-                LOGGER.warn('Loading vocab for {} from {}'.format(self, bare_model_path))
+            if not self._bare_model_path.exists() and self.use_vocab_from is not None:
+                message = 'Copying vocab for {} from {} to {}'
+                message = message.format(self, self.use_vocab_from._bare_model_path, self._bare_model_path)
+                LOGGER.debug(message)
+                copy(self.use_vocab_from._bare_model_path, self._bare_model_path)
+            with self._bare_model_path.open('rb') as rf:
+                LOGGER.info('Loading vocab for {} from {}'.format(self, self._bare_model_path))
                 saved_values = pickle.load(rf)
         except IOError:
             bare_model = FastText(**self.fasttext_parameters)
