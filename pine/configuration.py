@@ -46,7 +46,7 @@ FASTTEXT_PARAMETERS = {
         },
         'constrained': {
             'position_dependent_weights': 1,
-            'vector_size': 60,
+            'position_dependent_vector_size': 60,
             'window': 15,
         },
     },
