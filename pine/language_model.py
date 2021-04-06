@@ -304,6 +304,8 @@ class LanguageModel:
                 LOGGER.info('Loading vocab for {} from {}'.format(self, self._bare_model_path))
                 saved_values = pickle.load(rf)
         except IOError:
+            if self.use_vocab_from is not None:
+                raise ValueError('Failed to use vocab from {}'.format(self.use_vocab_from))
             bare_model = FastText(**self.fasttext_parameters)
             build_vocab_parameters = {
                 **FASTTEXT_PARAMETERS['build_vocab'],
