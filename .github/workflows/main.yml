@@ -1,0 +1,73 @@
+name: Test
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+env:
+  DEBIAN_FRONTEND: noninteractive
+jobs:
+  build:
+    name: Build package
+    runs-on: ubuntu-latest
+    container:
+      image: python:3.7
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+      - name: Build package
+        run: |
+          set -ex
+          python -V
+          pip install -U pip
+          pip install .
+  style-check:
+    name: Style check
+    runs-on: ubuntu-latest
+    container:
+      image: python:3.7
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+      - name: Build package
+        run: |
+          set -ex
+          python -V
+          pip install -U pip
+          pip install .
+          pip install flake8
+      - name: Style check
+        run: flake8
+  type-check:
+    name: Type check
+    runs-on: ubuntu-latest
+    container:
+      image: python:3.7
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+      - name: Build package
+        run: |
+          set -ex
+          python -V
+          pip install -U pip
+          pip install .
+          pip install pytype
+      - name: Type check
+        run: pytype .
+# unit-tests:
+#   name: Unit tests
+#   runs-on: ubuntu-latest
+#   container:
+#     image: python:3.7
+#   steps:
+#     - name: Checkout repository
+#       uses: actions/checkout@v2
+#     - name: Build package
+#       run: |
+#         set -ex
+#         python -V
+#         pip install -U pip
+#         pip install .
+#         pip install pytest
+#     - name: Unit tests
+#       run: python -m pytest
