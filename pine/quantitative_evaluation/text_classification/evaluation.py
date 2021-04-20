@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from collections.abc import Sequence
 from functools import lru_cache
 from logging import getLogger
 from pathlib import Path
@@ -125,7 +126,7 @@ class Evaluator:
         error_rate = test_errors / len(y_preds)
         return error_rate
 
-    def _get_best_knn(self, knns: Tuple[int] = (1, 3, 5, 7, 9, 11, 13, 15, 17, 19)) -> int:
+    def _get_best_knn(self, knns: Sequence[int] = (1, 3, 5, 7, 9, 11, 13, 15, 17, 19)) -> int:
         self._preprocess_dataset('validation')
         best_knn, best_error_rate = 1, float('inf')
         worst_knn, worst_error_rate = 1, float('-inf')
