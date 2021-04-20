@@ -513,6 +513,12 @@ CORPORA = {
                 'size': 54643915526,
             },
         ],
+        'cs': [
+            {
+                'url': 'http://web-language-models.s3-website-us-east-1.amazonaws.com/ngrams/cs/deduped/cs.deduped.xz',
+                'size': 131460123555,
+            },
+        ],
     },
 }
 
@@ -653,6 +659,7 @@ CORPUS_SIZES = {
     },
     'common_crawl': {
         'en': 37154103284,
+        'cs': 846912506,
     },
 }
 

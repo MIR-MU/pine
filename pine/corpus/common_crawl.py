@@ -12,8 +12,11 @@ from tqdm import tqdm
 
 
 def get_corpus_path(language: str, name: str, corpus_dir: Path) -> Path:
-    if language != 'en':
-        raise ValueError('Unsupported Common Crawl language {}'.format(language))
+    if language not in CORPORA['common_crawl']:
+        known_languages = ', '.join(CORPORA['common_crawl'])
+        message = 'Unsupported Common Crawl language {} (known languages: {})'
+        message = message.format(language, known_languages)
+        raise ValueError(message)
     corpus_dir /= name
     corpus_dir.mkdir(parents=True, exist_ok=True)
     corpus_path = corpus_dir / language
@@ -23,7 +26,7 @@ def get_corpus_path(language: str, name: str, corpus_dir: Path) -> Path:
     with corpus_path.open('wt') as f:
         desc = 'Creating corpus {}'.format(corpus_path)
         semaphore = Semaphore(IO_QUEUE_SIZE)
-        sentences = EnglishCommonCrawlSentences(desc, semaphore, corpus_dir)
+        sentences = CommonCrawlSentences(desc, semaphore, corpus_dir, language)
         for sentence in sentences:
             sentence = ' '.join(sentence)
             print(sentence, file=f)
@@ -31,14 +34,15 @@ def get_corpus_path(language: str, name: str, corpus_dir: Path) -> Path:
     return corpus_path
 
 
-class EnglishCommonCrawlSentences:
-    def __init__(self, desc: str, semaphore, corpus_dir: Path):
+class CommonCrawlSentences:
+    def __init__(self, desc: str, semaphore, corpus_dir: Path, language: str):
         self.desc = desc
         self.semaphore = semaphore
         self.corpus_dir = corpus_dir
+        self.language = language
 
     def __iter__(self) -> Iterable[List[str]]:
-        shards = CORPORA['common_crawl']['en']
+        shards = CORPORA['common_crawl'][self.language]
         shard_paths = []
         for shard_number, shard in enumerate(shards):
             shard_path = '{:02d}.txt'.format(shard_number)
