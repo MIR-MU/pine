@@ -30,7 +30,6 @@ def get_corpus_path(language: str, name: str, corpus_dir: Path) -> Path:
         for sentence in sentences:
             sentence = ' '.join(sentence)
             print(sentence, file=f)
-            semaphore.release()
     return corpus_path
 
 
@@ -55,7 +54,8 @@ class CommonCrawlSentences:
             shard_paths = tqdm(shard_paths, desc=self.desc)
             for shard_path in shard_paths:
                 sentences = parallel_simple_preprocess(pool, shard_path, self.semaphore)
-                sentences = filter(lambda x: x, sentences)
                 for sentence in sentences:
-                    yield sentence
+                    if sentence:
+                        yield sentence
+                    self.semaphore.release()
                 shard_path.unlink()
