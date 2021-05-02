@@ -5,6 +5,7 @@ from __future__ import annotations
 from pathlib import Path
 from typing import Iterable, List
 
+import smart_open
 from tqdm import tqdm
 
 from ..configuration import CORPUS_SIZES
@@ -44,7 +45,7 @@ class LineSentence(Iterable):
         self.size = size
 
     def __iter__(self) -> Iterable[List[str]]:
-        with self.path.open('rt') as f:
+        with smart_open.open(self.path, 'rt') as f:
             sentences = tqdm(f, desc='Reading {}'.format(self), total=self.size)
             for sentence in sentences:
                 sentence = sentence.split()

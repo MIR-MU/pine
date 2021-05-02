@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import gzip
 from pathlib import Path
 from typing import Iterable, List
 from multiprocessing import Pool, Semaphore
@@ -20,10 +21,10 @@ def get_corpus_path(language: str, name: str, corpus_dir: Path) -> Path:
     corpus_dir /= name
     corpus_dir.mkdir(parents=True, exist_ok=True)
     corpus_path = corpus_dir / language
-    corpus_path = corpus_path.with_suffix('.txt')
+    corpus_path = corpus_path.with_suffix('.txt.gz')
     if corpus_path.exists():
         return corpus_path
-    with corpus_path.open('wt') as f:
+    with gzip.open(corpus_path, 'wt', compresslevel=9) as f:
         desc = 'Creating corpus {}'.format(corpus_path)
         semaphore = Semaphore(IO_QUEUE_SIZE)
         sentences = CommonCrawlSentences(desc, semaphore, corpus_dir, language)
