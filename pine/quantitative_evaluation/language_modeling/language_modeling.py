@@ -68,6 +68,23 @@ RawResult = Tuple[TestResult, Sequence[EpochResult]]
 
 
 class Result:
+    """The results of a language modeling task for a log-bilinear language model.
+
+    Parameters
+    ----------
+    language_model : :class:`~pine.language_model.LanguageModel`
+        A log-bilinear language model.
+    result : RawResult
+        Results of a language modeling task.
+
+    Attributes
+    ----------
+    language_model : :class:`~pine.language_model.LanguageModel`
+        A log-bilinear language model.
+    result : RawResult
+        Results of a language modeling task.
+
+    """
     def __init__(self, language_model: LanguageModel, result: RawResult):
         self.language_model = language_model
         self.result = result

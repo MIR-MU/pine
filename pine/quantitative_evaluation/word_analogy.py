@@ -50,6 +50,23 @@ RawResult = Tuple[TotalAccuracy, List[Category]]
 
 
 class Result:
+    """The results of a word analogy task for a log-bilinear language model.
+
+    Parameters
+    ----------
+    result : RawResult
+        Results of a word analogy task.
+    language_model : :class:`~pine.language_model.LanguageModel`
+        A log-bilinear language model.
+
+    Attributes
+    ----------
+    result : RawResult
+        Results of a word analogy task.
+    language_model : :class:`~pine.language_model.LanguageModel`
+        A log-bilinear language model.
+
+    """
     def __init__(self, result: RawResult, language_model: LanguageModel):
         self.result = result
         self.language = language_model.language
