@@ -61,3 +61,4 @@ class EnglishWikipediaSentences:
             for sentences in pool.imap_unordered(_read_sentences_helper, articles):
                 for sentence in sentences:
                     yield sentence
+                self.semaphore.release()
