@@ -2,11 +2,8 @@
 Position-Independent Embeddings
 ===============================
 
-.. image:: https://img.shields.io/pypi/v/pine.svg
-        :target: https://pypi.python.org/pypi/pine
-
-.. image:: https://img.shields.io/travis/witiko/pine.svg
-        :target: https://travis-ci.org/witiko/pine
+.. image:: https://github.com/MIR-MU/pine/workflows/Test/badge.svg
+        :target: https://github.com/MIR-MU/pine/actions?query=workflow%3ATest
 
 .. image:: https://readthedocs.org/projects/pine/badge/?version=latest
         :target: https://readthedocs.org/projects/pine/?badge=latest
