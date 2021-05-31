@@ -379,6 +379,23 @@ def get_position_importance(language_model: LanguageModel) -> PositionImportance
 
 
 class PositionImportance:
+    """The importance of positions in a log-bilinear language model.
+
+    Parameters
+    ----------
+    language_model : :class:`~pine.language_model.LanguageModel`
+        The log-bilinear language model.
+    data : np.ndarray
+        The importance of positions.
+
+    Attributes
+    ----------
+    language_model : :class:`~pine.language_model.LanguageModel`
+        The log-bilinear language model.
+    data : np.ndarray
+        The importance of positions.
+
+    """
     def __init__(self, language_model: LanguageModel, data: np.ndarray):
         self.language_model = language_model
         self.data = data
