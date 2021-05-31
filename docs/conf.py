@@ -56,7 +56,7 @@ master_doc = 'index'
 
 # General information about the project.
 project = u'Position-Independent Embeddings'
-copyright = u'2021, Vítek Novotný'
+copyright = u'2021, Vít Novotný'
 
 # The version info for the project you're documenting, acts as replacement
 # for |version| and |release|, also used in various other places throughout
@@ -210,7 +210,7 @@ latex_elements = {
 latex_documents = [
     ('index', 'pine.tex',
      u'Position-Independent Embeddings Documentation',
-     u'Vítek Novotný', 'manual'),
+     u'Vít Novotný', 'manual'),
 ]
 
 # The name of an image file (relative to this directory) to place at
@@ -241,7 +241,7 @@ latex_documents = [
 man_pages = [
     ('index', 'pine',
      u'Position-Independent Embeddings Documentation',
-     [u'Vítek Novotný'], 1)
+     [u'Vít Novotný'], 1)
 ]
 
 # If true, show URL addresses after external links.
@@ -256,7 +256,7 @@ man_pages = [
 texinfo_documents = [
     ('index', 'pine',
      u'Position-Independent Embeddings Documentation',
-     u'Vítek Novotný',
+     u'Vít Novotný',
      'pine',
      'One line description of project.',
      'Miscellaneous'),
