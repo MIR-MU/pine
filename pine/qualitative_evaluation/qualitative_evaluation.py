@@ -350,6 +350,40 @@ def produce_example_sentences(language_model: LanguageModel, cluster_label: str)
 
 
 class ExampleSentences:
+    """Two example sentences that characterize a cluster of positional features in a log-bilinear language model.
+
+    A context word from a cluster of positional features will be placed on
+    two different positions of a sentence, where it produces the greatest
+    difference in masked word predictions. This is a useful illustration of
+    the behavior and the purpose of a cluster of positional features.
+
+    Parameters
+    ----------
+    language_model : :class:`~pine.language_model.LanguageModel`
+        A log-bilinear language model.
+    cluster_label : str
+        A label of a cluster of positional features.
+    masked_word : str
+        A masked word.
+    first_sentence : Sentence
+        A sentence.
+    second_sentence : Sentence
+        Another sentence.
+
+    Attributes
+    ----------
+    language_model : :class:`~pine.language_model.LanguageModel`
+        A log-bilinear language model.
+    cluster_label : str
+        A label of a cluster of positional features.
+    masked_word : str
+        A masked word.
+    first_sentence : Sentence
+        A sentence.
+    second_sentence : Sentence
+        Another sentence.
+
+    """
     def __init__(self, language_model: LanguageModel, cluster_label: str,
                  masked_word: str, first_sentence: Sentence,
                  second_sentence: Sentence):
