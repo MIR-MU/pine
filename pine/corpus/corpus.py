@@ -12,6 +12,25 @@ from ..configuration import CORPUS_SIZES
 
 
 def get_corpus(name: str, corpus_dir: Path, language: str = 'en') -> Corpus:
+    """Produces a given corpus in a given language.
+
+    Parameters
+    ----------
+    name : str
+        A name of the corpus. Known corpus names are `wikipedia`, which corresponds
+        to the Wikipedia, and `common_crawl`, which corresponds to the
+        `Deduplicated Common Crawl <http://statmt.org/ngrams/deduped/>`_.
+    corpus_dir : Path
+        The directory in which the corpus will be stored.
+    language : en
+        The language of the corpus.
+
+    Returns
+    -------
+    corpus : Corpus
+        The given corpus in the given language.
+
+    """
     if name not in CORPUS_SIZES:
         known_corpora = ', '.join(CORPUS_SIZES)
         message = 'Unknown corpus {} (known corpora: {})'.format(name, known_corpora)
