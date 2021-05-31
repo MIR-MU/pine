@@ -458,6 +458,23 @@ def cluster_positional_features(language_model: LanguageModel) -> ClusteredPosit
 
 
 class ClusteredPositionalFeatures:
+    """The clusters of positional features in a log-bilinear language model.
+
+    Parameters
+    ----------
+    language_model : :class:`~pine.language_model.LanguageModel`
+        A log-bilinear language model.
+    data : dict of (str, list of int)
+        Clusters of positional features in the log-bilinear language model.
+
+    Attributes
+    ----------
+    language_model : :class:`~pine.language_model.LanguageModel`
+        A log-bilinear language model.
+    data : dict of (str, list of int)
+        Clusters of positional features in the log-bilinear language model.
+
+    """
     def __init__(self, language_model: LanguageModel, data: Dict[str, List[int]]):
         self.language_model = language_model
         self.data = data
