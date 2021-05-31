@@ -5,7 +5,7 @@ Credits
 Development Lead
 ----------------
 
-* Vítek Novotný <witiko@mail.muni.cz>
+* Vít Novotný <witiko@mail.muni.cz>
 
 Contributors
 ------------
