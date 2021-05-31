@@ -4,9 +4,10 @@ Position-Independent Embeddings
 
 .. image:: https://github.com/MIR-MU/pine/workflows/Test/badge.svg
         :target: https://github.com/MIR-MU/pine/actions?query=workflow%3ATest
+        :alt: Continuous Integration Status
 
-.. image:: https://readthedocs.org/projects/pine/badge/?version=latest
-        :target: https://readthedocs.org/projects/pine/?badge=latest
+.. image:: https://readthedocs.org/projects/position-independent-embeddings/badge/?version=latest
+        :target: https://position-independent-embeddings.readthedocs.io/en/latest/index.html
         :alt: Documentation Status
 
 A python package that allows you to train, use, and evaluate position-independent word embeddings.
