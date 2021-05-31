@@ -59,6 +59,27 @@ def get_masked_word_probability(language_model: LanguageModel, sentence: Sentenc
 
 
 class SentenceProbability:
+    """The probability of a sentence given a masked word.
+
+    Parameters
+    ----------
+    sentence : Sentence
+        A sentence.
+    masked_word : str
+        A masked word.
+    probability : float
+        The probability of the sentence given the masked word.
+
+    Attributes
+    ----------
+    sentence : Sentence
+        A sentence.
+    masked_word : str
+        A masked word.
+    probability : float
+        The probability of the sentence given the masked word.
+
+    """
     def __init__(self, sentence: Sentence, masked_word: str, score: float):
         self.sentence = sentence
         self.masked_word = masked_word
