@@ -16,19 +16,3 @@ A python package that allows you to train, use, and evaluate position-independen
 
 * Free software: LGPLv2.1 license
 * Documentation: https://position-independent-embeddings.readthedocs.org.
-
-Features
---------
-
-* TODO
-
-Credits
----------
-
-Tools used in rendering this package:
-
-*  Cookiecutter_
-*  `cookiecutter-pypackage`_
-
-.. _Cookiecutter: https://github.com/audreyr/cookiecutter
-.. _`cookiecutter-pypackage`: https://github.com/audreyr/cookiecutter-pypackage
