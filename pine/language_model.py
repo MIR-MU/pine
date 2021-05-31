@@ -33,6 +33,162 @@ LOGGER = getLogger(__name__)
 
 
 class LanguageModel:
+    """A log-bilinear language model.
+
+    Parameters
+    ----------
+    corpus : str
+        The name of the corpus on which the language model will be trained. See
+        the :func:`~pine.corpus.get_corpus` for a list of available corpora for
+        a given language.
+    workspace : {Path, str}, optional
+        The path to a workspace in which corpora, models, evaluation results,
+        and cached data will be stored. The workspace ensures that when you
+        later reinitialize a model with the same parameters, it is not necessary
+        to retrain it and all available data will be loaded from the workspace.
+        This is convenient for experiments, although not so convenient for
+        productization. For productization, you should use the low-level
+        `gensim.models.fasttext.FastText` class instead of `LanguageModel`.
+        The default workspace is the current working directory (`.`).
+    language : str, optional
+        The language of the model. Determines the corpora and the evaluation
+        tasks available for the model. The default language is English (`en`).
+    subwords : bool, optional
+        Whether the model will use subwords as well as words during the
+        training. Using subwords is known to improve the speed of convergence
+        for log-bilinear models, especially for inflected natural languages.
+        [bojanowski2017enriching]_ However, subwords may not exist in domains
+        outside natural language processing where corpora can sequences of
+        arbitrary events. By default, the model will use subwords (`True`).
+    positions : {bool,str}, optional
+        Whether the model will use positions of context words relative to the
+        masked input word during the training. Using positions is known to
+        reduce the perplexity of log-bilinear models. [mikolov2018advances]_
+        The options are to not use positions (`False`), to use full
+        dimensionality for positions (`full`), or to use reduced dimensionality
+        for positions (`constrained`). Using reduced dimensionality for
+        positions has been shown to improve the speed of training and also the
+        speed of convergence for log-bilinear models. [novotny2021when]_
+        By default, the model will use reduced dimensionality for positions
+        (`constrained`).
+    use_vocab_from : {LanguageModel, NoneType}, optional
+        Another trained log-bilinear language model to borrow corpus statistics
+        (vocab) from to speed up the training. The other model must have been
+        trained on the same corpus in the same language as this model. By
+        default, we will do a preliminary pass over the corpus to retrieve
+        the vocab (`None`).
+    friendly_name : {str, NoneType}, optional
+        Your own name for the log-bilinear language model, which will be used
+        in outputs and in visualizations. The name will not affect the
+        workspace, i.e. initializing a model with a different friendly name
+        does not mean that you need to retrain the model. By default, the
+        friendly name of the model will be automatically generated according
+        to its parameters (`None`).
+    extra_fasttext_parameters : {dict, NoneType}, optional
+        Extra parameters for the log-bilinear language model to override the
+        defaults from :const:`~pine.configuration.FASTTEXT_PARAMETERS`.
+        There parameters are for the `gensim.models.fasttext.FastText` class
+        constructor. By default, no extra parameters will be used (`None`).
+
+    Attributes
+    ----------
+    corpus : :class:`~pine.corpus.Corpus`
+        The corpus on which the language model will be trained.
+        a given language.
+    workspace : Path
+        The path to a workspace in which corpora, models, evaluation results,
+        and cached data will be stored. The workspace ensures that when you
+        later reinitialize a model with the same parameters, it is not necessary
+        to retrain it and all available data will be loaded from the workspace.
+        This is convenient for experiments, although not so convenient for
+        productization. For productization, you should use the low-level
+        `gensim.models.fasttext.FastText` class instead of `LanguageModel`.
+    language : str
+        The language of the model. Determines the corpora and the evaluation
+        tasks available for the model.
+    subwords : bool
+        Whether the model will use subwords as well as words during the
+        training. Using subwords is known to improve the speed of convergence
+        for log-bilinear models, especially for inflected natural languages.
+        [bojanowski2017enriching]_ However, subwords may not exist in domains
+        outside natural language processing where corpora can sequences of
+        arbitrary events.
+    positions : {bool,str}
+        Whether the model will use positions of context words relative to the
+        masked input word during the training. Using positions is known to
+        reduce the perplexity of log-bilinear models. [mikolov2018advances]_
+        The options are to not use positions (`False`), to use full
+        dimensionality for positions (`full`), or to use reduced dimensionality
+        for positions (`constrained`). Using reduced dimensionality for
+        positions has been shown to improve the speed of training and also the
+        speed of convergence for log-bilinear models. [novotny2021when]_
+    friendly_name : str
+        Your own name for the log-bilinear language model, which will be used
+        in outputs and in visualizations. The name will not affect the
+        workspace, i.e. initializing a model with a different friendly name
+        does not mean that you need to retrain the model.
+    fasttext_parameters : dict
+        The full parameters of the log-bilinear language model for the
+        `gensim.models.fasttext.FastText` class constructor.
+    model : gensim.models.fasttext.FastText
+        The raw log-bilinear language model.
+    vectors : gensim.models.keyedvectors.KeyedVectors
+        The word, subword, and positional embeddings of the log-bilinear
+        language model.
+    training_duration : float
+        The training duration of the model in seconds.
+    input_vectors : np.ndarray
+        The input word vectors of the log-bilinear language model.
+    output_vectors : np.ndarray
+        The output word vectors of the log-bilinear language model.
+    positional_vectors : np.ndarray
+        The input positional vectors of the log-bilinear language model.
+    position_importance : :class:`~pine.qualitative_evaluation.PositionImportance`
+        The importance of positions. [novotny2021when]_
+    positional_feature_clusters : :class:`~pine.qualitative_evaluation.ClusteredPositionalFeatures`
+        Clusters of positional features. [novotny2021when]_
+    words : sequence of str
+        All words in the dictionary of the log-bilinear model.
+    classified_context_words : dict of (str, str)
+        All words in the dictionary of the log-bilinear model, classified to
+        the individual clusters of positional features. [novotny2021when]_
+    word_analogy : :class:`~pine.qualitative_evaluation.WordAnalogyResult`
+        The results of the log-bilinear language model on the word analogy task
+        of Mikolov et al. (2013) [mikolov2013efficient]_.
+    language_modeling : :class:`~pine.qualitative_evaluation.LanguageModelingResult`
+        The results of the log-bilinear language model on the language modeling task
+        of Novotný et al. (2021) [novotny2021when]_.
+    model_files : iterable of (Path, int)
+        The individual files of the log-bilinear language model with their
+        sizes in bytes.
+    cache_files : iterable of (Path, int)
+        The individual cached data of the log-bilinear language model with
+        their sizes in bytes.
+
+    References
+    ----------
+    The general log-bilinear language model was developed by Mikolov et al. (2013)
+    [mikolov2013efficient]_. The subword model was developed by Bojanowski et al.
+    (2017) [bojanowski2017enriching]_. The positional model was developed by
+    Mikolov et al. (2018) [mikolov2018advances]_. The constrained positional model
+    was developed by Novotný et al. (2021) [novotny2021when]_.
+
+    .. [mikolov2013efficient] Mikolov, T., Chen, K., Corrado, G., & Dean, J.
+       (2013). Efficient estimation of word representations in vector space.
+       *arXiv preprint arXiv:1301.3781*. https://arxiv.org/abs/1301.3781v3
+    .. [bojanowski2017enriching] Bojanowski, P., Grave, E., Joulin, A., &
+       Mikolov, T. (2017). Enriching word vectors with subword information.
+       *Transactions of the Association for Computational Linguistics*, 5,
+       135-146. https://arxiv.org/pdf/1607.04606.pdf
+    .. [mikolov2018advances] Mikolov, T., et al. "Advances in Pre-Training
+       Distributed Word Representations." *Proceedings of the Eleventh
+       International Conference on Language Resources and Evaluation (LREC
+       2018)*. 2018. http://www.lrec-conf.org/proceedings/lrec2018/pdf/721.pdf
+    .. [novotny2021when] Novotný, V., et al. "When FastText Pays Attention:
+       Efficient Estimation of Word Representations using Constrained
+       Positional Weighting". Manuscript submitted for publication.
+
+    """
     def __init__(self,
                  corpus: str,
                  workspace: Union[Path, str] = '.',
@@ -124,11 +280,43 @@ class LanguageModel:
         return self._positional_feature_clusters
 
     def predict_masked_words(self, sentence: 'Sentence') -> Iterable[str]:
+        """Predict masked words for a sentence.
+
+        Parameters
+        ----------
+        sentence : :class:`~pine.qualitative_evaluation.Sentence`
+            A sentence.
+
+        Returns
+        -------
+        masked_words : iterable of str
+            The predicted masked words for the sentence in a descending order
+            of probability.
+
+        """
         from .qualitative_evaluation import predict_masked_words
         return predict_masked_words(self, sentence)
 
     def get_masked_word_probability(self, sentence: 'Sentence', masked_word: str,
                                     cluster_label: Optional[str] = None) -> 'SentenceProbability':
+        """Get the probability of a sentence given a masked word.
+
+        Parameters
+        ----------
+        sentence : :class:`~pine.qualitative_evaluation.Sentence`
+            A sentence.
+        masked_word : str
+            A masked word.
+        cluster_label : {str, NoneType}, optional
+            The cluster of positional features [novotny2021when]_ to use for
+            the prediction. By default, we will use all features (`None`).
+
+        Returns
+        -------
+        sentence_probability : :class:`~pine.qualitative_evaluation.SentenceProbability`
+            The probability of the sentence given the masked word.
+
+        """
         from .qualitative_evaluation import get_masked_word_probability
         return get_masked_word_probability(self, sentence, masked_word, cluster_label)
 
@@ -140,9 +328,41 @@ class LanguageModel:
         return self._classified_context_words
 
     def classify_context_word(self, word: str) -> str:
+        """Classify a context word to a cluster of positional features. [novotny2021when]_
+
+        Parameters
+        ----------
+        word : str
+            A context word.
+
+        Returns
+        -------
+        cluster_label : str
+            A label of a cluster of positional features to which the context
+            word has been classified.
+
+        """
         return self.classified_context_words[word]
 
     def produce_example_sentences(self, cluster_label: str) -> 'ExampleSentences':
+        """Produce two example sentences that characterize a cluster of positional features. [novotny2021when]_
+
+        A context word from a cluster of positional features will be placed on
+        two different positions of a sentence, where it produces the greatest
+        difference in masked word predictions. This is a useful illustration of
+        the behavior and the purpose of a cluster of positional features.
+
+        Parameters
+        ----------
+        cluster_label : str
+            A label of a cluster of positional features.
+
+        Returns
+        -------
+        example_sentences : :class:`~pine.qualitative_evaluation.ClusteredPositionalFeatures`
+            Two example sentences that characterize the cluster of positional features.
+
+        """
         from .qualitative_evaluation import produce_example_sentences
         return produce_example_sentences(self, cluster_label)
 
@@ -194,6 +414,9 @@ class LanguageModel:
         return self._files(self.cache_dir)
 
     def print_files(self):
+        """Pretty-print the individual files and cached data of the log-bilinear language model on the standard output.
+
+        """
         lines = []
         lines.extend(['Model files:', ''])
         for path, size in sorted(self.model_files, key=lambda x: x[1], reverse=True):
