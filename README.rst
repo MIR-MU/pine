@@ -7,7 +7,7 @@ Position-Independent Embeddings
         :alt: Continuous Integration Status
 
 .. image:: https://readthedocs.org/projects/position-independent-embeddings/badge/?version=latest
-        :target: https://position-independent-embeddings.readthedocs.io/en/latest/index.html
+        :target: https://readthedocs.org/projects/position-independent-embeddings/?badge=latest
         :alt: Documentation Status
 
 A python package that allows you to train, use, and evaluate position-independent word embeddings.
@@ -15,7 +15,7 @@ A python package that allows you to train, use, and evaluate position-independen
 .. image:: https://github.com/MIR-MU/pine/raw/main/images/pine.png
 
 * Free software: LGPLv2.1 license
-* Documentation: https://pine.readthedocs.org.
+* Documentation: https://position-independent-embeddings.readthedocs.org.
 
 Features
 --------
