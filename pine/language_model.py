@@ -43,6 +43,10 @@ class LanguageModel:
                  friendly_name: str = None,
                  extra_fasttext_parameters: Optional[Dict] = None):
 
+        if use_vocab_from is not None:
+            if use_vocab_from._corpus != corpus or use_vocab_from.language != language:
+                raise ValueError("Can't use vocab from {}, which uses a different corpus")
+
         self._corpus = corpus
         self.workspace = Path(workspace)
         self.language = language
