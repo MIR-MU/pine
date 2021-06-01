@@ -31,6 +31,7 @@ setup(
     version='0.1.0',
     description='A python package that allows you to train, use, and evaluate position-independent word embeddings',
     long_description=readme + '\n\n' + history,
+    long_description_content_type='text/x-rst',
     author="Vít Novotný",
     author_email='witiko@mail.muni.cz',
     url='https://github.com/MIR-MU/pine',
