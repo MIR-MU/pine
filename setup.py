@@ -28,7 +28,7 @@ test_requirements = [str(tr.requirement) for tr in parsed_test_requirements]
 
 setup(
     name='position-independent-embeddings',
-    version='0.1.0',
+    version='0.1.1',
     description='A python package that allows you to train, use, and evaluate position-independent word embeddings',
     long_description=readme + '\n\n' + history,
     long_description_content_type='text/x-rst',
