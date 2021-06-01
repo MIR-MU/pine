@@ -6,7 +6,7 @@ from collections import deque
 import json
 from logging import getLogger
 from itertools import chain, product
-from typing import Sequence, Optional, Iterable, List, Dict, Tuple, TYPE_CHECKING
+from typing import Sequence, Optional, Iterable, List, Dict, Tuple, Union, TYPE_CHECKING
 
 import numpy as np
 from sklearn.cluster import AgglomerativeClustering
@@ -67,7 +67,7 @@ class SentenceProbability:
         A sentence.
     masked_word : str
         A masked word.
-    probability : float
+    score : float
         The probability of the sentence given the masked word.
 
     Attributes
@@ -76,7 +76,7 @@ class SentenceProbability:
         A sentence.
     masked_word : str
         A masked word.
-    probability : float
+    score : float
         The probability of the sentence given the masked word.
 
     """
@@ -86,7 +86,7 @@ class SentenceProbability:
         self.score = score
 
     def __repr__(self) -> str:
-        probability, = 100.0 * _sigmoid(np.array(self.score))
+        probability = 100.0 * _sigmoid(np.array(self.score))
         sentence = ' '.join(
             word if word != '[MASK]' else '[MASKED: {}]'.format(self.masked_word)
             for word
@@ -95,7 +95,7 @@ class SentenceProbability:
         return '{} (score {:.2f}, probability {:.2f}%)'.format(sentence, self.score, probability)
 
 
-def _sigmoid(value: np.ndarray) -> np.ndarray:
+def _sigmoid(value: Union[np.ndarray, float]) -> Union[np.ndarray, float]:
     return np.exp(-np.logaddexp(0, -value))
 
 
