@@ -10,6 +10,10 @@ Position-Independent Embeddings
         :target: https://readthedocs.org/projects/position-independent-embeddings/?badge=latest
         :alt: Documentation Status
 
+.. image:: https://colab.research.google.com/assets/colab-badge.svg
+        :target: https://colab.research.google.com/github/MIR-MU/pine/blob/master/notebooks/tutorial.ipynb
+        :alt: Open in Colab
+
 A python package that allows you to train, use, and evaluate position-independent word embeddings.
 
 .. image:: https://github.com/MIR-MU/pine/raw/main/images/pine.png
