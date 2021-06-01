@@ -11,7 +11,6 @@ Welcome to PInE's documentation!
    :caption: Contents:
     
    readme
-   installation
    usage
    contributing
    authors

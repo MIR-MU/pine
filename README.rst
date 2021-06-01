@@ -30,7 +30,6 @@ word embeddings.
 .. image:: https://github.com/MIR-MU/pine/raw/main/images/pine.png
 
 .. contents:: Table of Contents
-   :depth: 1
 
 Introduction
 ------------
