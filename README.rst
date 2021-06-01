@@ -111,4 +111,4 @@ This package was created with Cookiecutter_ and the
 Note
 ----
 
-Remember that this is a research tool :)
+Remember that this is a research tool. 😉
