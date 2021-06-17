@@ -575,6 +575,10 @@ WORD_ANALOGY_DATASETS = {
         'url': 'https://rusvectores.org/static/testsets/ru_analogy.txt',
         'size': 769508,
     },
+    'it': {
+        'url': 'https://web.archive.org/web/20170511144953if_/http://hlt.isti.cnr.it:80/wordembeddings/questions-words-ITA.txt',
+        'size': 686403,
+    },
 }
 
 TEXT_CLASSIFICATION_DATASETS = {
