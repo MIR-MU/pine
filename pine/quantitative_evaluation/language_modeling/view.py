@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from __future__ import annotations
+from typing import Optional
 
 from matplotlib.figure import Figure
 import matplotlib.pyplot as plt
@@ -12,7 +13,8 @@ from ...configuration import PLOT_PARAMETERS, LANGUAGE_MODELING_RESULT_KINDS, LA
 
 
 def plot_language_modeling_results(*language_models: LanguageModel,
-                                   kind: str = None, subset: str = None) -> Figure:
+                                   kind: Optional[str] = None,
+                                   subset: Optional[str] = None) -> Figure:
     if kind is None:
         kind = PLOT_PARAMETERS['language_modeling']['kind']
     if kind not in LANGUAGE_MODELING_RESULT_KINDS:
