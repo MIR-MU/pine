@@ -196,7 +196,7 @@ class LanguageModel:
                  subwords: bool = True,
                  positions: Union[bool, str] = 'constrained',
                  use_vocab_from: LanguageModel = None,
-                 friendly_name: str = None,
+                 friendly_name: Optional[str] = None,
                  extra_fasttext_parameters: Optional[Dict] = None):
 
         if use_vocab_from is not None:
