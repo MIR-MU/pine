@@ -21,8 +21,8 @@ between words on different positions in a sentence and to produce better
 position-independent representations of words. See our paper for details:
 
 * Novotný, V., et al. “When FastText Pays Attention: Efficient Estimation of
-  Word Representations using Constrained Positional Weighting”. Manuscript
-  submitted for publication.
+  Word Representations using Constrained Positional Weighting”. Available at
+  WWW: https://arxiv.org/abs/2104.09691v3
 
 This Python package allows you to train, use, and evaluate position-independent
 word embeddings.
