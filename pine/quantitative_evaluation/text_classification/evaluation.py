@@ -6,7 +6,7 @@ from collections.abc import Sequence
 from functools import lru_cache
 from logging import getLogger
 from pathlib import Path
-from typing import List, Tuple, Optional
+from typing import List, Tuple, Optional, Union
 from concurrent.futures import ProcessPoolExecutor, Future
 import shelve
 
@@ -192,17 +192,19 @@ class ParallelCachingWmdSimilarity(SimilarityABC):
                     return repr((query, document))
 
                 @lru_cache(maxsize=None)
-                def _load_from_shelf(query: Tuple[str], document: Tuple[str]) -> Future[float]:
+                def _load_from_shelf(query: Tuple[str], document: Tuple[str]) -> Union[Future[float], float]:
                     key = make_key(query, document)
                     if key in shelf:
-                        return shelf[key]
+                        value = shelf[key]
+                        assert isinstance(value, float)
+                        return value
                     return executor.submit(wmdistance, query, document)
 
-                def load_from_shelf(query: List[str], document: List[str]) -> Future[float]:
+                def load_from_shelf(query: List[str], document: List[str]) -> Union[Future[float], float]:
                     query, document = make_symmetric(query, document)
                     return _load_from_shelf(query, document)
 
-                def store_to_shelf(query: List[str], document: List[str], value: float):
+                def store_to_shelf(query: List[str], document: List[str], value: float) -> None:
                     key = make_key(*make_symmetric(query, document))
                     if key not in shelf:
                         shelf[key] = value
