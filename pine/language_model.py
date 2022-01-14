@@ -68,7 +68,7 @@ class LanguageModel:
         dimensionality for positions (`full`), or to use reduced dimensionality
         for positions (`constrained`). Using reduced dimensionality for
         positions has been shown to improve the speed of training and also the
-        speed of convergence for log-bilinear models. [novotny2021when]_
+        speed of convergence for log-bilinear models. [novotny2022when]_
         By default, the model will use reduced dimensionality for positions
         (`constrained`).
     use_vocab_from : {LanguageModel, NoneType}, optional
@@ -121,7 +121,7 @@ class LanguageModel:
         dimensionality for positions (`full`), or to use reduced dimensionality
         for positions (`constrained`). Using reduced dimensionality for
         positions has been shown to improve the speed of training and also the
-        speed of convergence for log-bilinear models. [novotny2021when]_
+        speed of convergence for log-bilinear models. [novotny2022when]_
     friendly_name : str
         Your own name for the log-bilinear language model, which will be used
         in outputs and in visualizations. The name will not affect the
@@ -144,20 +144,20 @@ class LanguageModel:
     positional_vectors : np.ndarray
         The input positional vectors of the log-bilinear language model.
     position_importance : :class:`~pine.qualitative_evaluation.PositionImportance`
-        The importance of positions. [novotny2021when]_
+        The importance of positions. [novotny2022when]_
     positional_feature_clusters : :class:`~pine.qualitative_evaluation.ClusteredPositionalFeatures`
-        Clusters of positional features. [novotny2021when]_
+        Clusters of positional features. [novotny2022when]_
     words : sequence of str
         All words in the dictionary of the log-bilinear model.
     classified_context_words : dict of (str, str)
         All words in the dictionary of the log-bilinear model, classified to
-        the individual clusters of positional features. [novotny2021when]_
+        the individual clusters of positional features. [novotny2022when]_
     word_analogy : :class:`~pine.qualitative_evaluation.WordAnalogyResult`
         The results of the log-bilinear language model on the word analogy task
         of Mikolov et al. (2013) [mikolov2013efficient]_.
     language_modeling : :class:`~pine.qualitative_evaluation.LanguageModelingResult`
         The results of the log-bilinear language model on the language modeling task
-        of Novotný et al. (2021) [novotny2021when]_.
+        of Novotný et al. (2021) [novotny2022when]_.
     model_files : iterable of (Path, int)
         The individual files of the log-bilinear language model with their
         sizes in bytes.
@@ -171,7 +171,7 @@ class LanguageModel:
     [mikolov2013efficient]_. The subword model was developed by Bojanowski et al.
     (2017) [bojanowski2017enriching]_. The positional model was developed by
     Mikolov et al. (2018) [mikolov2018advances]_. The constrained positional model
-    was developed by Novotný et al. (2021) [novotny2021when]_.
+    was developed by Novotný et al. (2021) [novotny2022when]_.
 
     .. [mikolov2013efficient] Mikolov, T., Chen, K., Corrado, G., & Dean, J.
        (2013). Efficient estimation of word representations in vector space.
@@ -184,9 +184,9 @@ class LanguageModel:
        Distributed Word Representations." *Proceedings of the Eleventh
        International Conference on Language Resources and Evaluation (LREC
        2018)*. 2018. http://www.lrec-conf.org/proceedings/lrec2018/pdf/721.pdf
-    .. [novotny2021when] Novotný, V., et al. "When FastText Pays Attention:
+    .. [novotny2022when] Novotný, V., et al. "When FastText Pays Attention:
        Efficient Estimation of Word Representations using Constrained
-       Positional Weighting". Manuscript submitted for publication.
+       Positional Weighting". 2022. https://arxiv.org/abs/2104.09691v5
 
     """
     def __init__(self,
@@ -308,7 +308,7 @@ class LanguageModel:
         masked_word : str
             A masked word.
         cluster_label : {str, NoneType}, optional
-            The cluster of positional features [novotny2021when]_ to use for
+            The cluster of positional features [novotny2022when]_ to use for
             the prediction. By default, we will use all features (`None`).
 
         Returns
@@ -328,7 +328,7 @@ class LanguageModel:
         return self._classified_context_words
 
     def classify_context_word(self, word: str) -> str:
-        """Classify a context word to a cluster of positional features. [novotny2021when]_
+        """Classify a context word to a cluster of positional features. [novotny2022when]_
 
         Parameters
         ----------
@@ -345,7 +345,7 @@ class LanguageModel:
         return self.classified_context_words[word]
 
     def produce_example_sentences(self, cluster_label: str) -> 'ExampleSentences':
-        """Produce two example sentences that characterize a cluster of positional features. [novotny2021when]_
+        """Produce two example sentences that characterize a cluster of positional features. [novotny2022when]_
 
         A context word from a cluster of positional features will be placed on
         two different positions of a sentence, where it produces the greatest

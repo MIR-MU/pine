@@ -20,9 +20,9 @@ positional weighting. Positional weighting allows the models to distinguish
 between words on different positions in a sentence and to produce better
 position-independent representations of words. See our paper for details:
 
-* Novotný, V., et al. “When FastText Pays Attention: Efficient Estimation of
-  Word Representations using Constrained Positional Weighting”. Available at
-  WWW: https://arxiv.org/abs/2104.09691v4
+* Novotný, Vít, et al. “When FastText Pays Attention: Efficient Estimation of
+  Word Representations using Constrained Positional Weighting”. 2022.
+  Available at WWW: https://arxiv.org/abs/2104.09691v5
 
 This Python package allows you to train, use, and evaluate position-independent
 word embeddings.
