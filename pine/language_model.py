@@ -37,10 +37,10 @@ class LanguageModel:
 
     Parameters
     ----------
-    corpus : str
+    corpus : {str, Corpus}
         The name of the corpus on which the language model will be trained. See
         the :func:`~pine.corpus.get_corpus` for a list of available corpora for
-        a given language.
+        a given language and their names. Alternatively, a custom corpus.
     workspace : {Path, str}, optional
         The path to a workspace in which corpora, models, evaluation results,
         and cached data will be stored. The workspace ensures that when you
@@ -190,7 +190,7 @@ class LanguageModel:
 
     """
     def __init__(self,
-                 corpus: str,
+                 corpus: Union[str, Corpus],
                  workspace: Union[Path, str] = '.',
                  language: str = 'en',
                  subwords: bool = True,
@@ -203,7 +203,13 @@ class LanguageModel:
             if use_vocab_from._corpus != corpus or use_vocab_from.language != language:
                 raise ValueError("Can't use vocab from {}, which uses a different corpus")
 
-        self._corpus = corpus
+        if isinstance(corpus, str):
+            self._corpus = corpus
+            self._custom_corpus = None
+        else:
+            self._corpus = 'custom'
+            self._custom_corpus = corpus
+
         self.workspace = Path(workspace)
         self.language = language
         self.subwords = subwords
@@ -430,6 +436,8 @@ class LanguageModel:
 
     @property
     def corpus(self) -> Corpus:
+        if self._custom_corpus is not None:
+            return self._custom_corpus
         return get_corpus(self._corpus, self.corpus_dir, self.language)
 
     @property
